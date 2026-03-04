@@ -33,7 +33,12 @@ export async function loadFromURL() {
   state.projectKey = projectName;
 
   try {
-    // Try to fetch from data/ directory (works both in dev and with bundled data)
+    // Check for embedded data first (single-file build)
+    if (window.__EMBEDDED_PROJECTS__ && window.__EMBEDDED_PROJECTS__[projectName]) {
+      loadProject(window.__EMBEDDED_PROJECTS__[projectName]);
+      return true;
+    }
+    // Fallback: fetch from data/ directory (dev mode or server)
     const resp = await fetch(`data/${projectName}.json`);
     if (!resp.ok) return false;
     const project = await resp.json();

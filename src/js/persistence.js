@@ -21,6 +21,9 @@ export function autoSave() {
       panX: state.panX,
       panY: state.panY,
       gridEnabled: state.gridEnabled,
+      groups: state.groups || [],
+      hiddenSectors: state.hiddenSectors ? [...state.hiddenSectors] : [],
+      projectTitle: state.projectTitle || '',
     }));
   } catch (_e) { /* quota exceeded or private mode */ }
 }
@@ -37,6 +40,9 @@ export function autoLoad() {
     state.panX = d.panX || 0;
     state.panY = d.panY || 0;
     state.gridEnabled = d.gridEnabled !== false;
+    state.groups = d.groups || [];
+    state.hiddenSectors = new Set(d.hiddenSectors || []);
+    state.projectTitle = d.projectTitle || '';
     rebuildIndex();
     return true;
   } catch (_e) {

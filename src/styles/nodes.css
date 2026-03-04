@@ -232,6 +232,21 @@
 .node .anchor-left { left: -6px; top: 50%; margin-top: -6px; }
 .node .anchor-right { right: -6px; top: 50%; margin-top: -6px; }
 
+/* Highlight anchor when dragging endpoint nearby */
+.node .anchor.anchor-highlight {
+  opacity: 1;
+  transform: scale(1.4);
+  background: #4ade80;
+  border-color: #fff;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
+
+/* Node highlight when endpoint is near */
+.node.drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: 4px;
+}
+
 .node .resize-handle {
   position: absolute;
   bottom: 0; right: 0;

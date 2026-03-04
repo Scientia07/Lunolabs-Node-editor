@@ -21,7 +21,7 @@ const bundledJS = new TextDecoder().decode(jsResult.outputFiles[0].contents);
 const cssDir = 'src/styles';
 const cssOrder = [
   'tokens.css', 'base.css', 'toolbar.css', 'canvas.css',
-  'nodes.css', 'popups.css', 'panels.css', 'toast.css',
+  'nodes.css', 'popups.css', 'panels.css', 'sidebar.css', 'toast.css',
 ];
 let bundledCSS = '';
 for (const file of cssOrder) {
@@ -42,10 +42,27 @@ let output = shell.replace(cssLinkPattern, '\n');
 // Insert inlined CSS before </head>
 output = output.replace('</head>', `<style>\n${bundledCSS}</style>\n</head>`);
 
-// Replace module script with inlined bundle
+// 4. Embed project data files as JS objects
+let embeddedData = '';
+try {
+  const dataFiles = readdirSync('src/data');
+  const projects = {};
+  for (const f of dataFiles) {
+    if (!f.endsWith('.json')) continue;
+    const name = f.replace('.json', '');
+    const content = readFileSync(join('src/data', f), 'utf8');
+    projects[name] = JSON.parse(content);
+  }
+  if (Object.keys(projects).length) {
+    embeddedData = `<script>window.__EMBEDDED_PROJECTS__=${JSON.stringify(projects)};</script>\n`;
+    console.log(`  Embedded: ${Object.keys(projects).length} project(s) (${Object.keys(projects).join(', ')})`);
+  }
+} catch { /* no data files to embed */ }
+
+// Replace module script with inlined bundle + embedded data
 output = output.replace(
   /<script type="module" src="js\/main\.js"><\/script>/,
-  `<script>\n${bundledJS}\n</script>`
+  `${embeddedData}<script>\n${bundledJS}\n</script>`
 );
 
 // Remove any remaining local stylesheet references
@@ -55,6 +72,7 @@ output = output.replace(/\s*<link[^>]*href="styles\/[^"]*"[^>]*>/g, '');
 output = output.replace(/\n{3,}/g, '\n\n');
 
 writeFileSync('dist/index.html', output, 'utf8');
+writeFileSync('index.html', output, 'utf8');
 
 // Copy data files for project loading
 try {

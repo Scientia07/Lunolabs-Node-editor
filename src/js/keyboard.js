@@ -11,6 +11,7 @@ import { deleteSelected, duplicateSelected } from './actions.js';
 import { drawGrid } from './grid.js';
 import { autoSave } from './persistence.js';
 import { setSpaceHeld } from './interactions.js';
+import { toggleSidebar } from './sidebar.js';
 
 let setToolFn, fullRenderFn;
 
@@ -23,7 +24,7 @@ export function initKeyboard(setTool, fullRender) {
 }
 
 function onKeyDown(e) {
-  if (e.target.isContentEditable) return;
+  if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
 
   if (e.key === ' ') { setSpaceHeld(true); e.preventDefault(); }
   if (e.key === 'v' || e.key === 'V') setToolFn('select');
@@ -43,6 +44,7 @@ function onKeyDown(e) {
     renderSelectionState();
     e.preventDefault();
   }
+  if (e.key === 'p' || e.key === 'P') { toggleSidebar(); }
   if (e.key === 'Escape') {
     state.selectedIds.clear();
     renderSelectionState();

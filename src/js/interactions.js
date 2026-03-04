@@ -6,7 +6,7 @@
 // ─── Mouse Interactions ───
 import { state, nodeIndex, genId, saveSnapshot, rebuildIndex } from './state.js';
 import { screenToCanvas, snapToGrid } from './utils.js';
-import { renderConnections, getNodeCenter, renderSelectionState, getNodesLayer, getSvgLayer } from './renderer.js';
+import { renderConnections, getConnectionEndpoints, getNodeCenter, getNodeAnchorPoint, renderSelectionState, getNodesLayer, getSvgLayer } from './renderer.js';
 import { updateTransform } from './transform.js';
 import { updateMinimap } from './minimap.js';
 import { autoSave } from './persistence.js';
@@ -16,11 +16,14 @@ import { showGradientPopup, overrideGradApply } from './gradient-popup.js';
 import { STICKY_COLORS } from './constants.js';
 
 let isDragging = false, isPanning = false, isSelecting = false, isResizing = false;
+let isDraggingEndpoint = false;
 let _popupJustOpened = false;
 let dragStartX = 0, dragStartY = 0;
 let dragOffsets = [];
 let spaceHeld = false;
 let connectTempLine = null;
+let connectFromAnchor = null;
+let endpointDrag = null; // { connId, end ('from'|'to'), tempLine }
 let fullRenderFn;
 
 export function initInteractions(fullRender) {
@@ -87,12 +90,51 @@ function onMouseDown(e, canvasContainer, selRect) {
 
   if (e.button !== 0) return;
 
+  // Check for endpoint handle drag on selected connection
+  const endpointEl = e.target.closest('.conn-endpoint');
+  if (endpointEl) {
+    const connId = parseInt(endpointEl.dataset.connId, 10);
+    const end = endpointEl.dataset.end; // 'from' or 'to'
+    const conn = state.connections.find(c => c.id === connId);
+    if (conn) {
+      isDraggingEndpoint = true;
+      saveSnapshot();
+      const svgLayer = getSvgLayer();
+      const cp = screenToCanvas(e.clientX, e.clientY);
+      const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      tempLine.setAttribute('x1', cp.x);
+      tempLine.setAttribute('y1', cp.y);
+      tempLine.setAttribute('x2', cp.x);
+      tempLine.setAttribute('y2', cp.y);
+      tempLine.setAttribute('stroke', conn.color || '#6c8aff');
+      tempLine.setAttribute('stroke-width', '2');
+      tempLine.setAttribute('stroke-dasharray', '6,4');
+      tempLine.setAttribute('stroke-opacity', '0.7');
+      svgLayer.appendChild(tempLine);
+      endpointDrag = { connId, end, conn, tempLine };
+      e.preventDefault();
+    }
+    return;
+  }
+
+  // Check for click on connection line/path to select it (includes hit areas)
+  const connEl = e.target.closest('path[data-id]') || e.target.closest('line[data-id]');
+  if (connEl && !connEl.classList.contains('conn-endpoint') && !connEl.classList.contains('conn-endpoint-ring')) {
+    const connId = parseInt(connEl.dataset.id, 10);
+    state.selectedConnId = (state.selectedConnId === connId) ? null : connId;
+    state.selectedIds.clear();
+    renderSelectionState();
+    renderConnections();
+    e.preventDefault();
+    return;
+  }
+
   const target = e.target.closest('.node');
   const anchor = e.target.closest('.anchor');
   const resizeH = e.target.closest('.resize-handle');
   const cp = screenToCanvas(e.clientX, e.clientY);
 
-  if (anchor && target) { startConnection(parseInt(target.dataset.id, 10), e); return; }
+  if (anchor && target) { startConnection(parseInt(target.dataset.id, 10), e, anchor.dataset.anchor); return; }
 
   if (resizeH && target) {
     isResizing = true;
@@ -104,7 +146,11 @@ function onMouseDown(e, canvasContainer, selRect) {
     return;
   }
 
-  if (state.tool === 'connect' && target) { startConnection(parseInt(target.dataset.id, 10), e); return; }
+  if (state.tool === 'connect' && target) {
+    const anchorEl = e.target.closest('.anchor');
+    startConnection(parseInt(target.dataset.id, 10), e, anchorEl?.dataset.anchor || null);
+    return;
+  }
 
   if (target && (state.tool === 'select' || state.tool === 'connect')) {
     const nid = parseInt(target.dataset.id, 10);
@@ -187,6 +233,12 @@ function onMouseDown(e, canvasContainer, selRect) {
       return;
     }
 
+    // Deselect connection when clicking empty canvas
+    if (state.selectedConnId !== null) {
+      state.selectedConnId = null;
+      renderConnections();
+    }
+
     if (state.tool === 'select') {
       if (!e.shiftKey) state.selectedIds.clear();
       renderSelectionState();
@@ -205,6 +257,29 @@ function onMouseDown(e, canvasContainer, selRect) {
 
 function onMouseMove(e, canvasContainer) {
   const nodesLayer = getNodesLayer();
+
+  if (isDraggingEndpoint && endpointDrag) {
+    const cp = screenToCanvas(e.clientX, e.clientY);
+    // Update temp line to cursor
+    const conn = endpointDrag.conn;
+    const pts = getConnectionEndpoints(conn);
+    if (pts) {
+      if (endpointDrag.end === 'from') {
+        endpointDrag.tempLine.setAttribute('x1', cp.x);
+        endpointDrag.tempLine.setAttribute('y1', cp.y);
+        endpointDrag.tempLine.setAttribute('x2', pts.tc.x);
+        endpointDrag.tempLine.setAttribute('y2', pts.tc.y);
+      } else {
+        endpointDrag.tempLine.setAttribute('x1', pts.fc.x);
+        endpointDrag.tempLine.setAttribute('y1', pts.fc.y);
+        endpointDrag.tempLine.setAttribute('x2', cp.x);
+        endpointDrag.tempLine.setAttribute('y2', cp.y);
+      }
+    }
+    // Highlight nearest anchor on hover
+    highlightNearestAnchor(e.clientX, e.clientY);
+    return;
+  }
 
   if (isPanning) {
     state.panX = e.clientX - dragStartX;
@@ -262,6 +337,29 @@ function onMouseUp(e, canvasContainer) {
   if (isDragging) { isDragging = false; autoSave(); return; }
   if (isResizing) { isResizing = false; autoSave(); return; }
 
+  if (isDraggingEndpoint && endpointDrag) {
+    isDraggingEndpoint = false;
+    if (endpointDrag.tempLine) endpointDrag.tempLine.remove();
+    clearAnchorHighlights();
+
+    // Find which node+anchor we landed on
+    const result = findNearestAnchor(e.clientX, e.clientY);
+    if (result) {
+      const conn = endpointDrag.conn;
+      if (endpointDrag.end === 'from' && result.nodeId !== conn.to) {
+        conn.from = result.nodeId;
+        conn.fromAnchor = result.anchor;
+      } else if (endpointDrag.end === 'to' && result.nodeId !== conn.from) {
+        conn.to = result.nodeId;
+        conn.toAnchor = result.anchor;
+      }
+    }
+    endpointDrag = null;
+    renderConnections();
+    autoSave();
+    return;
+  }
+
   if (isSelecting) {
     isSelecting = false;
     const selRect = document.getElementById('selection-rect');
@@ -299,20 +397,26 @@ function onMouseUp(e, canvasContainer) {
         );
         if (!exists) {
           saveSnapshot();
-          state.connections.push({ id: genId(), from: state.connectingFrom, to: toId, color: state.connectionColor });
+          const toAnchor = e.target.closest('.anchor')?.dataset.anchor || null;
+          const conn = { id: genId(), from: state.connectingFrom, to: toId, color: state.connectionColor };
+          if (connectFromAnchor) conn.fromAnchor = connectFromAnchor;
+          if (toAnchor) conn.toAnchor = toAnchor;
+          state.connections.push(conn);
           renderConnections();
           autoSave();
         }
       }
     }
     state.connectingFrom = null;
+    connectFromAnchor = null;
   }
 }
 
-function startConnection(fromId, e) {
+function startConnection(fromId, e, anchorPos) {
   state.connectingFrom = fromId;
+  connectFromAnchor = anchorPos || null;
   const fromNode = nodeIndex.get(fromId);
-  const fc = getNodeCenter(fromNode);
+  const fc = anchorPos ? getNodeAnchorPoint(fromNode, anchorPos) : getNodeCenter(fromNode);
   const svgLayer = getSvgLayer();
   connectTempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
   connectTempLine.setAttribute('x1', fc.x);
@@ -354,4 +458,60 @@ export function editNodeLabel(id) {
   };
   el.addEventListener('blur', finish);
   el.addEventListener('keydown', onKey);
+}
+
+// ─── Endpoint Drag Helpers ───
+
+const ANCHOR_SNAP_DIST = 40; // max distance in screen pixels to snap to an anchor
+
+// Find the nearest anchor on any node within snap distance
+function findNearestAnchor(screenX, screenY) {
+  const cp = screenToCanvas(screenX, screenY);
+  let best = null, bestDist = Infinity;
+
+  for (const n of state.nodes) {
+    for (const pos of ['top', 'bottom', 'left', 'right']) {
+      const pt = getNodeAnchorPoint(n, pos);
+      const d = Math.hypot(cp.x - pt.x, cp.y - pt.y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = { nodeId: n.id, anchor: pos, pt };
+      }
+    }
+  }
+
+  // Also consider node centers (no specific anchor)
+  for (const n of state.nodes) {
+    const ct = getNodeCenter(n);
+    const d = Math.hypot(cp.x - ct.x, cp.y - ct.y);
+    if (d < bestDist) {
+      bestDist = d;
+      best = { nodeId: n.id, anchor: null, pt: ct };
+    }
+  }
+
+  const snapDist = ANCHOR_SNAP_DIST / state.zoom;
+  return bestDist <= snapDist ? best : null;
+}
+
+// Highlight the nearest anchor dot while dragging
+function highlightNearestAnchor(screenX, screenY) {
+  clearAnchorHighlights();
+  const result = findNearestAnchor(screenX, screenY);
+  if (!result) return;
+
+  const nodesLayer = getNodesLayer();
+  if (result.anchor) {
+    const anchorEl = nodesLayer.querySelector(`[data-id="${result.nodeId}"] .anchor-${result.anchor}`);
+    if (anchorEl) anchorEl.classList.add('anchor-highlight');
+  } else {
+    const nodeEl = nodesLayer.querySelector(`[data-id="${result.nodeId}"]`);
+    if (nodeEl) nodeEl.classList.add('drop-target');
+  }
+}
+
+function clearAnchorHighlights() {
+  const nodesLayer = getNodesLayer();
+  nodesLayer.querySelectorAll('.anchor-highlight').forEach(el => el.classList.remove('anchor-highlight'));
+  nodesLayer.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
 }

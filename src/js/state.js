@@ -23,10 +23,15 @@ export const state = {
   nextId: 1,
   connectingFrom: null,
   connectionColor: DEFAULT_CONNECTION_COLOR,
+  selectedConnId: null,          // currently selected connection for endpoint editing
   // Project-level settings (can be overridden by loaded project)
   connectionStyle: 'bezier', // 'bezier' | 'straight'
   projectKey: null,          // localStorage key suffix
   theme: 'dark',
+  // Sidebar: groups & visibility
+  groups: [],               // [{ id, name, nodeIds: [], hidden: false }]
+  hiddenSectors: new Set(), // sector IDs hidden via sidebar
+  projectTitle: '',         // editable project title
 };
 
 // O(1) node lookup by id
@@ -49,6 +54,8 @@ export function saveSnapshot() {
     nodes: state.nodes,
     connections: state.connections,
     nextId: state.nextId,
+    groups: state.groups,
+    hiddenSectors: [...state.hiddenSectors],
   }));
   state.redoStack = [];
   if (state.undoStack.length > MAX_UNDO) state.undoStack.shift();
@@ -60,11 +67,15 @@ export function undo(fullRender, autoSave) {
     nodes: state.nodes,
     connections: state.connections,
     nextId: state.nextId,
+    groups: state.groups,
+    hiddenSectors: [...state.hiddenSectors],
   }));
   const snap = JSON.parse(state.undoStack.pop());
   state.nodes = snap.nodes;
   state.connections = snap.connections;
   state.nextId = snap.nextId;
+  if (snap.groups) state.groups = snap.groups;
+  if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
   state.selectedIds.clear();
   rebuildIndex();
   fullRender();
@@ -77,11 +88,15 @@ export function redo(fullRender, autoSave) {
     nodes: state.nodes,
     connections: state.connections,
     nextId: state.nextId,
+    groups: state.groups,
+    hiddenSectors: [...state.hiddenSectors],
   }));
   const snap = JSON.parse(state.redoStack.pop());
   state.nodes = snap.nodes;
   state.connections = snap.connections;
   state.nextId = snap.nextId;
+  if (snap.groups) state.groups = snap.groups;
+  if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
   state.selectedIds.clear();
   rebuildIndex();
   fullRender();

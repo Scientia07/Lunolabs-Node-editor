@@ -21,11 +21,17 @@ import { deleteSelected, duplicateSelected } from './actions.js';
 import { applyTheme } from './theme.js';
 import { loadFromURL } from './project.js';
 import { nodeIndex, saveSnapshot } from './state.js';
+import { initSidebar, refreshSidebar, applyVisibility } from './sidebar.js';
 
 // ─── Full Render ───
 function fullRender() {
   renderNodes();
-  requestAnimationFrame(() => { renderConnections(); updateMinimap(); });
+  requestAnimationFrame(() => {
+    renderConnections();
+    applyVisibility();
+    updateMinimap();
+    refreshSidebar();
+  });
   updateTransform();
 }
 
@@ -100,6 +106,9 @@ async function init() {
 
   // Setup context menu
   setupContextMenu();
+
+  // Init sidebar panel
+  initSidebar(fullRender);
 
   // Apply default theme
   applyTheme(state.theme);

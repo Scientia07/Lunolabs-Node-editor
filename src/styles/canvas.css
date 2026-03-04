@@ -57,6 +57,28 @@
   stroke-width: 3 !important;
 }
 
+/* Invisible wider hit area for thin lines */
+#connections-layer .conn-hit {
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+/* Endpoint handles on selected connections */
+#connections-layer .conn-endpoint {
+  pointer-events: all;
+  cursor: grab;
+}
+#connections-layer .conn-endpoint:hover {
+  r: 8;
+  filter: drop-shadow(0 0 4px var(--accent));
+}
+#connections-layer .conn-endpoint:active {
+  cursor: grabbing;
+}
+#connections-layer .conn-endpoint-ring {
+  pointer-events: none;
+}
+
 #nodes-layer {
   position: absolute;
   top: 0; left: 0;
