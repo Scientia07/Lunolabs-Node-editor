@@ -1,0 +1,64 @@
+/* ── Minimap ── */
+#minimap {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  width: var(--minimap-w);
+  height: var(--minimap-h);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  z-index: 900;
+  box-shadow: var(--shadow);
+}
+#minimap canvas { width: 100%; height: 100%; }
+#minimap-viewport {
+  position: absolute;
+  border: 1.5px solid var(--accent);
+  background: rgba(108,138,255,0.08);
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+/* ── Zoom Indicator ── */
+#zoom-indicator {
+  position: fixed;
+  bottom: 16px;
+  right: calc(var(--minimap-w) + 28px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px;
+  z-index: 900;
+  box-shadow: var(--shadow);
+}
+#zoom-indicator .tb-btn { height: 30px; padding: 0 8px; font-size: 11px; }
+#zoom-level {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 44px;
+  text-align: center;
+}
+
+/* ── Legend (shown for projects with legend data) ── */
+#legend {
+  position: fixed;
+  bottom: 16px; left: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  z-index: 900;
+  box-shadow: var(--shadow);
+  font-size: 11px;
+  line-height: 1.8;
+  display: none;
+}
+#legend.visible { display: block; }
+#legend h4 { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }

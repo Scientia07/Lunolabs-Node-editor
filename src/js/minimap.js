@@ -1,0 +1,78 @@
+/**
+ * @ai-generated true
+ * @agent claude-code
+ * @created 2026-03-04
+ */
+// ─── Minimap ───
+import { state, nodeIndex } from './state.js';
+
+let minimapCanvas, minimapCtx, minimapViewport;
+
+export function initMinimap() {
+  minimapCanvas = document.getElementById('minimap-canvas');
+  minimapCtx = minimapCanvas.getContext('2d');
+  minimapViewport = document.getElementById('minimap-viewport');
+}
+
+export function updateMinimap() {
+  const mw = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--minimap-w'), 10) || 180;
+  const mh = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--minimap-h'), 10) || 120;
+  minimapCanvas.width = mw;
+  minimapCanvas.height = mh;
+  minimapCtx.clearRect(0, 0, mw, mh);
+  if (!state.nodes.length) return;
+
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const nodesLayer = document.getElementById('nodes-layer');
+  state.nodes.forEach(n => {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + (n.width || 140));
+    maxY = Math.max(maxY, n.y + (n.height || 60));
+  });
+
+  const pad = 100;
+  minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+  const worldW = maxX - minX || 1;
+  const worldH = maxY - minY || 1;
+  const scale = Math.min(mw / worldW, mh / worldH);
+
+  // Draw connections
+  minimapCtx.strokeStyle = 'rgba(108,138,255,0.3)';
+  minimapCtx.lineWidth = 1;
+  state.connections.forEach(c => {
+    const f = nodeIndex.get(c.from);
+    const t = nodeIndex.get(c.to);
+    if (!f || !t) return;
+    minimapCtx.beginPath();
+    minimapCtx.moveTo((f.x - minX + 60) * scale, (f.y - minY + 30) * scale);
+    minimapCtx.lineTo((t.x - minX + 60) * scale, (t.y - minY + 30) * scale);
+    minimapCtx.stroke();
+  });
+
+  // Draw nodes
+  state.nodes.forEach(n => {
+    if (n.type === 'company' && n.parentId != null) return; // skip text-style companies in minimap
+    const nx = (n.x - minX) * scale;
+    const ny = (n.y - minY) * scale;
+    const nw = (n.width || (n.type === 'sector' ? 140 : 90)) * scale;
+    const nh = (n.height || (n.type === 'sector' ? 60 : 30)) * scale;
+    minimapCtx.fillStyle = n.color || (n.type === 'sticky' ? '#fef08a' : '#6c8aff');
+    minimapCtx.globalAlpha = 0.7;
+    if (n.type === 'circle' || n.type === 'center' || (n.type === 'sector' && n.size)) {
+      minimapCtx.beginPath();
+      minimapCtx.arc(nx + nw / 2, ny + nh / 2, Math.min(nw, nh) / 2, 0, Math.PI * 2);
+      minimapCtx.fill();
+    } else {
+      minimapCtx.fillRect(nx, ny, Math.max(nw, 3), Math.max(nh, 3));
+    }
+    minimapCtx.globalAlpha = 1;
+  });
+
+  // Viewport indicator
+  const vw = window.innerWidth, vh = window.innerHeight;
+  minimapViewport.style.left = Math.max(0, (-state.panX / state.zoom - minX) * scale) + 'px';
+  minimapViewport.style.top = Math.max(0, (-state.panY / state.zoom - minY) * scale) + 'px';
+  minimapViewport.style.width = (vw / state.zoom) * scale + 'px';
+  minimapViewport.style.height = (vh / state.zoom) * scale + 'px';
+}
