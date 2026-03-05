@@ -3,7 +3,7 @@
  * @agent claude-code
  * @created 2026-03-04
  */
-import { buildSync } from 'esbuild';
+import { buildSync, transformSync } from 'esbuild';
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, copyFileSync } from 'fs';
 import { join } from 'path';
 
@@ -32,6 +32,11 @@ for (const file of cssOrder) {
     console.warn(`Warning: ${path} not found, skipping (${e.message})`);
   }
 }
+
+// 2b. Minify concatenated CSS
+const rawCSSSize = bundledCSS.length;
+const cssMinResult = transformSync(bundledCSS, { loader: 'css', minify: true });
+bundledCSS = cssMinResult.code;
 
 // 3. Read shell HTML and inline everything
 const shell = readFileSync('src/index.html', 'utf8');
@@ -85,5 +90,5 @@ try {
 } catch (e) { console.warn('No data files to copy:', e.message); }
 
 console.log('Built dist/index.html successfully');
-console.log(`  CSS: ${(bundledCSS.length / 1024).toFixed(1)}KB`);
+console.log(`  CSS: ${(bundledCSS.length / 1024).toFixed(1)}KB (${(rawCSSSize / 1024).toFixed(1)}KB unminified)`);
 console.log(`  JS:  ${(bundledJS.length / 1024).toFixed(1)}KB`);

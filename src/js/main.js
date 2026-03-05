@@ -4,7 +4,7 @@
  * @created 2026-03-04
  */
 // ─── Main Entry Point ───
-import { state, rebuildIndex } from './state.js';
+import { state, rebuildIndex, on, emit } from './state.js';
 import { initGrid, drawGrid } from './grid.js';
 import { initRenderer, renderNodes, renderConnections, renderSelectionState } from './renderer.js';
 import { initMinimap, updateMinimap } from './minimap.js';
@@ -20,7 +20,7 @@ import { autoSave, autoSaveNow, autoLoad } from './persistence.js';
 import { deleteSelected, duplicateSelected } from './actions.js';
 import { applyTheme } from './theme.js';
 import { loadFromURL } from './project.js';
-import { nodeIndex, saveSnapshot } from './state.js';
+import { nodeIndex, saveSnapshot } from './state.js'; // re-import ok (same module)
 import { initSidebar, refreshSidebar, applyVisibility } from './sidebar.js';
 import { initNodePopup } from './node-popup.js';
 
@@ -36,6 +36,10 @@ function fullRender() {
     refreshSidebar();
   });
 }
+
+// ─── Register event bus listeners ───
+on('render', fullRender);
+on('save', autoSave);
 
 // ─── Context Menu Wiring ───
 function setupContextMenu() {
@@ -103,15 +107,15 @@ async function init() {
   setZoomToRef(zoomTo);
 
   // Wire toolbar
-  initToolbar(fullRender);
-  initInteractions(fullRender);
-  initKeyboard(setTool, fullRender);
+  initToolbar();
+  initInteractions();
+  initKeyboard(setTool);
 
   // Setup context menu
   setupContextMenu();
 
   // Init sidebar panel
-  initSidebar(fullRender);
+  initSidebar();
 
   // Apply default theme
   applyTheme(state.theme);

@@ -4,7 +4,7 @@
  * @created 2026-03-04
  */
 // ─── Mouse Interactions ───
-import { state, nodeIndex, genId, saveSnapshot, rebuildIndex } from './state.js';
+import { state, nodeIndex, genId, saveSnapshot, rebuildIndex, emit } from './state.js';
 import { screenToCanvas, snapToGrid } from './utils.js';
 import { renderConnections, getConnectionEndpoints, getNodeCenter, getNodeAnchorPoint, renderSelectionState, getNodesLayer, getSvgLayer, domCache } from './renderer.js';
 import { updateTransform } from './transform.js';
@@ -25,12 +25,10 @@ let spaceHeld = false;
 let connectTempLine = null;
 let connectFromAnchor = null;
 let endpointDrag = null; // { connId, end ('from'|'to'), tempLine }
-let fullRenderFn;
 // P2: RAF-gate mousemove — cap at 60fps instead of 120+ Hz
 let rafPending = false;
 
-export function initInteractions(fullRender) {
-  fullRenderFn = fullRender;
+export function initInteractions() {
   const canvasContainer = document.getElementById('canvas-container');
   const selRect = document.getElementById('selection-rect');
 
@@ -208,7 +206,7 @@ function onMouseDown(e, canvasContainer, selRect) {
         const node = { id: genId(), type: 'sector', x: snapToGrid(cpCopy.x), y: snapToGrid(cpCopy.y), label: 'Neuer Sektor', color: c1, color2: c2, gradAngle: angle };
         state.nodes.push(node);
         rebuildIndex();
-        fullRenderFn();
+        emit('render');
         setTimeout(() => editNodeLabel(node.id), 100);
       });
       return;
@@ -227,7 +225,7 @@ function onMouseDown(e, canvasContainer, selRect) {
         state.connections.push({ id: genId(), from: nearestSector.id, to: node.id, color: nearestSector.color });
       }
       rebuildIndex();
-      fullRenderFn();
+      emit('render');
       setTimeout(() => editNodeLabel(node.id), 100);
       return;
     }
@@ -237,7 +235,7 @@ function onMouseDown(e, canvasContainer, selRect) {
       const node = { id: genId(), type: 'sticky', x: snapToGrid(cp.x), y: snapToGrid(cp.y), label: '', color: STICKY_COLORS[Math.floor(Math.random() * STICKY_COLORS.length)], width: 160, height: 120 };
       state.nodes.push(node);
       rebuildIndex();
-      fullRenderFn();
+      emit('render');
       setTimeout(() => editNodeLabel(node.id), 100);
       return;
     }
@@ -247,7 +245,7 @@ function onMouseDown(e, canvasContainer, selRect) {
       const node = { id: genId(), type: state.shapeType, x: snapToGrid(cp.x), y: snapToGrid(cp.y), label: '', color: null, borderColor: null, width: state.shapeType === 'circle' ? 100 : (state.shapeType === 'textbox' ? null : 140), height: state.shapeType === 'circle' ? 100 : (state.shapeType === 'textbox' ? null : 80) };
       state.nodes.push(node);
       rebuildIndex();
-      fullRenderFn();
+      emit('render');
       setTimeout(() => editNodeLabel(node.id), 100);
       return;
     }

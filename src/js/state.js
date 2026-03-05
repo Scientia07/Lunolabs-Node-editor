@@ -78,18 +78,36 @@ export function saveSnapshot() {
   if (state.undoStack.length > MAX_UNDO) state.undoStack.shift();
 }
 
-export function undo(fullRender, autoSave) {
+export function undo() {
   if (!state.undoStack.length) return;
   state.redoStack.push(createSnapshot());
   applySnapshot(JSON.parse(state.undoStack.pop()));
-  fullRender();
-  autoSave();
+  emit('render');
+  emit('save');
 }
 
-export function redo(fullRender, autoSave) {
+export function redo() {
   if (!state.redoStack.length) return;
   state.undoStack.push(createSnapshot());
   applySnapshot(JSON.parse(state.redoStack.pop()));
-  fullRender();
-  autoSave();
+  emit('render');
+  emit('save');
+}
+
+// ─── Event Bus ───
+const listeners = new Map();
+
+export function on(event, fn) {
+  if (!listeners.has(event)) listeners.set(event, new Set());
+  listeners.get(event).add(fn);
+}
+
+export function off(event, fn) {
+  listeners.get(event)?.delete(fn);
+}
+
+export function emit(event, ...args) {
+  if (listeners.has(event)) {
+    for (const fn of listeners.get(event)) fn(...args);
+  }
 }

@@ -4,7 +4,7 @@
  * @created 2026-03-04
  */
 // ─── Keyboard Shortcuts ───
-import { state, undo, redo } from './state.js';
+import { state, undo, redo, emit } from './state.js';
 import { renderSelectionState } from './renderer.js';
 import { closeMenus } from './context-menu.js';
 import { deleteSelected, duplicateSelected } from './actions.js';
@@ -14,11 +14,10 @@ import { setSpaceHeld } from './interactions.js';
 import { toggleSidebar } from './sidebar.js';
 import { hideNodePopup } from './node-popup.js';
 
-let setToolFn, fullRenderFn;
+let setToolFn;
 
-export function initKeyboard(setTool, fullRender) {
+export function initKeyboard(setTool) {
   setToolFn = setTool;
-  fullRenderFn = fullRender;
 
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', (e) => { if (e.key === ' ') setSpaceHeld(false); });
@@ -36,10 +35,10 @@ function onKeyDown(e) {
     drawGrid();
     autoSave();
   }
-  if (e.key === 'Delete' || e.key === 'Backspace') { hideNodePopup(); deleteSelected(fullRenderFn); e.preventDefault(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { hideNodePopup(); undo(fullRenderFn, autoSave); e.preventDefault(); }
-  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { hideNodePopup(); redo(fullRenderFn, autoSave); e.preventDefault(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'd') { duplicateSelected(fullRenderFn); e.preventDefault(); }
+  if (e.key === 'Delete' || e.key === 'Backspace') { hideNodePopup(); deleteSelected(() => emit('render')); e.preventDefault(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { hideNodePopup(); undo(); e.preventDefault(); }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { hideNodePopup(); redo(); e.preventDefault(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'd') { duplicateSelected(() => emit('render')); e.preventDefault(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
     state.nodes.forEach(n => state.selectedIds.add(n.id));
     renderSelectionState();

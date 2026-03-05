@@ -1,0 +1,190 @@
+---
+name: state-and-undo
+description: How state management, the node index, undo/redo snapshots, and persistence work in this editor. Follow this when modifying state shape, adding new properties, or implementing features that mutate nodes/connections.
+trigger: When adding new node properties, modifying state shape, implementing undo-aware features, or working with persistence
+---
+
+# State Management & Undo — Netzwerk-Editor
+
+## State Object (`src/js/state.js`)
+
+All editor state lives in a single exported object:
+
+```javascript
+export const state = {
+  nodes: [],           // Array of node objects
+  connections: [],     // Array of { id, from, to, color, fromAnchor?, toAnchor?, style? }
+  tool: 'select',      // Current tool mode
+  shapeType: 'rect',   // Sub-type for shape tool
+  zoom: 1, panX: 0, panY: 0,
+  gridEnabled: true, snapEnabled: true, gridSize: 40,
+  selectedIds: new Set(),
+  undoStack: [], redoStack: [],
+  nextId: 1,
+  connectingFrom: null,
+  connectionColor: '#6c8aff',
+  selectedConnId: null,
+  connectionStyle: 'bezier',
+  projectKey: null,
+  theme: 'dark',
+  groups: [],
+  hiddenSectors: new Set(),
+  projectTitle: '',
+};
+```
+
+## Node Index (`nodeIndex`)
+
+O(1) lookup by node ID:
+
+```javascript
+export const nodeIndex = new Map();
+
+// Must be called after any structural change to state.nodes:
+export function rebuildIndex() {
+  nodeIndex.clear();
+  for (const n of state.nodes) nodeIndex.set(n.id, n);
+}
+```
+
+**When to call `rebuildIndex()`:**
+- After `state.nodes.push(...)` — new node created
+- After `state.nodes = state.nodes.filter(...)` — node deleted
+- After `state.nodes = snap.nodes` — undo/redo restore
+- After changing `n.type` — not strictly needed, but good practice
+
+**When NOT needed:**
+- After mutating a node's properties (color, font, opacity) — the Map reference stays valid
+
+## Adding New Node Properties
+
+To add a new property (e.g., `opacity`, `borderWidth`):
+
+1. **No state.js changes needed** — nodes are plain objects, properties are added dynamically
+2. **Renderer** (`renderer.js:createNodeElement`): Apply the property to the DOM element
+   ```javascript
+   if (n.myProp != null) el.style.myProp = n.myProp;
+   ```
+3. **Export PNG** (`export-png.js`): Apply in the canvas rendering section
+   ```javascript
+   if (n.myProp != null) ctx.someCanvasProperty = n.myProp;
+   ```
+4. **Popup/controls**: Add UI to set the property (see `popup-panel` skill)
+5. **Snapshots**: Already handled — `saveSnapshot()` serializes the entire `state.nodes` array via `JSON.stringify`, so any new property is automatically included
+
+## Undo/Redo Pattern
+
+### How Snapshots Work
+
+Snapshot creation and restoration are extracted into private helpers:
+
+```javascript
+/** Serialize current undoable state into a JSON string */
+function createSnapshot() {
+  return JSON.stringify({
+    nodes: state.nodes,
+    connections: state.connections,
+    nextId: state.nextId,
+    groups: state.groups,
+    hiddenSectors: [...state.hiddenSectors],
+  });
+}
+
+/** Restore state from a parsed snapshot object */
+function applySnapshot(snap) {
+  state.nodes = snap.nodes;
+  state.connections = snap.connections;
+  state.nextId = snap.nextId;
+  if (snap.groups) state.groups = snap.groups;
+  if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
+  state.selectedIds.clear();
+  rebuildIndex();
+}
+
+export function saveSnapshot() {
+  state.undoStack.push(createSnapshot());
+  state.redoStack = [];
+  if (state.undoStack.length > MAX_UNDO) state.undoStack.shift();
+}
+
+export function undo(fullRender, autoSave) {
+  if (!state.undoStack.length) return;
+  state.redoStack.push(createSnapshot());
+  applySnapshot(JSON.parse(state.undoStack.pop()));
+  fullRender();
+  autoSave();
+}
+```
+
+- Full JSON snapshot of structural state
+- `selectedIds` is NOT snapshotted (intentional — always cleared on undo)
+- `MAX_UNDO = 80` snapshots
+- `createSnapshot()` and `applySnapshot()` are private helpers (not exported)
+
+### When to Call `saveSnapshot()`
+
+**Before any mutation that the user should be able to undo:**
+- Creating a node
+- Deleting nodes/connections
+- Moving nodes (called once on mousedown, not on every mousemove)
+- Changing node color, font, type, size
+- Changing connection color or endpoints
+
+### Lazy Snapshot Pattern (for popups)
+
+When a popup opens and the user makes multiple live-preview changes, take ONE snapshot on first change:
+
+```javascript
+let _snapshotTaken = false;
+
+function ensureSnapshot() {
+  if (!_snapshotTaken) {
+    saveSnapshot();
+    _snapshotTaken = true;
+  }
+}
+
+export function showPopup(nodeId) {
+  _snapshotTaken = false; // Reset on open
+  // ... populate fields
+}
+
+// Each input handler:
+inputEl.addEventListener('input', () => {
+  ensureSnapshot(); // Only saves once
+  applyChange();
+});
+```
+
+This means Ctrl+Z reverts ALL changes made during one popup session.
+
+### Undo/Redo Restore
+
+Now uses the `applySnapshot()` helper internally:
+
+```javascript
+export function undo(fullRender, autoSave) {
+  if (!state.undoStack.length) return;
+  state.redoStack.push(createSnapshot());         // Save current for redo
+  applySnapshot(JSON.parse(state.undoStack.pop())); // Restore previous
+  fullRender();                                    // Re-render everything
+  autoSave();                                      // Persist to localStorage
+}
+```
+
+Note: `applySnapshot` handles `selectedIds.clear()` and `rebuildIndex()` internally.
+
+## Persistence (`src/js/persistence.js`)
+
+- `autoSave()` serializes state to `localStorage` (debounced)
+- `autoLoad()` restores from `localStorage` on startup
+- Both serialize the full `state.nodes` array, so new properties are automatically persisted
+- Project JSON files (`src/data/*.json`) are loaded via `project.js:loadFromURL()`
+
+## Important Rules
+
+1. **Never mutate `state.nodes` array directly** without calling `rebuildIndex()` after structural changes
+2. **Always `saveSnapshot()` before mutations** that the user should be able to undo
+3. **Use `nodeIndex.get(id)`** for O(1) lookups, never `state.nodes.find()`
+4. **Dispatch `editor:render`** after mutations in popups (or call `fullRender()` if you have the reference)
+5. **Close popups on undo/redo** — any popup holding a `currentNodeId` becomes stale after undo
