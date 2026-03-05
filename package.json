@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "build": "node build.js",
-    "dev": "open index.html"
+    "dev": "open index.html",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.25.0",
+    "jsdom": "^28.1.0",
+    "vitest": "^4.0.18"
   }
 }
