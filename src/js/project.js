@@ -8,13 +8,30 @@ import { state, rebuildIndex } from './state.js';
 import { applyTheme } from './theme.js';
 import { esc, safeColor } from './utils.js';
 
-// Load a project JSON object into state
-export function loadProject(project) {
+/**
+ * Load a project JSON object into state. Single source of truth.
+ * @param {object} project - project data { nodes, connections, nextId, meta }
+ * @param {object} [opts] - options
+ * @param {string} [opts.name] - fallback project name if meta.title is missing
+ * @param {boolean} [opts.resetState=true] - reset groups/undo/selection (false for initial URL load where no prior state exists)
+ */
+export function loadProject(project, opts = {}) {
+  const { name = '', resetState = true } = opts;
+
   state.nodes = project.nodes || [];
   state.connections = project.connections || [];
   state.nextId = project.nextId || 1;
 
-  // Clear previous legend before applying new project
+  if (resetState) {
+    state.groups = [];
+    state.hiddenSectors = new Set();
+    state.selectedIds.clear();
+    state.undoStack = [];
+    state.redoStack = [];
+  }
+
+  state.projectTitle = project.meta?.title || name;
+
   clearLegend();
 
   if (project.meta) {
@@ -42,14 +59,14 @@ export async function loadFromURL() {
   try {
     // Check for embedded data first (single-file build)
     if (window.__EMBEDDED_PROJECTS__ && window.__EMBEDDED_PROJECTS__[projectName]) {
-      loadProject(window.__EMBEDDED_PROJECTS__[projectName]);
+      loadProject(window.__EMBEDDED_PROJECTS__[projectName], { resetState: false });
       return true;
     }
     // Fallback: fetch from data/ directory (dev mode or server)
     const resp = await fetch(`data/${projectName}.json`);
     if (!resp.ok) return false;
     const project = await resp.json();
-    loadProject(project);
+    loadProject(project, { resetState: false });
     return true;
   } catch (_e) {
     return false;

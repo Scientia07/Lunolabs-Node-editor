@@ -9,6 +9,7 @@
 import { state, rebuildIndex, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { showToast, validateProjectJSON, serializeProject } from './utils.js';
+import { loadProject as loadProjectData } from './project.js';
 
 const SAVED_PROJECTS_KEY = 'network-editor-saved-projects';
 
@@ -58,26 +59,7 @@ export function loadProject(projectEntry) {
 }
 
 function applyProject(project, name) {
-  state.nodes = project.nodes || [];
-  state.connections = project.connections || [];
-  state.nextId = project.nextId || 1;
-  state.groups = [];
-  state.hiddenSectors = new Set();
-  state.projectTitle = project.meta?.title || name;
-  state.selectedIds.clear();
-  state.undoStack = [];
-  state.redoStack = [];
-
-  if (project.meta) {
-    if (project.meta.theme) {
-      state.theme = project.meta.theme;
-      document.documentElement.setAttribute('data-theme', state.theme);
-    }
-    if (project.meta.connectionStyle) state.connectionStyle = project.meta.connectionStyle;
-    if (project.meta.gridEnabled !== undefined) state.gridEnabled = project.meta.gridEnabled;
-  }
-
-  rebuildIndex();
+  loadProjectData(project, { name, resetState: true });
   emit('render');
   autoSave();
 }
