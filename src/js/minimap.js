@@ -34,15 +34,11 @@ export function updateMinimap() {
   minimapCtx.clearRect(0, 0, mw, mh);
   if (!state.nodes.length) return;
 
-  const bb = getNodesBoundingBox(state.nodes);
-  if (!bb) return;
-  const pad = 100;
-  const minX = bb.minX - pad;
-  const minY = bb.minY - pad;
-  const maxX = bb.maxX + pad;
-  const maxY = bb.maxY + pad;
-  const worldW = maxX - minX || 1;
-  const worldH = maxY - minY || 1;
+  const box = getNodesBoundingBox(state.nodes, null, 100);
+  if (!box) return;
+  const { minX, minY, maxX, maxY } = box;
+  const worldW = (maxX - minX) || 1;
+  const worldH = (maxY - minY) || 1;
   const scale = Math.min(mw / worldW, mh / worldH);
 
   // Draw connections

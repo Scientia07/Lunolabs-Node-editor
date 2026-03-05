@@ -8,7 +8,7 @@ import { state } from './state.js';
 import { drawGrid } from './grid.js';
 import { updateMinimap } from './minimap.js';
 import { autoSave } from './persistence.js';
-import { domCache } from './renderer.js';
+import { getNodesLayer } from './renderer.js';
 import { getNodesBoundingBox } from './utils.js';
 
 export function updateTransform() {
@@ -32,20 +32,16 @@ export function zoomTo(newZoom, cx, cy) {
 
 export function zoomFit() {
   if (!state.nodes.length) return;
-  const bb = getNodesBoundingBox(state.nodes, n => {
-    const el = domCache.get(n.id);
-    return { w: el ? el.offsetWidth : (n.width || 140), h: el ? el.offsetHeight : (n.height || 60) };
-  });
-  if (!bb) return;
-  const { minX, minY, maxX, maxY } = bb;
-  const pad = 80;
-  const w = maxX - minX + pad * 2;
-  const h = maxY - minY + pad * 2;
+  const nodesLayer = getNodesLayer();
+  const box = getNodesBoundingBox(state.nodes, nodesLayer);
+  if (!box) return;
+  const w = box.maxX - box.minX;
+  const h = box.maxY - box.minY;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   state.zoom = Math.min(vw / w, vh / h, 2);
-  state.panX = (vw - w * state.zoom) / 2 - minX * state.zoom + pad * state.zoom;
-  state.panY = (vh - h * state.zoom) / 2 - minY * state.zoom + pad * state.zoom;
+  state.panX = (vw - w * state.zoom) / 2 - box.minX * state.zoom;
+  state.panY = (vh - h * state.zoom) / 2 - box.minY * state.zoom;
   updateTransform();
   autoSave();
 }

@@ -13,15 +13,9 @@ export function exportPNG() {
   showToast('PNG wird erstellt...');
 
   const nodesLayer = getNodesLayer();
-  const bb = getNodesBoundingBox(state.nodes, n => {
-    const el = domCache.get(n.id);
-    return { w: el ? el.offsetWidth : (n.width || 140), h: el ? el.offsetHeight : (n.height || 60) };
-  });
-  if (!bb) return;
-
-  const pad = 80;
-  let { minX, minY, maxX, maxY } = bb;
-  minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+  const box = getNodesBoundingBox(state.nodes, nodesLayer);
+  if (!box) { showToast('Keine Elemente zum Exportieren'); return; }
+  const { minX, minY, maxX, maxY } = box;
   const canvasW = maxX - minX;
   const canvasH = maxY - minY;
 

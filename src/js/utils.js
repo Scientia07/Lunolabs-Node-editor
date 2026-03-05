@@ -73,22 +73,25 @@ export function validateProjectJSON(raw) {
 }
 
 /**
- * Compute bounding box for all nodes.
- * @param {Array} nodes - array of node objects with x, y, and optional width/height
- * @param {function} [getSize] - optional (node) => {w, h} to get actual DOM dimensions
- * @returns {{ minX, minY, maxX, maxY }} or null if no nodes
+ * Calculate bounding box of all nodes.
+ * @param {Array} nodes - array of node objects with x, y
+ * @param {HTMLElement} [nodesLayer] - optional DOM layer for measuring actual element sizes
+ * @param {number} [pad=80] - padding around the bounding box
+ * @returns {{ minX: number, minY: number, maxX: number, maxY: number }} or null if no nodes
  */
-export function getNodesBoundingBox(nodes, getSize) {
+export function getNodesBoundingBox(nodes, nodesLayer, pad = 80) {
   if (!nodes.length) return null;
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const n of nodes) {
-    const size = getSize ? getSize(n) : { w: n.width || 140, h: n.height || 60 };
+    const el = nodesLayer?.querySelector(`[data-id="${n.id}"]`);
+    const w = el ? el.offsetWidth : (n.width || 140);
+    const h = el ? el.offsetHeight : (n.height || 60);
     minX = Math.min(minX, n.x);
     minY = Math.min(minY, n.y);
-    maxX = Math.max(maxX, n.x + size.w);
-    maxY = Math.max(maxY, n.y + size.h);
+    maxX = Math.max(maxX, n.x + w);
+    maxY = Math.max(maxY, n.y + h);
   }
-  return { minX, minY, maxX, maxY };
+  return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
 }
 
 export function getContrastColor(hex) {
