@@ -24,6 +24,9 @@ import { showColorPopup } from './color-popup.js';
 import { showGradientPopup, overrideGradApply } from './gradient-popup.js';
 import { STICKY_COLORS } from './constants.js';
 import { showNodePopup, hideNodePopup, repositionNodePopup } from './node-popup.js';
+import { showQuickAdd } from './quick-add.js';
+import { showConnPopup, hideConnPopup } from './conn-popup.js';
+import { pinNode, isLayoutRunning, runForceLayout } from './force-layout.js';
 
 let isDragging = false, isPanning = false, isSelecting = false, isResizing = false;
 let isDraggingEndpoint = false;
@@ -141,6 +144,11 @@ function onMouseDown(e, canvasContainer, selRect) {
     state.selectedConnId = (state.selectedConnId === connId) ? null : connId;
     state.selectedIds.clear();
     hideNodePopup();
+    if (state.selectedConnId !== null) {
+      showConnPopup(state.selectedConnId);
+    } else {
+      hideConnPopup();
+    }
     renderSelectionState();
     renderConnections();
     e.preventDefault();
@@ -180,6 +188,8 @@ function onMouseDown(e, canvasContainer, selRect) {
     }
     renderSelectionState();
 
+    // Hide connection popup when selecting nodes
+    hideConnPopup();
     // Show/hide node popup based on selection count
     if (state.selectedIds.size === 1) {
       const selectedId = [...state.selectedIds][0];
@@ -197,6 +207,8 @@ function onMouseDown(e, canvasContainer, selRect) {
       if (n) dragOffsets.push({ id, ox: n.x - cp.x, oy: n.y - cp.y });
     });
     saveSnapshot();
+    // Pin dragged nodes in force layout
+    state.selectedIds.forEach(id => pinNode(id));
     e.preventDefault();
     return;
   }
@@ -262,6 +274,7 @@ function onMouseDown(e, canvasContainer, selRect) {
     // Deselect connection when clicking empty canvas
     if (state.selectedConnId !== null) {
       state.selectedConnId = null;
+      hideConnPopup();
       renderConnections();
     }
 
@@ -359,7 +372,14 @@ function onMouseMove(e, canvasContainer) {
 
 function onMouseUp(e, canvasContainer) {
   if (isPanning) { isPanning = false; canvasContainer.classList.remove('panning'); autoSave(); return; }
-  if (isDragging) { isDragging = false; autoSave(); return; }
+  if (isDragging) {
+    isDragging = false;
+    autoSave();
+    if (state.physicsLayout && !isLayoutRunning()) {
+      runForceLayout();
+    }
+    return;
+  }
   if (isResizing) { isResizing = false; autoSave(); return; }
 
   if (isDraggingEndpoint && endpointDrag) {
@@ -437,6 +457,10 @@ function onMouseUp(e, canvasContainer) {
           autoSave();
         }
       }
+    } else {
+      // Dragged to empty canvas — show quick-add popup
+      const cp = screenToCanvas(e.clientX, e.clientY);
+      showQuickAdd(e.clientX, e.clientY, cp, state.connectingFrom, connectFromAnchor);
     }
     state.connectingFrom = null;
     connectFromAnchor = null;
