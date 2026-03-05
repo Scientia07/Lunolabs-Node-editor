@@ -55,3 +55,22 @@ A floating popup tied to node selection must be dismissed in every code path tha
 
 ### [PROCESS] Local skills encode tribal knowledge for vanilla JS projects
 Framework-less projects have no convention to lean on. Codifying patterns like the module init order, popup lifecycle, and node type registry as `.claude/skills/` files means new agents discover project-specific patterns automatically instead of reverse-engineering them from 10+ files.
+
+---
+
+## Session: Phase 3 Architecture Refactoring (A1-A7) — 2026-03-05
+
+### [ARCHITECTURE] Event bus in the state module eliminates callback threading
+Replacing `fullRenderFn` callback injection (stored as module-level `let` in 4 modules) with a 15-line `on()`/`off()`/`emit()` bus in state.js removed all callback threading. The bus lives in state.js because it's already the universal shared dependency — no new imports needed. Undo/redo became parameterless, simplifying their API from `undo(fullRender, autoSave)` to just `undo()`.
+
+### [ARCHITECTURE] Unifying duplicate logic catches hidden behavioral divergence
+The two `loadProject` functions in project.js and sidebar.js had silently diverged: one used `applyTheme()` while the other set `data-theme` directly; one handled legends, the other skipped them entirely. Merging into a single `loadProject(project, opts)` with a `resetState` flag fixed both bugs. DRY isn't just about code size — it prevents behavioral drift.
+
+### [PROCESS] Bottom-up extraction order makes big refactors safe
+Extracting small helpers first (A4: snapshot, A5: bounding box, A6: serialization, A7: ID gen) reduced the diff size when the event bus (A3) and sidebar split (A1) landed later. Each of the 7 commits was independently verifiable via `node build.js`, and no commit broke the build.
+
+### [CODE-PATTERN] Callback parameters break circular deps in module splits
+When splitting sidebar.js into 3 files, settings-panel.js needed to call `refreshSidebar()` from sidebar.js. Instead of creating a circular import, `refreshSidebar` is passed as a callback parameter to `renderSettingsTab(contentEl, refreshCallback)`. Simpler than re-exporting through a third module or overusing the event bus for UI-internal concerns.
+
+### [PROCESS] Subagent-driven development keeps context clean across sequential tasks
+Dispatching fresh subagents per task (7 refactoring tasks) prevented context pollution from accumulating file reads and edits. Each agent read only the files it needed, made targeted changes, and committed. The controller provided full task text directly (no plan file reading overhead).

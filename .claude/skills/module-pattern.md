@@ -80,37 +80,57 @@ initSidebar()       — sidebar panel
 
 **Rule:** If your module needs a DOM element, init it BEFORE `initInteractions`. If it needs to respond to tool changes or selections, wire it in `interactions.js` or `keyboard.js`.
 
+## Event Bus (Primary Communication)
+
+The **event bus** in `state.js` is the primary way modules trigger re-renders and save:
+
+```javascript
+import { emit } from './state.js';
+
+// After any mutation that needs a re-render:
+emit('render');
+
+// main.js registers the listeners:
+on('render', fullRender);
+on('save', autoSave);
+```
+
+**No module stores a `fullRenderFn` reference.** All core modules (interactions, keyboard, toolbar, sidebar) use `emit('render')` directly.
+
 ## Circular Dependency Avoidance
 
 Modules must NOT import from modules that import from them. Common solutions:
 
-1. **Lazy reference pattern** (used for `zoomTo`):
+1. **Event bus** (primary pattern — used by all core modules):
+   ```javascript
+   import { emit } from './state.js';
+   emit('render'); // state.js is the universal dependency
+   ```
+
+2. **Lazy reference pattern** (used for `zoomTo`):
    ```javascript
    let _ref;
    export function setRef(fn) { _ref = fn; }
-   // Later, call _ref() instead of importing directly
    ```
 
-2. **Custom event dispatch** (used by all popups):
+3. **Callback parameter** (used when a child module needs parent's function):
    ```javascript
-   // In your module — signal that a re-render is needed:
-   document.dispatchEvent(new CustomEvent('editor:render'));
-
-   // main.js listens and calls fullRender() + autoSave()
-   ```
-
-3. **Callback injection** (used by interactions, keyboard):
-   ```javascript
-   export function initModule(fullRender) {
-     fullRenderFn = fullRender; // Store for later use
+   // settings-panel.js needs refreshSidebar from sidebar.js
+   export function renderSettingsTab(contentEl, refreshCallback) {
+     // ...
+     refreshCallback(); // No circular import
    }
+   ```
+
+4. **DOM CustomEvent** (used by popups as a bridge):
+   ```javascript
+   document.dispatchEvent(new CustomEvent('editor:render'));
+   // main.js listens: document.addEventListener('editor:render', ...)
    ```
 
 ## Re-render Signal
 
-**Never import `fullRender` directly.** Instead:
-- Dispatch `editor:render` event (preferred for popups/panels)
-- Accept `fullRender` as an init parameter (for core modules like interactions, keyboard)
+**Use `emit('render')` from state.js.** This is the standard pattern. The DOM `editor:render` CustomEvent is a legacy bridge used by some popups — prefer the event bus for new code.
 
 ## Key Files Reference
 
@@ -122,6 +142,9 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `interactions.js` | All mouse events (drag, pan, select, connect, resize) — RAF-gated mousemove |
 | `keyboard.js` | Keyboard shortcuts |
 | `constants.js` | PALETTE, FONTS, STICKY_COLORS, defaults |
-| `utils.js` | screenToCanvas, snapToGrid, showToast, esc, safeColor, validateProjectJSON, getNodesBoundingBox |
+| `utils.js` | screenToCanvas, snapToGrid, showToast, esc, safeColor, validateProjectJSON, getNodesBoundingBox, serializeProject |
 | `persistence.js` | localStorage autoSave (debounced 500ms) / autoSaveNow (immediate) / autoLoad |
+| `project.js` | Unified `loadProject(project, opts)`, `loadFromURL()`, legend rendering |
+| `project-manager.js` | Project CRUD — save/load/delete/import/download/new (localStorage) |
+| `settings-panel.js` | Settings tab rendering — theme, grid, connection style, project list |
 | `node-popup.js` | Node properties popup — color/gradient, form/type, font editing |

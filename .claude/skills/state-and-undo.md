@@ -107,12 +107,12 @@ export function saveSnapshot() {
   if (state.undoStack.length > MAX_UNDO) state.undoStack.shift();
 }
 
-export function undo(fullRender, autoSave) {
+export function undo() {
   if (!state.undoStack.length) return;
   state.redoStack.push(createSnapshot());
   applySnapshot(JSON.parse(state.undoStack.pop()));
-  fullRender();
-  autoSave();
+  emit('render');
+  emit('save');
 }
 ```
 
@@ -120,6 +120,7 @@ export function undo(fullRender, autoSave) {
 - `selectedIds` is NOT snapshotted (intentional — always cleared on undo)
 - `MAX_UNDO = 80` snapshots
 - `createSnapshot()` and `applySnapshot()` are private helpers (not exported)
+- `undo()` and `redo()` are **parameterless** — they use the event bus (`emit('render')`, `emit('save')`) instead of callback parameters
 
 ### When to Call `saveSnapshot()`
 
@@ -160,19 +161,37 @@ This means Ctrl+Z reverts ALL changes made during one popup session.
 
 ### Undo/Redo Restore
 
-Now uses the `applySnapshot()` helper internally:
+Uses `applySnapshot()` internally, then emits events via the bus:
 
 ```javascript
-export function undo(fullRender, autoSave) {
+export function undo() {
   if (!state.undoStack.length) return;
   state.redoStack.push(createSnapshot());         // Save current for redo
   applySnapshot(JSON.parse(state.undoStack.pop())); // Restore previous
-  fullRender();                                    // Re-render everything
-  autoSave();                                      // Persist to localStorage
+  emit('render');                                   // Re-render everything
+  emit('save');                                     // Persist to localStorage
 }
 ```
 
 Note: `applySnapshot` handles `selectedIds.clear()` and `rebuildIndex()` internally.
+
+## Event Bus (`on`/`off`/`emit`)
+
+state.js also hosts a lightweight event bus for module communication:
+
+```javascript
+import { on, off, emit } from './state.js';
+
+// In main.js:
+on('render', fullRender);
+on('save', autoSave);
+
+// In any module:
+emit('render');  // Triggers fullRender
+emit('save');    // Triggers autoSave
+```
+
+This replaces the old pattern of passing `fullRender` as a callback to init functions.
 
 ## Persistence (`src/js/persistence.js`)
 
@@ -186,5 +205,5 @@ Note: `applySnapshot` handles `selectedIds.clear()` and `rebuildIndex()` interna
 1. **Never mutate `state.nodes` array directly** without calling `rebuildIndex()` after structural changes
 2. **Always `saveSnapshot()` before mutations** that the user should be able to undo
 3. **Use `nodeIndex.get(id)`** for O(1) lookups, never `state.nodes.find()`
-4. **Dispatch `editor:render`** after mutations in popups (or call `fullRender()` if you have the reference)
+4. **Use `emit('render')` from state.js** after mutations (the event bus is the standard pattern; DOM `editor:render` is a legacy bridge)
 5. **Close popups on undo/redo** — any popup holding a `currentNodeId` becomes stale after undo
