@@ -8,7 +8,7 @@
  */
 import { state, nodeIndex, saveSnapshot, rebuildIndex, genId } from './state.js';
 import { autoSave } from './persistence.js';
-import { esc, safeColor, showToast, validateProjectJSON } from './utils.js';
+import { esc, safeColor, showToast, validateProjectJSON, serializeProject } from './utils.js';
 import { domCache } from './renderer.js';
 
 let fullRenderFn;
@@ -205,7 +205,7 @@ function renderGroupsTab() {
       <button class="group-eye" data-group-id="${g.id}" title="${isHidden ? 'Einblenden' : 'Ausblenden'}">
         ${isHidden ? iconEyeOff : iconEye}
       </button>
-      <button class="group-delete" data-group-id="${g.id}" title="Gruppe loeschen" style="background:none;border:none;color:var(--danger);cursor:pointer;padding:2px;border-radius:4px;opacity:0.5">
+      <button class="group-delete" data-group-id="${g.id}" title="Gruppe loeschen">
         ${iconTrash}
       </button>
     </div>`;
@@ -380,7 +380,7 @@ function renderSettingsTab() {
   for (const p of allProjects) {
     const isCurrent = p.title === state.projectTitle;
     const badge = p.source === 'embedded'
-      ? '<span style="font-size:8px;padding:1px 4px;background:var(--accent-dim);color:var(--accent);border-radius:3px;margin-left:4px">VORLAGE</span>'
+      ? '<span class="project-badge">VORLAGE</span>'
       : '';
     const deleteBtn = p.source === 'saved'
       ? `<button class="conn-delete" data-delete-project="${esc(p.key)}" title="Loeschen">&times;</button>`
@@ -388,12 +388,12 @@ function renderSettingsTab() {
     projectListHtml += `<div class="conn-item ${isCurrent ? 'highlighted' : ''}" data-load-project="${esc(p.key)}" data-source="${p.source}">
       <span class="conn-dot" style="background:${isCurrent ? 'var(--accent)' : 'var(--text-dim)'}"></span>
       <span class="conn-label">${esc(p.title)}${badge}</span>
-      ${isCurrent ? '<span style="font-size:9px;color:var(--accent);font-weight:600">AKTIV</span>' : ''}
+      ${isCurrent ? '<span class="project-active">AKTIV</span>' : ''}
       ${deleteBtn}
     </div>`;
   }
   if (!allProjects.length) {
-    projectListHtml = '<div style="font-size:11px;color:var(--text-dim);padding:4px 0">Keine Projekte</div>';
+    projectListHtml = '<div class="sidebar-empty">Keine Projekte</div>';
   }
 
   const iconSave = `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`;
@@ -406,13 +406,13 @@ function renderSettingsTab() {
       <span class="settings-label">Projekte</span>
       ${projectListHtml}
       <div id="save-project-area"></div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <button class="group-add-btn" id="save-project-btn" style="flex:1">${iconSave} Speichern</button>
-        <button class="group-add-btn" id="import-project-btn" style="flex:1">${iconUpload} Importieren</button>
+      <div class="sidebar-btn-row">
+        <button class="group-add-btn" id="save-project-btn">${iconSave} Speichern</button>
+        <button class="group-add-btn" id="import-project-btn">${iconUpload} Importieren</button>
       </div>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="group-add-btn" id="download-project-btn" style="flex:1">${iconDownload} Als Datei</button>
-        <button class="group-add-btn" id="new-project-btn" style="flex:1">${iconFile} Neu</button>
+      <div class="sidebar-btn-row">
+        <button class="group-add-btn" id="download-project-btn">${iconDownload} Als Datei</button>
+        <button class="group-add-btn" id="new-project-btn">${iconFile} Neu</button>
       </div>
     </div>
 
@@ -595,25 +595,9 @@ function getAllProjects() {
   return projects;
 }
 
-/** Build a project data object from current state */
-function serializeProject(title) {
-  return {
-    version: 2,
-    meta: {
-      title,
-      theme: state.theme,
-      connectionStyle: state.connectionStyle,
-      gridEnabled: state.gridEnabled,
-    },
-    nodes: state.nodes,
-    connections: state.connections,
-    nextId: state.nextId,
-  };
-}
-
 /** Save current state as a named project into localStorage */
 function saveProject(name) {
-  const projectData = serializeProject(name);
+  const projectData = serializeProject(state, name);
   try {
     const saved = JSON.parse(localStorage.getItem(SAVED_PROJECTS_KEY) || '{}');
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
@@ -696,7 +680,7 @@ function importProjectFile() {
 function downloadProject() {
   const name = state.projectTitle || 'projekt';
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
-  const data = serializeProject(name);
+  const data = serializeProject(state, name);
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

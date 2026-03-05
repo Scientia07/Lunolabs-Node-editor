@@ -137,3 +137,19 @@ export function roundRect(ctx, x, y, w, h, r) {
   ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
+
+/** Build a project data object from current state for save/export */
+export function serializeProject(state, title) {
+  return {
+    version: 2,
+    meta: {
+      title: title || state.projectTitle || '',
+      theme: state.theme,
+      connectionStyle: state.connectionStyle,
+      gridEnabled: state.gridEnabled,
+    },
+    nodes: state.nodes,
+    connections: state.connections,
+    nextId: state.nextId,
+  };
+}
