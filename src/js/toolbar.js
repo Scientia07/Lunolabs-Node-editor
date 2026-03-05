@@ -21,6 +21,7 @@ import { exportJSON, importJSON } from './export-json.js';
 import { exportPNG } from './export-png.js';
 import { toggleTheme } from './theme.js';
 import { hideNodePopup } from './node-popup.js';
+import { relayout } from './force-layout.js';
 
 /** Safe getElementById + addEventListener — skips if element missing */
 function bindButton(id, event, handler) {
@@ -73,6 +74,9 @@ export function initToolbar() {
   // Undo / Redo
   bindButton('undo-btn', 'click', () => { hideNodePopup(); undo(); });
   bindButton('redo-btn', 'click', () => { hideNodePopup(); redo(); });
+  bindButton('relayout-btn', 'click', () => {
+    if (state.physicsLayout) relayout();
+  });
 
   // Export dropdown
   bindButton('export-wrap-btn', 'click', (e) => {

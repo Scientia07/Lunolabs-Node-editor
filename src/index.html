@@ -77,6 +77,9 @@
   <button class="tb-btn icon-only" id="redo-btn" title="Ctrl+Y">
     <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-5.64-8.36L23 10"/></svg>
   </button>
+  <button class="tb-btn icon-only" id="relayout-btn" title="Auto-Layout neu berechnen">
+    <svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+  </button>
   <div class="sep"></div>
 
   <!-- Export dropdown -->
@@ -132,6 +135,18 @@
     <svg viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
   <button class="tb-btn" id="zoom-fit" style="font-size:10px;font-family:var(--font-mono)">FIT</button>
+</div>
+
+<!-- QUICK-ADD POPUP (drag-to-create from anchor) -->
+<div id="quick-add-popup" class="quick-add-popup">
+  <button class="quick-add-btn" data-type="sector">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Sektor
+  </button>
+  <button class="quick-add-btn" data-type="company">
+    <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+    Eintrag
+  </button>
 </div>
 
 <!-- CONTEXT MENU -->
@@ -197,6 +212,53 @@
     <div class="tab-pane active" data-tab="connections"></div>
     <div class="tab-pane" data-tab="groups"></div>
     <div class="tab-pane" data-tab="settings"></div>
+  </div>
+</div>
+
+<!-- CONNECTION PROPERTIES POPUP -->
+<div class="node-popup" id="conn-popup">
+  <div class="np-tabs">
+    <button class="np-tab active" data-np-tab="cp-color">Farbe</button>
+    <button class="np-tab" data-np-tab="cp-style">Stil</button>
+  </div>
+
+  <!-- Farbe (Color) Tab -->
+  <div class="np-pane active" data-np-pane="cp-color">
+    <div class="color-swatches" id="cp-swatches"></div>
+    <label>Farbe</label>
+    <div class="color-row">
+      <input type="color" id="cp-color" value="#6c8aff">
+      <span id="cp-hex" class="np-hex">#6c8aff</span>
+    </div>
+  </div>
+
+  <!-- Stil (Style) Tab -->
+  <div class="np-pane" data-np-pane="cp-style">
+    <label>Linienstil</label>
+    <select id="cp-line-style" class="np-select">
+      <option value="bezier">Bezier</option>
+      <option value="straight">Gerade</option>
+    </select>
+    <label>Strichtyp</label>
+    <select id="cp-dash" class="np-select">
+      <option value="">Durchgehend</option>
+      <option value="6,4">Gestrichelt</option>
+      <option value="2,3">Gepunktet</option>
+      <option value="10,4,2,4">Strich-Punkt</option>
+    </select>
+    <label>Dicke: <span id="cp-width-val">2</span>px</label>
+    <input type="range" id="cp-width" min="1" max="8" value="2" style="width:100%">
+    <label>Rand</label>
+    <div class="color-row">
+      <input type="color" id="cp-outline-color" value="#000000">
+      <span id="cp-outline-hex" class="np-hex">keiner</span>
+    </div>
+    <label>Randdicke: <span id="cp-outline-w-val">0</span>px</label>
+    <input type="range" id="cp-outline-w" min="0" max="6" value="0" style="width:100%">
+    <label class="cp-toggle-row">
+      <input type="checkbox" id="cp-hidden">
+      <span>Unsichtbar</span>
+    </label>
   </div>
 </div>
 
