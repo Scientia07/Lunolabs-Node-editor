@@ -63,26 +63,26 @@
 
 ---
 
-## Phase 8: CSV Export
+## Phase 8: CSV Export ✅ DONE
 
 > **Depends on**: Phase 7 (meta must exist to export)
 > **Research**: `docs/research/02-csv-import-export/`
 > **PRD Section**: 4.6
 
-| # | Task | Files | Description |
-|---|------|-------|-------------|
-| E1 | Create `csv-export.js` module | NEW `csv-export.js` | Build CSV string from state.nodes with all meta fields as columns |
-| E2 | Semicolon delimiter + UTF-8 BOM | `csv-export.js` | `\uFEFF` prefix, `;` separator, proper quoting |
-| E3 | Dynamic columns from custom meta | `csv-export.js` | Scan all nodes for union of meta keys, create columns |
-| E4 | Sector name resolution | `csv-export.js` | Map `parentId` → parent sector label for human-readable "Sektor" column |
-| E5 | Add CSV to export dropdown | `index.html`, `project-manager.js` | "CSV exportieren" option in export menu |
-| E6 | Download trigger | `csv-export.js` | Blob + download link, filename: `netzwerk-export-YYYY-MM-DD.csv` |
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| E1 | Create `csv-export.js` module | `csv-export.js` | Done |
+| E2 | Semicolon delimiter + UTF-8 BOM | `csv-export.js` | Done |
+| E3 | Dynamic columns from custom meta | `csv-export.js` | Done |
+| E4 | Sector name resolution | `csv-export.js` | Done |
+| E5 | Add CSV to export dropdown | `index.html`, `toolbar.js` | Done |
+| E6 | Download trigger | `csv-export.js` | Done |
 
 **Acceptance criteria:**
-- [ ] One-click CSV download from export menu
-- [ ] Opens correctly in German Excel (umlauts, semicolons, BOM)
-- [ ] All metadata fields appear as columns
-- [ ] Sector column shows human-readable sector name
+- [x] One-click CSV download from export menu
+- [x] Opens correctly in German Excel (umlauts, semicolons, BOM)
+- [x] All metadata fields appear as columns
+- [x] Sector column shows human-readable sector name
 
 ---
 
@@ -178,11 +178,11 @@ Phase 7  (Metadata)     ✅ DONE
   |       |
   |       +---> Phase 7C (Gradient Wash)  ✅ DONE
   |
-  +---> Phase 8  (CSV Export)     ← START HERE
+  +---> Phase 8  (CSV Export)      ✅ DONE
           |
-          +---> Phase 9  (CSV Import)
+          +---> Phase 9  (CSV Import)  ← START HERE
 
-Phase 10 (Search) ← can start now, parallel with 8/9
+Phase 10 (Search) ← can start now, parallel with 9
 
 Scalability (SC1-SC4, SC6) ← when needed for 500+ nodes
 Features (F2, F4-F6) ← fill in as time allows
