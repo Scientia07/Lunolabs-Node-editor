@@ -16,12 +16,14 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync, copyFileSync } fro
 import { join } from 'path';
 
 // 1. Bundle JS
+const buildDate = new Date().toISOString().replace('T', ' ').slice(0, 16);
 const jsResult = buildSync({
   entryPoints: ['src/js/main.js'],
   bundle: true,
   format: 'iife',
   minify: true,
   write: false,
+  define: { __BUILD_DATE__: JSON.stringify(buildDate) },
 });
 const bundledJS = new TextDecoder().decode(jsResult.outputFiles[0].contents);
 

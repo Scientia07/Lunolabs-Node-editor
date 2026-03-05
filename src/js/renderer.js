@@ -171,6 +171,15 @@ export function renderConnections() {
     const style = c.style || connStyle;
     const isSelected = state.selectedConnId === c.id;
 
+    // Hidden connections: only show as ghost when selected
+    if (c.hidden && !isSelected) return;
+
+    const baseWidth = c.width || (style === 'straight' ? 1.5 : 2);
+    const strokeW = isSelected ? Math.max(baseWidth + 1, 3) : baseWidth;
+    const strokeOp = c.hidden ? '0.15' : (isSelected ? '0.9' : (style === 'straight' ? '0.45' : '0.6'));
+
+    const hasOutline = c.outlineColor && c.outlineWidth > 0;
+
     if (style === 'straight') {
       // Invisible wider hit area
       const hit = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -182,14 +191,30 @@ export function renderConnections() {
       hit.dataset.id = c.id;
       svgLayer.appendChild(hit);
 
+      // Outline (border) stroke behind main stroke
+      if (hasOutline) {
+        const outline = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        outline.setAttribute('x1', fc.x); outline.setAttribute('y1', fc.y);
+        outline.setAttribute('x2', tc.x); outline.setAttribute('y2', tc.y);
+        outline.setAttribute('stroke', c.outlineColor);
+        outline.setAttribute('stroke-width', strokeW + c.outlineWidth * 2);
+        outline.setAttribute('stroke-opacity', strokeOp);
+        outline.setAttribute('stroke-linecap', 'round');
+        if (c.dash) outline.setAttribute('stroke-dasharray', c.dash);
+        outline.dataset.id = c.id;
+        svgLayer.appendChild(outline);
+      }
+
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', fc.x);
       line.setAttribute('y1', fc.y);
       line.setAttribute('x2', tc.x);
       line.setAttribute('y2', tc.y);
       line.setAttribute('stroke', c.color || '#6c8aff');
-      line.setAttribute('stroke-width', isSelected ? '3' : '1.5');
-      line.setAttribute('stroke-opacity', isSelected ? '0.9' : '0.45');
+      line.setAttribute('stroke-width', strokeW);
+      line.setAttribute('stroke-opacity', strokeOp);
+      line.setAttribute('stroke-linecap', 'round');
+      if (c.dash) line.setAttribute('stroke-dasharray', c.dash);
       line.dataset.id = c.id;
       svgLayer.appendChild(line);
     } else {
@@ -212,12 +237,28 @@ export function renderConnections() {
       hitPath.dataset.id = c.id;
       svgLayer.appendChild(hitPath);
 
+      // Outline (border) stroke behind main stroke
+      if (hasOutline) {
+        const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        outline.setAttribute('d', d);
+        outline.setAttribute('stroke', c.outlineColor);
+        outline.setAttribute('stroke-width', strokeW + c.outlineWidth * 2);
+        outline.setAttribute('fill', 'none');
+        outline.setAttribute('stroke-opacity', strokeOp);
+        outline.setAttribute('stroke-linecap', 'round');
+        if (c.dash) outline.setAttribute('stroke-dasharray', c.dash);
+        outline.dataset.id = c.id;
+        svgLayer.appendChild(outline);
+      }
+
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', d);
       path.setAttribute('stroke', c.color || '#6c8aff');
-      path.setAttribute('stroke-width', isSelected ? '3' : '2');
+      path.setAttribute('stroke-width', strokeW);
       path.setAttribute('fill', 'none');
-      path.setAttribute('stroke-opacity', isSelected ? '0.9' : '0.6');
+      path.setAttribute('stroke-opacity', strokeOp);
+      path.setAttribute('stroke-linecap', 'round');
+      if (c.dash) path.setAttribute('stroke-dasharray', c.dash);
       path.dataset.id = c.id;
       svgLayer.appendChild(path);
     }

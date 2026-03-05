@@ -10,6 +10,11 @@
  * @strengths   Single source of truth for all magic values, clean and minimal
  * @issues      None
  * ─────────────────────────────────────────────── */
+// ─── App Info ───
+export const APP_VERSION = '2.1.0';
+// __BUILD_DATE__ is replaced at build time by esbuild; falls back to 'dev' in dev mode
+export const BUILD_DATE = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : 'dev';
+
 // ─── Constants ───
 
 export const PALETTE = [

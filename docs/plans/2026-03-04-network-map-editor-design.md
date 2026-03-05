@@ -19,15 +19,21 @@ Interactive whiteboard-style network map for Jugendburo to visualize partner com
 - SVG bezier curves between nodes
 - Auto-created when company added near a sector (within 600px)
 - Manual connections between any two nodes (via anchor points or Connect tool)
-- Custom color per connection (right-click -> Farbe aendern)
+- **Drag-to-create**: Drag from an anchor dot to empty canvas → quick popup to choose Sektor or Eintrag → auto-creates node + connection
+- Custom color per connection (click connection → popup)
+- **Per-connection styling**: line style (bezier/straight), dash pattern (solid/dashed/dotted/dash-dot), thickness (1-8px)
+- **Outline/border**: Optional outer stroke color + width (Adobe-style inner/outer border)
+- **Hidden connections**: Toggle to make connections invisible (ghost outline when selected for editing)
 
 ## Interactions
 - **Add sector**: Toolbar Sektor -> click canvas -> color picker -> name -> placed
 - **Add company**: Toolbar Firma -> click canvas -> auto-connects to nearest sector
+- **Drag-to-create**: Drag from anchor dot to empty space -> quick popup (Sektor/Eintrag) -> node created + connected
 - **Drag & drop**: All elements freely draggable, connections follow
 - **Edit text**: Double-click any node for inline editing
 - **Delete**: Right-click context menu or Delete key
 - **Duplicate**: Ctrl+D or context menu
+- **Connection properties**: Click any connection line -> popup with color, style, thickness, outline, hidden toggle
 
 ## Persistence
 - Auto-save to localStorage on every change

@@ -15,6 +15,7 @@
 import { state, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { esc, safeColor } from './utils.js';
+import { APP_VERSION, BUILD_DATE } from './constants.js';
 import {
   getAllProjects, saveProject, deleteSavedProject,
   loadProject, importProjectFile, downloadProject, newBlankProject
@@ -132,6 +133,20 @@ export function renderSettingsTab(contentEl, refreshCallback) {
         <span class="settings-row-label">Verbindungen</span>
         <span class="settings-range-value">${state.connections.length}</span>
       </div>
+      <div class="settings-row">
+        <span class="settings-row-label">Sektoren</span>
+        <span class="settings-range-value">${state.nodes.filter(n => n.type === 'sector' || n.type === 'center').length}</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-row-label">Gruppen</span>
+        <span class="settings-range-value">${state.groups.length}</span>
+      </div>
+    </div>
+
+    <div class="settings-section settings-version">
+      <span class="settings-row-label">Netzwerk-Editor v${APP_VERSION}</span>
+      <span class="settings-row-label" style="color:var(--text-muted);font-size:11px">Build: ${BUILD_DATE}</span>
+      <span class="settings-row-label" style="color:var(--text-muted);font-size:11px">&copy; Jugendbuero March / LunoLabs</span>
     </div>
   `;
 
