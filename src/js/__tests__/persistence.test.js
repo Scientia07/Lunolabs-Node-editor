@@ -1,3 +1,8 @@
+/**
+ * @ai-generated true
+ * @agent claude-code
+ * @created 2026-03-05
+ */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { state, nodeIndex, rebuildIndex } from '../state.js';
 import { autoSave, autoSaveNow, autoLoad } from '../persistence.js';
