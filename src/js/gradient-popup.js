@@ -8,8 +8,7 @@
  * @depends-on  state.js, constants.js
  * @used-by     main.js, interactions.js
  * @strengths   Live preview, override mechanism for sector creation, viewport clamping
- * @issues      Duplicates gradient preview logic with node-popup.js;
- *              getGradPopup() exported but never used — dead code
+ * @issues      Duplicates gradient preview logic with node-popup.js
  * ─────────────────────────────────────────────── */
 // ─── Gradient Popup ───
 import { state, nodeIndex, saveSnapshot } from './state.js';
@@ -98,5 +97,3 @@ function updateGradientPreview() {
 export function overrideGradApply(handler) {
   _overrideHandler = handler;
 }
-
-export function getGradPopup() { return gradPopup; }
