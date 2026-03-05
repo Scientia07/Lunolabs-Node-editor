@@ -29,8 +29,8 @@ Output:
 Embedded: 1 project(s) (netzwerk-jb-march)
 Data: 1 file(s) copied
 Built dist/index.html successfully
-  CSS: 27.6KB
-  JS:  62.7KB
+  CSS: 23.1KB
+  JS:  69.7KB
 ```
 
 ## Build Steps
@@ -132,8 +132,8 @@ In dev mode, the browser loads ES modules natively. No dev server needed — jus
 ## Output Size Guidelines
 
 Current sizes (minified):
-- CSS: ~22KB (minified via esbuild transformSync)
-- JS: ~63KB
-- Total HTML: ~100KB (with embedded project data)
+- CSS: ~23KB (minified via esbuild transformSync)
+- JS: ~70KB
+- Total HTML: ~110KB (with embedded project data)
 
 The single-file output is designed to be shareable via email, USB, or any file transfer. Keep it under 500KB for practical use.

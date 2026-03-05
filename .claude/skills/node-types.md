@@ -33,7 +33,7 @@ All nodes are plain objects with these fields:
   color: '#6c8aff',   // Primary color
   color2: '#ff6b6b',  // Gradient end color
   gradAngle: 135,     // Gradient angle in degrees
-  opacity: 0.8,       // 0-1, applied as CSS opacity and canvas globalAlpha
+  opacity: 0.8,       // 0-1, applied as CSS opacity and canvas globalAlpha (manual override)
   width: 140,         // Explicit width (sticky, rect, circle)
   height: 80,         // Explicit height (sticky, rect)
   borderColor: '#d0d0dd', // Border color (rect, circle)
@@ -45,6 +45,18 @@ All nodes are plain objects with these fields:
   size: 'lg',         // sector circle variant size
   parentId: 5,        // company text variant — linked to sector
   underlined: true,   // company text variant
+
+  // Metadata (flexible key-value):
+  meta: {
+    tier: 'nah',        // 'nah' | 'satellit' — drives gradient wash CSS class
+    relevancy: 8,       // 1-10, auto-maps to opacity if node.opacity is unset
+    contact: 'Name',    // Contact person
+    email: 'a@b.ch',   // Email
+    phone: '+41...',    // Phone
+    tags: 'A, B',       // Comma-separated tags
+    notes: 'Free text', // Notes
+    // ... any user-defined keys
+  },
 }
 ```
 
@@ -150,6 +162,7 @@ Some types have variants based on data fields:
 
 - **Sector**: `n.size` present → circle variant (`node-sector--circle`), absent → rounded rect
 - **Company**: `n.parentId != null` → text variant (`node-company--text`), absent → card with color dot
+- **Company satellite**: `n.meta?.tier === 'satellit'` → adds `node-company--satellite` class with gradient wash background using parent sector's color at low opacity
 
 To add a variant, use the same type but check for a distinguishing field:
 ```javascript
@@ -164,7 +177,28 @@ if (n.type === 'sector') {
 
 ## Connection Rendering
 
-Connections are drawn in `renderConnections()` as SVG `<path>` (bezier) or `<line>` (straight) elements. They connect node anchor points. Adding a new node type requires NO changes to connection rendering — the anchor system works for all types.
+Connections are drawn in `renderConnections()` as SVG elements. They connect node anchor points. Adding a new node type requires NO changes to connection rendering — the anchor system works for all types.
+
+### Per-Connection Properties
+
+Each connection can override global defaults with optional properties:
+
+| Property | Default | Effect |
+|----------|---------|--------|
+| `style` | `state.connectionStyle` | `'bezier'` (path) or `'straight'` (line) |
+| `dash` | `null` (solid) | `stroke-dasharray`: `'6,4'` dashed, `'2,3'` dotted, `'10,4,2,4'` dash-dot |
+| `width` | 2 (bezier) / 1.5 (straight) | Stroke width in px |
+| `outlineColor` | `null` | Outer stroke color (Adobe-style dual stroke) |
+| `outlineWidth` | `null` | Outer stroke extra width per side |
+| `hidden` | `false` | Invisible — skipped in render unless selected (ghost at 15% opacity) |
+
+### Dual-Stroke (Outline) Rendering
+
+When `outlineColor` and `outlineWidth > 0`, the same SVG path is rendered twice:
+1. **Outline stroke** (behind): width = `mainWidth + outlineWidth * 2`, color = `outlineColor`
+2. **Main stroke** (on top): width = `mainWidth`, color = `connection.color`
+
+Both strokes share the same `stroke-dasharray` and `stroke-linecap: round`.
 
 ## Rendering Pipeline
 

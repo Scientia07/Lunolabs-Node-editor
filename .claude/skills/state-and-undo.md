@@ -13,7 +13,7 @@ All editor state lives in a single exported object:
 ```javascript
 export const state = {
   nodes: [],           // Array of node objects
-  connections: [],     // Array of { id, from, to, color, fromAnchor?, toAnchor?, style? }
+  connections: [],     // Array of connection objects (see Connection Shape below)
   tool: 'select',      // Current tool mode
   shapeType: 'rect',   // Sub-type for shape tool
   zoom: 1, panX: 0, panY: 0,
@@ -55,6 +55,62 @@ export function rebuildIndex() {
 
 **When NOT needed:**
 - After mutating a node's properties (color, font, opacity) — the Map reference stays valid
+
+## Connection Shape
+
+```javascript
+{
+  id: 1,               // Unique integer
+  from: 2, to: 5,      // Source and target node IDs
+  color: '#6c8aff',    // Line color
+
+  // Optional — per-connection overrides:
+  fromAnchor: 'right',  // Anchor direction: top/bottom/left/right
+  toAnchor: 'left',
+  style: 'straight',    // 'bezier' (default) or 'straight'
+  dash: '6,4',          // stroke-dasharray: null=solid, '6,4'=dashed, '2,3'=dotted, '10,4,2,4'=dash-dot
+  width: 3,             // Stroke width in px (default: 2 bezier, 1.5 straight)
+  outlineColor: '#ff0000', // Outer stroke color (Adobe-style dual stroke)
+  outlineWidth: 2,      // Outer stroke extra width per side
+  hidden: true,         // Invisible connection (ghost outline at 15% opacity when selected)
+}
+```
+
+**Per-connection properties** are optional and override global defaults. They auto-serialize through `state.connections` — no special handling needed for persistence or undo.
+
+## Node Metadata (`node.meta`)
+
+Nodes can carry a flexible `meta` object for structured data beyond visual properties:
+
+```javascript
+node.meta = {
+  tier: "nah",           // "nah" | "satellit" — drives gradient wash visual
+  relevancy: 8,          // 1-10, auto-maps to opacity (manual opacity overrides)
+  contact: "Max Muster",
+  email: "max@example.ch",
+  phone: "+41 79 123 45 67",
+  tags: "Praevention, Beratung",
+  notes: "Free text",
+  // ... any user-defined key-value pairs
+}
+```
+
+**Opacity resolution order:**
+1. `node.opacity` (manual override from popup slider) — wins if set
+2. `node.meta.relevancy / 10` — auto-calculated from relevancy
+3. Default: `1.0` (fully visible)
+
+```javascript
+const effectiveOpacity = node.opacity != null
+  ? node.opacity
+  : (node.meta?.relevancy ?? 10) / 10;
+```
+
+**Predefined suggested fields** are in `constants.js:SUGGESTED_META_FIELDS`. The `meta` object is free-form — users can add any key.
+
+**Persistence:** `meta` is just another node property — it auto-serializes through `JSON.stringify` in snapshots, localStorage, and JSON export. No special handling needed.
+
+**Sidebar Details tab** (`sidebar.js:renderDetailsTab()`) shows and edits metadata for the selected node.
 
 ## Adding New Node Properties
 
@@ -206,4 +262,5 @@ This replaces the old pattern of passing `fullRender` as a callback to init func
 2. **Always `saveSnapshot()` before mutations** that the user should be able to undo
 3. **Use `nodeIndex.get(id)`** for O(1) lookups, never `state.nodes.find()`
 4. **Use `emit('render')` from state.js** after mutations (the event bus is the standard pattern; DOM `editor:render` is a legacy bridge)
-5. **Close popups on undo/redo** — any popup holding a `currentNodeId` becomes stale after undo
+5. **Close popups on undo/redo** — any popup holding a `currentNodeId` or `currentConnId` becomes stale after undo
+6. **Connection properties are optional** — `style`, `dash`, `width`, `outlineColor`, `outlineWidth`, `hidden` default to `undefined` and auto-serialize

@@ -11,9 +11,11 @@ trigger: When creating a new popup, modal, floating panel, picker, or properties
 | Type | Class | z-index | Example |
 |------|-------|---------|---------|
 | Context menu | `#context-menu` | 3000 | Right-click menu |
+| Quick-add | `.quick-add-popup` | 3000 | Drag-to-create (Sektor/Eintrag) |
 | Color picker | `.color-popup` | 2500 | Simple swatch picker |
 | Popup panel | `.popup-panel` | 2500 | Gradient popup, font popup |
-| Node popup | `.node-popup` | 2500 | Tabbed properties popup |
+| Node popup | `.node-popup` | 2500 | Tabbed node properties popup |
+| Conn popup | `.node-popup` (`#conn-popup`) | 2500 | Tabbed connection properties popup |
 
 ## Show/Hide Lifecycle
 
@@ -195,3 +197,41 @@ Reuse existing component classes:
 - `.gradient-preview` — gradient preview bar
 - `.font-list` + `.font-option` — scrollable font list
 - `.popup-btn` — full-width action button
+- `.cp-toggle-row` — checkbox toggle with label (used in conn popup)
+
+## Connection Popup Pattern (`conn-popup.js`)
+
+The connection popup follows the same node-popup pattern but positions near the connection midpoint:
+
+```javascript
+export function showConnPopup(connId) {
+  const conn = state.connections.find(c => c.id === connId);
+  // Populate fields from conn properties (color, style, dash, width, outline, hidden)
+  // Position near midpoint:
+  const pts = getConnectionEndpoints(conn);
+  const midScreenX = ((pts.fc.x + pts.tc.x) / 2) * state.zoom + state.panX;
+  const midScreenY = ((pts.fc.y + pts.tc.y) / 2) * state.zoom + state.panY;
+  // Clamp to viewport, show popup
+}
+```
+
+**Show/hide triggers** (in `interactions.js`):
+- Show: when `state.selectedConnId` is set (connection clicked)
+- Hide: when connection deselected, node selected, or empty canvas clicked
+
+The conn popup reuses the `.node-popup` CSS class for tab/pane styling — it's mutually exclusive with the node popup.
+
+## Quick-Add Popup Pattern (`quick-add.js`)
+
+A lightweight popup that uses closure-based cleanup instead of module-level state:
+
+```javascript
+export function showQuickAdd(screenX, screenY, canvasPos, fromId, fromAnchor) {
+  // Position at cursor, show popup
+  // Register click/mousedown/keydown listeners
+  // On button click: create node + connection, hide popup
+  // cleanup() removes all listeners on hide
+}
+```
+
+**Key difference from other popups:** Quick-add uses `document.addEventListener('mousedown', onOutside, true)` (capture phase) for outside-click dismissal instead of the global click handler in `initInteractions()`. This is because the popup is ephemeral and self-cleaning — no need to add it to the global whitelist.

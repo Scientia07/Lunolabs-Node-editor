@@ -70,9 +70,11 @@ initColorPopup()    — simple color picker
 initGradientPopup() — gradient picker
 initFontPopup()     — font picker
 initNodePopup()     — node properties popup
+initConnPopup()     — connection properties popup
 setZoomToRef(zoomTo) — breaks circular dep
 initToolbar()       — toolbar buttons
 initInteractions()  — mouse events on canvas
+initQuickAdd()      — drag-to-create popup
 initKeyboard()      — keyboard shortcuts
 setupContextMenu()  — contextmenu event wiring (uses imports from above)
 initSidebar()       — sidebar panel
@@ -148,3 +150,5 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `project-manager.js` | Project CRUD — save/load/delete/import/download/new (localStorage) |
 | `settings-panel.js` | Settings tab rendering — theme, grid, connection style, project list |
 | `node-popup.js` | Node properties popup — color/gradient, form/type, font editing |
+| `conn-popup.js` | Connection properties popup — color, style, dash, thickness, outline, hidden |
+| `quick-add.js` | Drag-to-create popup — Sektor/Eintrag from anchor drag to empty canvas |
