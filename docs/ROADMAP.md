@@ -86,28 +86,28 @@
 
 ---
 
-## Phase 9: CSV Import
+## Phase 9: CSV Import ✅ DONE
 
 > **Depends on**: Phase 8 (export format defines import format)
 > **PRD Section**: 4.7
 
-| # | Task | Files | Description |
-|---|------|-------|-------------|
-| I1 | Create `csv-import.js` module | NEW `csv-import.js` | Parse CSV with auto-delimiter detection (`,` or `;`) |
-| I2 | Import preview modal | `index.html`, `csv-import.js` | Show first 5 rows in table before applying |
-| I3 | Column auto-mapping | `csv-import.js` | Map headers to known fields (Label→label, Beziehung→meta.tier, etc.) |
-| I4 | Conflict resolution | `csv-import.js` | Existing label = update metadata; new label = create company node |
-| I5 | Sector matching | `csv-import.js` | Match "Sektor" column to existing sector labels, or create new |
-| I6 | Undo support | `csv-import.js` | `saveSnapshot()` before import → entire import undoable |
-| I7 | Add import button | `index.html`, `project-manager.js` | "CSV importieren" option or button |
-| I8 | Import modal styles | `panels.css` or `sidebar.css` | Preview table, mapping dropdowns, confirm/cancel buttons |
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| I1 | CSV parser with auto-delimiter detection | `csv-import.js` | Done |
+| I2 | Import preview modal | `index.html`, `csv-import.js` | Done |
+| I3 | Fuzzy header auto-mapping | `csv-import.js` | Done (German + English aliases) |
+| I4 | Conflict resolution (label match) | `csv-import.js` | Done |
+| I5 | Sector matching by label | `csv-import.js` | Done |
+| I6 | Undo support (saveSnapshot) | `csv-import.js` | Done |
+| I7 | Import dropdown (JSON + CSV) | `index.html`, `toolbar.js` | Done |
+| I8 | Modal styles | `popups.css` | Done |
 
 **Acceptance criteria:**
-- [ ] Import creates new nodes with metadata populated
-- [ ] Existing nodes matched by label get metadata updated
-- [ ] Preview shows data before changes
-- [ ] Undo reverts the entire import as one action
-- [ ] Handles both comma and semicolon delimiters
+- [x] Import creates new nodes with metadata populated
+- [x] Existing nodes matched by label get metadata updated
+- [x] Preview shows data before changes
+- [x] Undo reverts the entire import as one action
+- [x] Handles both comma and semicolon delimiters
 
 ---
 
@@ -180,9 +180,9 @@ Phase 7  (Metadata)     ✅ DONE
   |
   +---> Phase 8  (CSV Export)      ✅ DONE
           |
-          +---> Phase 9  (CSV Import)  ← START HERE
+          +---> Phase 9  (CSV Import)  ✅ DONE
 
-Phase 10 (Search) ← can start now, parallel with 9
+Phase 10 (Search) ← START HERE
 
 Scalability (SC1-SC4, SC6) ← when needed for 500+ nodes
 Features (F2, F4-F6) ← fill in as time allows
