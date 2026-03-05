@@ -6,8 +6,10 @@
 /**
  * Sidebar Panel — Connections, Groups, Settings, Projects
  */
-import { state, nodeIndex, saveSnapshot, rebuildIndex } from './state.js';
+import { state, nodeIndex, saveSnapshot, rebuildIndex, genId } from './state.js';
 import { autoSave } from './persistence.js';
+import { esc, safeColor, showToast, validateProjectJSON } from './utils.js';
+import { domCache } from './renderer.js';
 
 let fullRenderFn;
 let sidebarEl, contentEl;
@@ -90,7 +92,7 @@ function renderConnectionsTab() {
       const toNode = nodeIndex.get(c.to);
       const toLabel = toNode?.label || `Node ${c.to}`;
       html += `<div class="conn-item" data-conn-id="${c.id}" data-from="${c.from}" data-to="${c.to}">
-        <span class="conn-dot" style="background:${c.color || '#6c8aff'}"></span>
+        <span class="conn-dot" style="background:${safeColor(c.color)}"></span>
         <span class="conn-label">${esc(toLabel)}</span>
         <button class="conn-delete" data-conn-id="${c.id}" title="Loeschen">&times;</button>
       </div>`;
@@ -179,7 +181,7 @@ function renderGroupsTab() {
       const connected = getNodesConnectedTo(s.id);
       const isHidden = state.hiddenSectors.has(s.id);
       html += `<div class="group-item ${isHidden ? 'hidden-group' : ''}" data-sector-id="${s.id}">
-        <span class="group-color" style="background:${s.color || '#6c8aff'}"></span>
+        <span class="group-color" style="background:${safeColor(s.color)}"></span>
         <span class="group-name">${esc(s.label || 'Sektor ' + s.id)}</span>
         <span class="group-count">${connected.length}</span>
         <button class="group-eye" data-sector-id="${s.id}" title="${isHidden ? 'Einblenden' : 'Ausblenden'}">
@@ -290,8 +292,7 @@ function showGroupEditRow() {
   const create = () => {
     const name = input.value.trim();
     if (!name) { area.innerHTML = ''; return; }
-    const id = Date.now();
-    state.groups.push({ id, name, nodeIds: [], hidden: false });
+    state.groups.push({ id: genId(), name, nodeIds: [], hidden: false });
     autoSave();
     renderGroupsTab();
   };
@@ -351,17 +352,19 @@ export function applyVisibility() {
     }
   }
 
-  // Apply to DOM
-  const nodesLayer = document.getElementById('nodes-layer');
-  nodesLayer.querySelectorAll('.node').forEach(el => {
-    const nid = parseInt(el.dataset.id, 10);
-    el.style.display = hiddenNodeIds.has(nid) ? 'none' : '';
-  });
+  // Apply to DOM using domCache for O(1) lookups
+  for (const n of state.nodes) {
+    const el = domCache.get(n.id);
+    if (el) el.style.display = hiddenNodeIds.has(n.id) ? 'none' : '';
+  }
 
-  // Hide connections where either endpoint is hidden
+  // P6: Build connection index for O(1) lookup instead of Array.find per SVG element
+  const connIndex = new Map();
+  for (const c of state.connections) connIndex.set(c.id, c);
+
   const svgLayer = document.getElementById('connections-layer');
   svgLayer.querySelectorAll('[data-id]').forEach(el => {
-    const conn = state.connections.find(c => c.id === parseInt(el.dataset.id, 10));
+    const conn = connIndex.get(parseInt(el.dataset.id, 10));
     if (!conn) return;
     el.style.display = (hiddenNodeIds.has(conn.from) || hiddenNodeIds.has(conn.to)) ? 'none' : '';
   });
@@ -588,16 +591,16 @@ function getAllProjects() {
     for (const [key, data] of Object.entries(saved)) {
       projects.push({ key, title: data.meta?.title || key, source: 'saved', data });
     }
-  } catch { /* corrupt data */ }
+  } catch (e) { console.warn('Failed to read saved projects:', e); }
   return projects;
 }
 
-/** Save current state as a named project into localStorage */
-function saveProject(name) {
-  const projectData = {
+/** Build a project data object from current state */
+function serializeProject(title) {
+  return {
     version: 2,
     meta: {
-      title: name,
+      title,
       theme: state.theme,
       connectionStyle: state.connectionStyle,
       gridEnabled: state.gridEnabled,
@@ -606,13 +609,18 @@ function saveProject(name) {
     connections: state.connections,
     nextId: state.nextId,
   };
+}
+
+/** Save current state as a named project into localStorage */
+function saveProject(name) {
+  const projectData = serializeProject(name);
   try {
     const saved = JSON.parse(localStorage.getItem(SAVED_PROJECTS_KEY) || '{}');
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
     saved[slug] = projectData;
     localStorage.setItem(SAVED_PROJECTS_KEY, JSON.stringify(saved));
     state.projectTitle = name;
-  } catch { /* quota exceeded */ }
+  } catch (e) { console.warn('Failed to save project:', e); }
 }
 
 /** Delete a user-saved project from localStorage */
@@ -621,7 +629,7 @@ function deleteSavedProject(key) {
     const saved = JSON.parse(localStorage.getItem(SAVED_PROJECTS_KEY) || '{}');
     delete saved[key];
     localStorage.setItem(SAVED_PROJECTS_KEY, JSON.stringify(saved));
-  } catch { /* ignore */ }
+  } catch (e) { console.warn('Failed to delete project:', e); }
 }
 
 /** Load a project (embedded or saved) */
@@ -664,12 +672,17 @@ function importProjectFile() {
     reader.onload = () => {
       try {
         const project = JSON.parse(reader.result);
+        const check = validateProjectJSON(project);
+        if (!check.valid) {
+          showToast('Ungueltige Datei: ' + check.error);
+          return;
+        }
         const name = project.meta?.title || file.name.replace('.json', '');
         applyProject(project, name);
         // Auto-save imported project so it persists
         saveProject(name);
         refreshSidebar();
-      } catch { /* invalid JSON */ }
+      } catch { showToast('Fehler beim Import — ungueltige JSON-Datei'); }
     };
     reader.readAsText(file);
     input.value = '';
@@ -683,18 +696,7 @@ function importProjectFile() {
 function downloadProject() {
   const name = state.projectTitle || 'projekt';
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
-  const data = {
-    version: 2,
-    meta: {
-      title: name,
-      theme: state.theme,
-      connectionStyle: state.connectionStyle,
-      gridEnabled: state.gridEnabled,
-    },
-    nodes: state.nodes,
-    connections: state.connections,
-    nextId: state.nextId,
-  };
+  const data = serializeProject(name);
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -723,7 +725,4 @@ function newBlankProject() {
   autoSave();
 }
 
-// ─── Helpers ───
-function esc(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+// esc() and safeColor() imported from utils.js

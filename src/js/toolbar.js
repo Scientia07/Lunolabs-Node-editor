@@ -12,8 +12,16 @@ import { showToast } from './utils.js';
 import { exportJSON, importJSON } from './export-json.js';
 import { exportPNG } from './export-png.js';
 import { toggleTheme } from './theme.js';
+import { hideNodePopup } from './node-popup.js';
 
 let fullRenderFn;
+
+/** Safe getElementById + addEventListener — skips if element missing */
+function on(id, event, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(event, handler);
+  else console.warn(`Toolbar: #${id} not found`);
+}
 
 export function setTool(tool) {
   state.tool = tool;
@@ -47,48 +55,45 @@ export function initToolbar(fullRender) {
   });
 
   // Grid toggle
-  document.getElementById('grid-toggle').addEventListener('click', () => {
+  on('grid-toggle', 'click', () => {
     state.gridEnabled = !state.gridEnabled;
-    document.getElementById('grid-toggle').classList.toggle('active', state.gridEnabled);
+    document.getElementById('grid-toggle')?.classList.toggle('active', state.gridEnabled);
     drawGrid();
     autoSave();
   });
 
   // Theme toggle
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    toggleTheme();
-    drawGrid();
-  });
+  on('theme-toggle', 'click', () => { toggleTheme(); drawGrid(); });
 
   // Undo / Redo
-  document.getElementById('undo-btn').addEventListener('click', () => undo(fullRenderFn, autoSave));
-  document.getElementById('redo-btn').addEventListener('click', () => redo(fullRenderFn, autoSave));
+  on('undo-btn', 'click', () => { hideNodePopup(); undo(fullRenderFn, autoSave); });
+  on('redo-btn', 'click', () => { hideNodePopup(); redo(fullRenderFn, autoSave); });
 
   // Export dropdown
-  document.getElementById('export-wrap-btn').addEventListener('click', (e) => {
-    document.getElementById('export-dropdown').classList.toggle('open');
+  on('export-wrap-btn', 'click', (e) => {
+    document.getElementById('export-dropdown')?.classList.toggle('open');
     e.stopPropagation();
   });
-  document.getElementById('export-json-btn').addEventListener('click', () => {
-    document.getElementById('export-dropdown').classList.remove('open');
+  on('export-json-btn', 'click', () => {
+    document.getElementById('export-dropdown')?.classList.remove('open');
     exportJSON();
   });
-  document.getElementById('export-png-btn').addEventListener('click', () => {
-    document.getElementById('export-dropdown').classList.remove('open');
+  on('export-png-btn', 'click', () => {
+    document.getElementById('export-dropdown')?.classList.remove('open');
     exportPNG();
   });
 
   // Import
-  document.getElementById('import-btn').addEventListener('click', () => document.getElementById('file-input').click());
-  document.getElementById('file-input').addEventListener('change', (e) => {
+  on('import-btn', 'click', () => document.getElementById('file-input')?.click());
+  on('file-input', 'change', (e) => {
     if (e.target.files[0]) importJSON(e.target.files[0], fullRenderFn);
     e.target.value = '';
   });
 
   // Zoom
-  document.getElementById('zoom-in').addEventListener('click', () => zoomTo(state.zoom * 1.2));
-  document.getElementById('zoom-out').addEventListener('click', () => zoomTo(state.zoom / 1.2));
-  document.getElementById('zoom-fit').addEventListener('click', zoomFit);
+  on('zoom-in', 'click', () => zoomTo(state.zoom * 1.2));
+  on('zoom-out', 'click', () => zoomTo(state.zoom / 1.2));
+  on('zoom-fit', 'click', zoomFit);
 
   // Resize
   window.addEventListener('resize', () => { drawGrid(); });

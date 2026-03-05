@@ -28,8 +28,8 @@ for (const file of cssOrder) {
   const path = join(cssDir, file);
   try {
     bundledCSS += readFileSync(path, 'utf8') + '\n';
-  } catch {
-    console.warn(`Warning: ${path} not found, skipping`);
+  } catch (e) {
+    console.warn(`Warning: ${path} not found, skipping (${e.message})`);
   }
 }
 
@@ -57,7 +57,7 @@ try {
     embeddedData = `<script>window.__EMBEDDED_PROJECTS__=${JSON.stringify(projects)};</script>\n`;
     console.log(`  Embedded: ${Object.keys(projects).length} project(s) (${Object.keys(projects).join(', ')})`);
   }
-} catch { /* no data files to embed */ }
+} catch (e) { console.warn('No data files to embed:', e.message); }
 
 // Replace module script with inlined bundle + embedded data
 output = output.replace(
@@ -82,7 +82,7 @@ try {
     copyFileSync(join('src/data', f), join('dist/data', f));
   }
   console.log(`  Data: ${dataFiles.length} file(s) copied`);
-} catch { /* no data files */ }
+} catch (e) { console.warn('No data files to copy:', e.message); }
 
 console.log('Built dist/index.html successfully');
 console.log(`  CSS: ${(bundledCSS.length / 1024).toFixed(1)}KB`);

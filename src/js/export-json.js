@@ -5,7 +5,7 @@
  */
 // ─── JSON Export/Import ───
 import { state, saveSnapshot, rebuildIndex } from './state.js';
-import { showToast } from './utils.js';
+import { showToast, validateProjectJSON } from './utils.js';
 import { autoSave } from './persistence.js';
 
 export function exportJSON() {
@@ -30,6 +30,11 @@ export function importJSON(file, fullRender) {
   reader.onload = () => {
     try {
       const d = JSON.parse(reader.result);
+      const check = validateProjectJSON(d);
+      if (!check.valid) {
+        showToast('Ungueltige Datei: ' + check.error);
+        return;
+      }
       saveSnapshot();
       state.nodes = d.nodes || [];
       state.connections = d.connections || [];

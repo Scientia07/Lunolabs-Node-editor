@@ -5,27 +5,22 @@
  */
 // ─── PNG Export (unified: handles all node types) ───
 import { state, nodeIndex } from './state.js';
-import { getContrastColor, wrapText, roundRect } from './utils.js';
-import { getNodeCenter, getNodesLayer } from './renderer.js';
-import { showToast } from './utils.js';
+import { getContrastColor, wrapText, roundRect, getNodesBoundingBox, showToast } from './utils.js';
+import { getNodeCenter, getNodesLayer, domCache } from './renderer.js';
 
 export function exportPNG() {
   if (!state.nodes.length) { showToast('Keine Elemente zum Exportieren'); return; }
   showToast('PNG wird erstellt...');
 
   const nodesLayer = getNodesLayer();
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  state.nodes.forEach(n => {
-    const el = nodesLayer.querySelector(`[data-id="${n.id}"]`);
-    const w = el ? el.offsetWidth : (n.width || 140);
-    const h = el ? el.offsetHeight : (n.height || 60);
-    minX = Math.min(minX, n.x);
-    minY = Math.min(minY, n.y);
-    maxX = Math.max(maxX, n.x + w);
-    maxY = Math.max(maxY, n.y + h);
+  const bb = getNodesBoundingBox(state.nodes, n => {
+    const el = domCache.get(n.id);
+    return { w: el ? el.offsetWidth : (n.width || 140), h: el ? el.offsetHeight : (n.height || 60) };
   });
+  if (!bb) return;
 
   const pad = 80;
+  let { minX, minY, maxX, maxY } = bb;
   minX -= pad; minY -= pad; maxX += pad; maxY += pad;
   const canvasW = maxX - minX;
   const canvasH = maxY - minY;
@@ -76,13 +71,14 @@ export function exportPNG() {
 
   // Draw nodes
   state.nodes.forEach(n => {
-    const el = nodesLayer.querySelector(`[data-id="${n.id}"]`);
+    const el = domCache.get(n.id);
     const w = el ? el.offsetWidth : (n.width || 140);
     const h = el ? el.offsetHeight : (n.height || 60);
     const x = n.x - minX;
     const y = n.y - minY;
 
     ctx.save();
+    if (n.opacity != null && n.opacity !== 1) ctx.globalAlpha = n.opacity;
     const fontFam = n.font || 'DM Sans, sans-serif';
     const fWeight = n.fontWeight || (n.type === 'center' ? '700' : n.type === 'sector' ? '600' : '400');
     const fSize = n.fontSize || (n.type === 'center' ? 15 : n.type === 'sector' ? (n.size === 'lg' ? 14 : 12) : 13);

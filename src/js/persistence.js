@@ -5,13 +5,29 @@
  */
 // ─── Persistence (localStorage) ───
 import { state, rebuildIndex } from './state.js';
+import { validateProjectJSON } from './utils.js';
 
 function getStorageKey() {
   if (state.projectKey) return `network-editor-${state.projectKey}`;
   return 'network-editor-state';
 }
 
+// P3: Debounce autoSave — prevents JSON.stringify on every drag tick
+let saveTimer = null;
+
 export function autoSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSave, 500);
+}
+
+// Immediate save (for migration and before-unload)
+export function autoSaveNow() {
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  flushSave();
+}
+
+function flushSave() {
+  saveTimer = null;
   try {
     localStorage.setItem(getStorageKey(), JSON.stringify({
       nodes: state.nodes,
@@ -33,6 +49,8 @@ export function autoLoad() {
     const raw = localStorage.getItem(getStorageKey());
     if (!raw) return migrateFromV1();
     const d = JSON.parse(raw);
+    const check = validateProjectJSON(d);
+    if (!check.valid) { console.warn('Corrupt saved state:', check.error); return false; }
     state.nodes = d.nodes || [];
     state.connections = d.connections || [];
     state.nextId = d.nextId || 1;
@@ -68,7 +86,7 @@ function migrateFromV1() {
         state.gridEnabled = d.gridEnabled !== false;
         rebuildIndex();
         // Save under new key and remove old
-        autoSave();
+        autoSaveNow();
         return true;
       }
     } catch (_e) { /* ignore corrupt data */ }

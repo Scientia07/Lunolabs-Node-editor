@@ -8,7 +8,8 @@ import { state } from './state.js';
 import { drawGrid } from './grid.js';
 import { updateMinimap } from './minimap.js';
 import { autoSave } from './persistence.js';
-import { getNodesLayer } from './renderer.js';
+import { domCache } from './renderer.js';
+import { getNodesBoundingBox } from './utils.js';
 
 export function updateTransform() {
   const canvas = document.getElementById('canvas');
@@ -31,17 +32,12 @@ export function zoomTo(newZoom, cx, cy) {
 
 export function zoomFit() {
   if (!state.nodes.length) return;
-  const nodesLayer = getNodesLayer();
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  state.nodes.forEach(n => {
-    const el = nodesLayer.querySelector(`[data-id="${n.id}"]`);
-    const w = el ? el.offsetWidth : (n.width || 140);
-    const h = el ? el.offsetHeight : (n.height || 60);
-    minX = Math.min(minX, n.x);
-    minY = Math.min(minY, n.y);
-    maxX = Math.max(maxX, n.x + w);
-    maxY = Math.max(maxY, n.y + h);
+  const bb = getNodesBoundingBox(state.nodes, n => {
+    const el = domCache.get(n.id);
+    return { w: el ? el.offsetWidth : (n.width || 140), h: el ? el.offsetHeight : (n.height || 60) };
   });
+  if (!bb) return;
+  const { minX, minY, maxX, maxY } = bb;
   const pad = 80;
   const w = maxX - minX + pad * 2;
   const h = maxY - minY + pad * 2;

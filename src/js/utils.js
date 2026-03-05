@@ -22,6 +22,75 @@ export function showToast(msg) {
   setTimeout(() => el.classList.remove('show'), 2000);
 }
 
+/** Escape HTML entities to prevent XSS when inserting into innerHTML */
+export function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Validate a CSS hex color — returns the color if valid, fallback otherwise */
+export function safeColor(color, fallback = '#6c8aff') {
+  if (typeof color !== 'string') return fallback;
+  return /^#[0-9a-fA-F]{3,8}$/.test(color) ? color : fallback;
+}
+
+/** Validate imported project JSON structure. Returns { valid, data, error }. */
+export function validateProjectJSON(raw) {
+  if (!raw || typeof raw !== 'object') return { valid: false, error: 'Kein gueltiges JSON-Objekt' };
+
+  const nodes = raw.nodes;
+  const connections = raw.connections;
+
+  if (!Array.isArray(nodes)) return { valid: false, error: 'nodes muss ein Array sein' };
+  if (connections !== undefined && !Array.isArray(connections)) return { valid: false, error: 'connections muss ein Array sein' };
+
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i];
+    if (typeof n !== 'object' || n === null) return { valid: false, error: `node[${i}] ist ungueltig` };
+    if (typeof n.id !== 'number') return { valid: false, error: `node[${i}].id fehlt oder ist keine Zahl` };
+    if (typeof n.x !== 'number' || typeof n.y !== 'number') return { valid: false, error: `node[${i}] hat keine gueltigen x/y Koordinaten` };
+    if (typeof n.type !== 'string') return { valid: false, error: `node[${i}].type fehlt` };
+  }
+
+  if (Array.isArray(connections)) {
+    for (let i = 0; i < connections.length; i++) {
+      const c = connections[i];
+      if (typeof c !== 'object' || c === null) return { valid: false, error: `connection[${i}] ist ungueltig` };
+      if (typeof c.id !== 'number') return { valid: false, error: `connection[${i}].id fehlt` };
+      if (typeof c.from !== 'number' || typeof c.to !== 'number') return { valid: false, error: `connection[${i}].from/to fehlt` };
+    }
+  }
+
+  if (raw.nextId !== undefined && (typeof raw.nextId !== 'number' || raw.nextId < 1)) {
+    return { valid: false, error: 'nextId muss eine positive Zahl sein' };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Compute bounding box for all nodes.
+ * @param {Array} nodes - array of node objects with x, y, and optional width/height
+ * @param {function} [getSize] - optional (node) => {w, h} to get actual DOM dimensions
+ * @returns {{ minX, minY, maxX, maxY }} or null if no nodes
+ */
+export function getNodesBoundingBox(nodes, getSize) {
+  if (!nodes.length) return null;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of nodes) {
+    const size = getSize ? getSize(n) : { w: n.width || 140, h: n.height || 60 };
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + size.w);
+    maxY = Math.max(maxY, n.y + size.h);
+  }
+  return { minX, minY, maxX, maxY };
+}
+
 export function getContrastColor(hex) {
   if (!hex || hex.charAt(0) !== '#') return '#ffffff';
   const r = parseInt(hex.slice(1, 3), 16);

@@ -7,10 +7,23 @@
 import { state } from './state.js';
 
 let gridCanvas, gridCtx;
+// P4: Cache CSS properties — re-read only on theme change/resize
+let cachedMajorColor = 'rgba(108,138,255,0.1)';
+let cachedMinorColor = 'rgba(108,138,255,0.04)';
 
 export function initGrid() {
   gridCanvas = document.getElementById('grid-canvas');
   gridCtx = gridCanvas.getContext('2d');
+  refreshGridColors();
+  window.addEventListener('resize', refreshGridColors);
+  // Re-read on theme change (dispatched by settings)
+  document.addEventListener('editor:render', refreshGridColors);
+}
+
+function refreshGridColors() {
+  const style = getComputedStyle(document.documentElement);
+  cachedMajorColor = style.getPropertyValue('--grid-major').trim() || 'rgba(108,138,255,0.1)';
+  cachedMinorColor = style.getPropertyValue('--grid-minor').trim() || 'rgba(108,138,255,0.04)';
 }
 
 export function drawGrid() {
@@ -24,16 +37,11 @@ export function drawGrid() {
   const offsetX = state.panX % gs;
   const offsetY = state.panY % gs;
 
-  // Read theme-aware colors from CSS custom properties
-  const style = getComputedStyle(document.documentElement);
-  const majorColor = style.getPropertyValue('--grid-major').trim() || 'rgba(108,138,255,0.1)';
-  const minorColor = style.getPropertyValue('--grid-minor').trim() || 'rgba(108,138,255,0.04)';
-
   gridCtx.clearRect(0, 0, w, h);
 
   for (let x = offsetX; x < w; x += gs) {
     const idx = Math.round((x - state.panX) / gs);
-    gridCtx.strokeStyle = idx % 5 === 0 ? majorColor : minorColor;
+    gridCtx.strokeStyle = idx % 5 === 0 ? cachedMajorColor : cachedMinorColor;
     gridCtx.lineWidth = idx % 5 === 0 ? 1 : 0.5;
     gridCtx.beginPath();
     gridCtx.moveTo(x, 0);
@@ -43,7 +51,7 @@ export function drawGrid() {
 
   for (let y = offsetY; y < h; y += gs) {
     const idx = Math.round((y - state.panY) / gs);
-    gridCtx.strokeStyle = idx % 5 === 0 ? majorColor : minorColor;
+    gridCtx.strokeStyle = idx % 5 === 0 ? cachedMajorColor : cachedMinorColor;
     gridCtx.lineWidth = idx % 5 === 0 ? 1 : 0.5;
     gridCtx.beginPath();
     gridCtx.moveTo(0, y);

@@ -5,34 +5,42 @@
  */
 // ─── Minimap ───
 import { state, nodeIndex } from './state.js';
+import { getNodesBoundingBox } from './utils.js';
 
 let minimapCanvas, minimapCtx, minimapViewport;
+// P5: Cache minimap dimensions — re-read only on resize
+let cachedMW = 180;
+let cachedMH = 120;
 
 export function initMinimap() {
   minimapCanvas = document.getElementById('minimap-canvas');
   minimapCtx = minimapCanvas.getContext('2d');
   minimapViewport = document.getElementById('minimap-viewport');
+  refreshMinimapDimensions();
+  window.addEventListener('resize', refreshMinimapDimensions);
+}
+
+function refreshMinimapDimensions() {
+  const style = getComputedStyle(document.documentElement);
+  cachedMW = parseInt(style.getPropertyValue('--minimap-w'), 10) || 180;
+  cachedMH = parseInt(style.getPropertyValue('--minimap-h'), 10) || 120;
 }
 
 export function updateMinimap() {
-  const mw = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--minimap-w'), 10) || 180;
-  const mh = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--minimap-h'), 10) || 120;
+  const mw = cachedMW;
+  const mh = cachedMH;
   minimapCanvas.width = mw;
   minimapCanvas.height = mh;
   minimapCtx.clearRect(0, 0, mw, mh);
   if (!state.nodes.length) return;
 
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  const nodesLayer = document.getElementById('nodes-layer');
-  state.nodes.forEach(n => {
-    minX = Math.min(minX, n.x);
-    minY = Math.min(minY, n.y);
-    maxX = Math.max(maxX, n.x + (n.width || 140));
-    maxY = Math.max(maxY, n.y + (n.height || 60));
-  });
-
+  const bb = getNodesBoundingBox(state.nodes);
+  if (!bb) return;
   const pad = 100;
-  minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+  const minX = bb.minX - pad;
+  const minY = bb.minY - pad;
+  const maxX = bb.maxX + pad;
+  const maxY = bb.maxY + pad;
   const worldW = maxX - minX || 1;
   const worldH = maxY - minY || 1;
   const scale = Math.min(mw / worldW, mh / worldH);

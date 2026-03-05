@@ -26,6 +26,7 @@
   --toolbar-h: 52px;
   --minimap-w: 180px;
   --minimap-h: 120px;
+  --sidebar-w: 280px;
 
   /* Grid colors */
   --grid-major: rgba(108,138,255,0.1);
@@ -63,6 +64,7 @@
   --toolbar-h: 52px;
   --minimap-w: 200px;
   --minimap-h: 140px;
+  --sidebar-w: 280px;
 
   /* Grid colors */
   --grid-major: rgba(0,0,0,0.08);

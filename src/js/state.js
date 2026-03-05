@@ -49,56 +49,47 @@ export function genId() {
 }
 
 // ─── Undo / Redo ───
-export function saveSnapshot() {
-  state.undoStack.push(JSON.stringify({
+
+/** Serialize current undoable state into a JSON string */
+function createSnapshot() {
+  return JSON.stringify({
     nodes: state.nodes,
     connections: state.connections,
     nextId: state.nextId,
     groups: state.groups,
     hiddenSectors: [...state.hiddenSectors],
-  }));
+  });
+}
+
+/** Restore state from a parsed snapshot object */
+function applySnapshot(snap) {
+  state.nodes = snap.nodes;
+  state.connections = snap.connections;
+  state.nextId = snap.nextId;
+  if (snap.groups) state.groups = snap.groups;
+  if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
+  state.selectedIds.clear();
+  rebuildIndex();
+}
+
+export function saveSnapshot() {
+  state.undoStack.push(createSnapshot());
   state.redoStack = [];
   if (state.undoStack.length > MAX_UNDO) state.undoStack.shift();
 }
 
 export function undo(fullRender, autoSave) {
   if (!state.undoStack.length) return;
-  state.redoStack.push(JSON.stringify({
-    nodes: state.nodes,
-    connections: state.connections,
-    nextId: state.nextId,
-    groups: state.groups,
-    hiddenSectors: [...state.hiddenSectors],
-  }));
-  const snap = JSON.parse(state.undoStack.pop());
-  state.nodes = snap.nodes;
-  state.connections = snap.connections;
-  state.nextId = snap.nextId;
-  if (snap.groups) state.groups = snap.groups;
-  if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
-  state.selectedIds.clear();
-  rebuildIndex();
+  state.redoStack.push(createSnapshot());
+  applySnapshot(JSON.parse(state.undoStack.pop()));
   fullRender();
   autoSave();
 }
 
 export function redo(fullRender, autoSave) {
   if (!state.redoStack.length) return;
-  state.undoStack.push(JSON.stringify({
-    nodes: state.nodes,
-    connections: state.connections,
-    nextId: state.nextId,
-    groups: state.groups,
-    hiddenSectors: [...state.hiddenSectors],
-  }));
-  const snap = JSON.parse(state.redoStack.pop());
-  state.nodes = snap.nodes;
-  state.connections = snap.connections;
-  state.nextId = snap.nextId;
-  if (snap.groups) state.groups = snap.groups;
-  if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
-  state.selectedIds.clear();
-  rebuildIndex();
+  state.undoStack.push(createSnapshot());
+  applySnapshot(JSON.parse(state.redoStack.pop()));
   fullRender();
   autoSave();
 }

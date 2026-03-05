@@ -12,6 +12,7 @@ import { drawGrid } from './grid.js';
 import { autoSave } from './persistence.js';
 import { setSpaceHeld } from './interactions.js';
 import { toggleSidebar } from './sidebar.js';
+import { hideNodePopup } from './node-popup.js';
 
 let setToolFn, fullRenderFn;
 
@@ -35,9 +36,9 @@ function onKeyDown(e) {
     drawGrid();
     autoSave();
   }
-  if (e.key === 'Delete' || e.key === 'Backspace') { deleteSelected(fullRenderFn); e.preventDefault(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { undo(fullRenderFn, autoSave); e.preventDefault(); }
-  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { redo(fullRenderFn, autoSave); e.preventDefault(); }
+  if (e.key === 'Delete' || e.key === 'Backspace') { hideNodePopup(); deleteSelected(fullRenderFn); e.preventDefault(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { hideNodePopup(); undo(fullRenderFn, autoSave); e.preventDefault(); }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { hideNodePopup(); redo(fullRenderFn, autoSave); e.preventDefault(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'd') { duplicateSelected(fullRenderFn); e.preventDefault(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
     state.nodes.forEach(n => state.selectedIds.add(n.id));
@@ -49,6 +50,7 @@ function onKeyDown(e) {
     state.selectedIds.clear();
     renderSelectionState();
     closeMenus();
+    hideNodePopup();
     setToolFn('select');
   }
 }

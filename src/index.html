@@ -200,6 +200,72 @@
   </div>
 </div>
 
+<!-- NODE PROPERTIES POPUP -->
+<div class="node-popup" id="node-popup">
+  <div class="np-tabs">
+    <button class="np-tab active" data-np-tab="color">Farbe</button>
+    <button class="np-tab" data-np-tab="form">Form</button>
+    <button class="np-tab" data-np-tab="font">Schrift</button>
+  </div>
+
+  <!-- Farbe (Color) Tab -->
+  <div class="np-pane active" data-np-pane="color">
+    <div class="color-swatches" id="np-swatches"></div>
+    <label>Farbe 1</label>
+    <div class="color-row">
+      <input type="color" id="np-color1" value="#6c8aff">
+      <span id="np-hex1" class="np-hex">#6c8aff</span>
+    </div>
+    <label>Farbe 2 (Verlauf)</label>
+    <div class="color-row">
+      <input type="color" id="np-color2" value="#6c8aff">
+      <span id="np-hex2" class="np-hex">#6c8aff</span>
+    </div>
+    <label>Winkel: <span id="np-angle-val">135</span>&deg;</label>
+    <input type="range" id="np-angle" min="0" max="360" value="135" style="width:100%">
+    <label>Deckkraft: <span id="np-opacity-val">100</span>%</label>
+    <input type="range" id="np-opacity" min="0" max="100" value="100" style="width:100%">
+    <div class="gradient-preview" id="np-grad-preview"></div>
+  </div>
+
+  <!-- Form (Shape) Tab -->
+  <div class="np-pane" data-np-pane="form">
+    <label>Typ</label>
+    <select id="np-type" class="np-select">
+      <option value="sector">Sektor</option>
+      <option value="company">Eintrag</option>
+      <option value="sticky">Sticky</option>
+      <option value="rect">Rechteck</option>
+      <option value="circle">Kreis</option>
+      <option value="textbox">Textbox</option>
+    </select>
+    <label>Rahmenfarbe</label>
+    <div class="color-row">
+      <input type="color" id="np-border-color" value="#d0d0dd">
+      <span id="np-border-hex" class="np-hex">#d0d0dd</span>
+    </div>
+    <label>Breite</label>
+    <input type="number" id="np-width" class="np-number" min="40" max="800" step="10">
+    <label>Hoehe</label>
+    <input type="number" id="np-height" class="np-number" min="30" max="800" step="10">
+  </div>
+
+  <!-- Schrift (Font) Tab -->
+  <div class="np-pane" data-np-pane="font">
+    <div class="font-list" id="np-font-list"></div>
+    <label>Groesse: <span id="np-fsize-val">13</span>px</label>
+    <input type="range" id="np-fsize" min="9" max="24" value="13" style="width:100%">
+    <label>Staerke</label>
+    <select id="np-fweight" class="np-select">
+      <option value="300">Light</option>
+      <option value="400" selected>Regular</option>
+      <option value="500">Medium</option>
+      <option value="600">Semibold</option>
+      <option value="700">Bold</option>
+    </select>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 

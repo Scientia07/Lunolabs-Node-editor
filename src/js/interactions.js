@@ -6,7 +6,7 @@
 // ─── Mouse Interactions ───
 import { state, nodeIndex, genId, saveSnapshot, rebuildIndex } from './state.js';
 import { screenToCanvas, snapToGrid } from './utils.js';
-import { renderConnections, getConnectionEndpoints, getNodeCenter, getNodeAnchorPoint, renderSelectionState, getNodesLayer, getSvgLayer } from './renderer.js';
+import { renderConnections, getConnectionEndpoints, getNodeCenter, getNodeAnchorPoint, renderSelectionState, getNodesLayer, getSvgLayer, domCache } from './renderer.js';
 import { updateTransform } from './transform.js';
 import { updateMinimap } from './minimap.js';
 import { autoSave } from './persistence.js';
@@ -14,10 +14,11 @@ import { closeMenus } from './context-menu.js';
 import { showColorPopup } from './color-popup.js';
 import { showGradientPopup, overrideGradApply } from './gradient-popup.js';
 import { STICKY_COLORS } from './constants.js';
+import { showNodePopup, hideNodePopup, repositionNodePopup } from './node-popup.js';
 
 let isDragging = false, isPanning = false, isSelecting = false, isResizing = false;
 let isDraggingEndpoint = false;
-let _popupJustOpened = false;
+let popupJustOpened = false;
 let dragStartX = 0, dragStartY = 0;
 let dragOffsets = [];
 let spaceHeld = false;
@@ -25,6 +26,8 @@ let connectTempLine = null;
 let connectFromAnchor = null;
 let endpointDrag = null; // { connId, end ('from'|'to'), tempLine }
 let fullRenderFn;
+// P2: RAF-gate mousemove — cap at 60fps instead of 120+ Hz
+let rafPending = false;
 
 export function initInteractions(fullRender) {
   fullRenderFn = fullRender;
@@ -32,7 +35,14 @@ export function initInteractions(fullRender) {
   const selRect = document.getElementById('selection-rect');
 
   canvasContainer.addEventListener('mousedown', (e) => onMouseDown(e, canvasContainer, selRect));
-  canvasContainer.addEventListener('mousemove', (e) => onMouseMove(e, canvasContainer, selRect));
+  canvasContainer.addEventListener('mousemove', (e) => {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      onMouseMove(e, canvasContainer, selRect);
+    });
+  });
   canvasContainer.addEventListener('mouseup', (e) => onMouseUp(e, canvasContainer, selRect));
   canvasContainer.addEventListener('dblclick', (e) => {
     const target = e.target.closest('.node');
@@ -49,15 +59,15 @@ export function initInteractions(fullRender) {
     if (!e.target.closest('#context-menu')) {
       document.getElementById('context-menu').classList.remove('open');
     }
-    if (!e.target.closest('.color-popup') && !e.target.closest('.popup-panel') && !e.target.closest('.ctx-item')) {
+    if (!e.target.closest('.color-popup') && !e.target.closest('.popup-panel') && !e.target.closest('.node-popup') && !e.target.closest('.ctx-item')) {
       // Don't close popups that were just opened this frame (e.g. sector tool opens gradient popup on mousedown)
-      if (!_popupJustOpened) {
+      if (!popupJustOpened) {
         document.getElementById('color-popup')?.classList.remove('open');
         document.getElementById('gradient-popup')?.classList.remove('open');
         document.getElementById('font-popup')?.classList.remove('open');
       }
     }
-    _popupJustOpened = false;
+    popupJustOpened = false;
     if (!e.target.closest('.dropdown-wrap')) {
       document.getElementById('shapes-dropdown').classList.remove('open');
       document.getElementById('export-dropdown').classList.remove('open');
@@ -123,6 +133,7 @@ function onMouseDown(e, canvasContainer, selRect) {
     const connId = parseInt(connEl.dataset.id, 10);
     state.selectedConnId = (state.selectedConnId === connId) ? null : connId;
     state.selectedIds.clear();
+    hideNodePopup();
     renderSelectionState();
     renderConnections();
     e.preventDefault();
@@ -162,6 +173,14 @@ function onMouseDown(e, canvasContainer, selRect) {
     }
     renderSelectionState();
 
+    // Show/hide node popup based on selection count
+    if (state.selectedIds.size === 1) {
+      const selectedId = [...state.selectedIds][0];
+      showNodePopup(selectedId);
+    } else {
+      hideNodePopup();
+    }
+
     isDragging = true;
     dragStartX = cp.x;
     dragStartY = cp.y;
@@ -178,7 +197,7 @@ function onMouseDown(e, canvasContainer, selRect) {
   if (!target) {
     if (state.tool === 'sector') {
       // Use gradient popup for new sector
-      _popupJustOpened = true;
+      popupJustOpened = true;
       showGradientPopup(e.clientX, e.clientY, ['__new__']);
       const cpCopy = { ...cp };
       overrideGradApply(() => {
@@ -242,6 +261,7 @@ function onMouseDown(e, canvasContainer, selRect) {
     if (state.tool === 'select') {
       if (!e.shiftKey) state.selectedIds.clear();
       renderSelectionState();
+      hideNodePopup();
       isSelecting = true;
       dragStartX = e.clientX;
       dragStartY = e.clientY;
@@ -256,8 +276,6 @@ function onMouseDown(e, canvasContainer, selRect) {
 }
 
 function onMouseMove(e, canvasContainer) {
-  const nodesLayer = getNodesLayer();
-
   if (isDraggingEndpoint && endpointDrag) {
     const cp = screenToCanvas(e.clientX, e.clientY);
     // Update temp line to cursor
@@ -295,11 +313,12 @@ function onMouseMove(e, canvasContainer) {
       if (!node) return;
       node.x = e.altKey ? cp.x + d.ox : snapToGrid(cp.x + d.ox);
       node.y = e.altKey ? cp.y + d.oy : snapToGrid(cp.y + d.oy);
-      const el = nodesLayer.querySelector(`[data-id="${d.id}"]`);
+      const el = domCache.get(d.id);
       if (el) { el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; }
     });
     renderConnections();
     updateMinimap();
+    repositionNodePopup();
     return;
   }
 
@@ -318,7 +337,7 @@ function onMouseMove(e, canvasContainer) {
     if (node) {
       node.width = Math.max(80, d.origW + (e.clientX - dragStartX) / state.zoom);
       node.height = Math.max(60, d.origH + (e.clientY - dragStartY) / state.zoom);
-      const el = nodesLayer.querySelector(`[data-id="${d.id}"]`);
+      const el = domCache.get(d.id);
       if (el) { el.style.width = node.width + 'px'; el.style.minHeight = node.height + 'px'; el.style.height = node.height + 'px'; }
     }
     return;
@@ -332,7 +351,6 @@ function onMouseMove(e, canvasContainer) {
 }
 
 function onMouseUp(e, canvasContainer) {
-  const nodesLayer = getNodesLayer();
   if (isPanning) { isPanning = false; canvasContainer.classList.remove('panning'); autoSave(); return; }
   if (isDragging) { isDragging = false; autoSave(); return; }
   if (isResizing) { isResizing = false; autoSave(); return; }
@@ -373,13 +391,19 @@ function onMouseUp(e, canvasContainer) {
       const tl = screenToCanvas(rx, ry);
       const br = screenToCanvas(rx + rw, ry + rh);
       state.nodes.forEach(n => {
-        const el = nodesLayer.querySelector(`[data-id="${n.id}"]`);
+        const el = domCache.get(n.id);
         if (!el) return;
         const cx = n.x + el.offsetWidth / 2;
         const cy = n.y + el.offsetHeight / 2;
         if (cx >= tl.x && cx <= br.x && cy >= tl.y && cy <= br.y) state.selectedIds.add(n.id);
       });
       renderSelectionState();
+      // Show popup only if exactly 1 node selected by rubber-band
+      if (state.selectedIds.size === 1) {
+        showNodePopup([...state.selectedIds][0]);
+      } else {
+        hideNodePopup();
+      }
     }
     return;
   }
@@ -433,8 +457,8 @@ function startConnection(fromId, e, anchorPos) {
 }
 
 export function editNodeLabel(id) {
-  const nodesLayer = getNodesLayer();
-  const el = nodesLayer.querySelector(`[data-id="${id}"] .node-label`);
+  const nodeEl = domCache.get(id);
+  const el = nodeEl?.querySelector('.node-label');
   if (!el) return;
   el.setAttribute('contenteditable', 'true');
   el.focus();
@@ -500,13 +524,13 @@ function highlightNearestAnchor(screenX, screenY) {
   const result = findNearestAnchor(screenX, screenY);
   if (!result) return;
 
-  const nodesLayer = getNodesLayer();
+  const cachedNode = domCache.get(result.nodeId);
+  if (!cachedNode) return;
   if (result.anchor) {
-    const anchorEl = nodesLayer.querySelector(`[data-id="${result.nodeId}"] .anchor-${result.anchor}`);
+    const anchorEl = cachedNode.querySelector(`.anchor-${result.anchor}`);
     if (anchorEl) anchorEl.classList.add('anchor-highlight');
   } else {
-    const nodeEl = nodesLayer.querySelector(`[data-id="${result.nodeId}"]`);
-    if (nodeEl) nodeEl.classList.add('drop-target');
+    cachedNode.classList.add('drop-target');
   }
 }
 

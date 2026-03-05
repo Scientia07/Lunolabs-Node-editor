@@ -5,9 +5,13 @@
  */
 // ─── Node & Connection Rendering ───
 import { state, nodeIndex } from './state.js';
-import { getContrastColor, getGradientCSS } from './utils.js';
+import { getContrastColor, getGradientCSS, esc } from './utils.js';
 
 let nodesLayer, svgLayer;
+
+// P1: O(1) DOM element lookup by node ID — eliminates querySelector scans
+const domCache = new Map();
+export { domCache };
 
 export function initRenderer() {
   nodesLayer = document.getElementById('nodes-layer');
@@ -25,7 +29,12 @@ export function finishActiveEdit() {
 export function renderNodes() {
   finishActiveEdit();
   nodesLayer.innerHTML = '';
-  state.nodes.forEach(n => nodesLayer.appendChild(createNodeElement(n)));
+  domCache.clear();
+  state.nodes.forEach(n => {
+    const el = createNodeElement(n);
+    domCache.set(n.id, el);
+    nodesLayer.appendChild(el);
+  });
 }
 
 // Unified node element creation — handles all node types from both apps
@@ -39,6 +48,7 @@ export function createNodeElement(n) {
   if (n.font) el.style.fontFamily = n.font;
   if (n.fontSize) el.style.fontSize = n.fontSize + 'px';
   if (n.fontWeight) el.style.fontWeight = n.fontWeight;
+  if (n.opacity != null && n.opacity !== 1) el.style.opacity = n.opacity;
 
   if (n.type === 'center') {
     el.className = 'node node-center';
@@ -105,11 +115,7 @@ export function createNodeElement(n) {
   label.className = 'node-label';
   label.setAttribute('contenteditable', 'false');
   if (n.label && n.label.includes('\n')) {
-    label.innerHTML = n.label.split('\n').map(l => {
-      // Escape HTML entities for safety
-      const safe = l.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      return safe;
-    }).join('<br>');
+    label.innerHTML = n.label.split('\n').map(l => esc(l)).join('<br>');
   } else {
     label.textContent = n.label || '';
   }
@@ -247,14 +253,14 @@ function renderEndpointHandle(pt, connId, end) {
 }
 
 export function getNodeCenter(n) {
-  const el = nodesLayer.querySelector(`[data-id="${n.id}"]`);
+  const el = domCache.get(n.id);
   if (el) return { x: n.x + el.offsetWidth / 2, y: n.y + el.offsetHeight / 2 };
   return { x: n.x + 60, y: n.y + 30 };
 }
 
 // Get the position of a specific anchor point on a node
 export function getNodeAnchorPoint(n, anchor) {
-  const el = nodesLayer.querySelector(`[data-id="${n.id}"]`);
+  const el = domCache.get(n.id);
   const w = el ? el.offsetWidth : 120;
   const h = el ? el.offsetHeight : 60;
   switch (anchor) {
@@ -287,8 +293,29 @@ function autoBestAnchor(fromNode, toNode) {
   };
 }
 
+// P7: Track previous selection to only update changed nodes
+let prevSelectedIds = new Set();
+
 export function renderSelectionState() {
-  nodesLayer.querySelectorAll('.node').forEach(el => {
-    el.classList.toggle('selected', state.selectedIds.has(parseInt(el.dataset.id, 10)));
-  });
+  // Determine which nodes changed selection state
+  const toAdd = new Set();
+  const toRemove = new Set();
+  for (const id of state.selectedIds) {
+    if (!prevSelectedIds.has(id)) toAdd.add(id);
+  }
+  for (const id of prevSelectedIds) {
+    if (!state.selectedIds.has(id)) toRemove.add(id);
+  }
+
+  // Only touch DOM elements that actually changed
+  for (const id of toAdd) {
+    const el = domCache.get(id);
+    if (el) el.classList.add('selected');
+  }
+  for (const id of toRemove) {
+    const el = domCache.get(id);
+    if (el) el.classList.remove('selected');
+  }
+
+  prevSelectedIds = new Set(state.selectedIds);
 }

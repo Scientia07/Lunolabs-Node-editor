@@ -1,7 +1,5 @@
 /* ── Sidebar Panel ── */
-:root {
-  --sidebar-w: 280px;
-}
+/* --sidebar-w defined in tokens.css */
 
 #sidebar {
   position: fixed;

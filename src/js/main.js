@@ -16,23 +16,25 @@ import { initFontPopup, showFontPopup } from './font-popup.js';
 import { initToolbar, setTool } from './toolbar.js';
 import { initInteractions, setZoomToRef, editNodeLabel } from './interactions.js';
 import { initKeyboard } from './keyboard.js';
-import { autoSave, autoLoad } from './persistence.js';
+import { autoSave, autoSaveNow, autoLoad } from './persistence.js';
 import { deleteSelected, duplicateSelected } from './actions.js';
 import { applyTheme } from './theme.js';
 import { loadFromURL } from './project.js';
 import { nodeIndex, saveSnapshot } from './state.js';
 import { initSidebar, refreshSidebar, applyVisibility } from './sidebar.js';
+import { initNodePopup } from './node-popup.js';
 
 // ─── Full Render ───
 function fullRender() {
   renderNodes();
+  renderConnections();
+  applyVisibility();
+  updateTransform();
+  // Non-critical UI updates deferred to next frame
   requestAnimationFrame(() => {
-    renderConnections();
-    applyVisibility();
     updateMinimap();
     refreshSidebar();
   });
-  updateTransform();
 }
 
 // ─── Context Menu Wiring ───
@@ -95,6 +97,7 @@ async function init() {
   initColorPopup();
   initGradientPopup();
   initFontPopup();
+  initNodePopup();
 
   // Wire zoom reference for interactions (breaks circular dep)
   setZoomToRef(zoomTo);
@@ -127,7 +130,7 @@ async function init() {
   }
 
   // Grid toggle visual state
-  document.getElementById('grid-toggle').classList.toggle('active', state.gridEnabled);
+  document.getElementById('grid-toggle')?.classList.toggle('active', state.gridEnabled);
 
   // Render everything
   fullRender();
@@ -137,5 +140,8 @@ async function init() {
     setTimeout(() => zoomFit(), 200);
   }
 }
+
+// Flush debounced save before page unload to prevent data loss
+window.addEventListener('beforeunload', () => autoSaveNow());
 
 init();
