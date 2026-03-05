@@ -19,6 +19,7 @@ import { autoSave } from './persistence.js';
 import { showToast } from './utils.js';
 import { exportJSON, importJSON } from './export-json.js';
 import { exportPNG } from './export-png.js';
+import { exportCSV } from './csv-export.js';
 import { toggleTheme } from './theme.js';
 import { hideNodePopup } from './node-popup.js';
 import { relayout } from './force-layout.js';
@@ -90,6 +91,10 @@ export function initToolbar() {
   bindButton('export-png-btn', 'click', () => {
     document.getElementById('export-dropdown')?.classList.remove('open');
     exportPNG();
+  });
+  bindButton('export-csv-btn', 'click', () => {
+    document.getElementById('export-dropdown')?.classList.remove('open');
+    exportCSV();
   });
 
   // Import
