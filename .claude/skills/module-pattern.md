@@ -152,3 +152,5 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `node-popup.js` | Node properties popup — color/gradient, form/type, font editing |
 | `conn-popup.js` | Connection properties popup — color, style, dash, thickness, outline, hidden |
 | `quick-add.js` | Drag-to-create popup — Sektor/Eintrag from anchor drag to empty canvas |
+| `csv-export.js` | CSV export — buildCSV() + exportCSV(), semicolons + BOM, dynamic meta columns |
+| `csv-import.js` | CSV import — parser, auto-mapping, preview modal, conflict resolution |

@@ -200,5 +200,5 @@ Features (F2, F4-F6) ← fill in as time allows
 | CSV Import/Export | `docs/research/02-csv-import-export/` | Format design, Excel compatibility |
 | Visual Tier System | `docs/research/03-visual-tier-system/` | Gradient wash design |
 | Integration Roadmap | `docs/research/04-integration-roadmap/` | Original phased plan (superseded by this file) |
-| Latest Handoff | `docs/handoffs/HANDOFF-20260305-CW10.md` | Session context |
+| Latest Handoff | `docs/handoffs/HANDOFF-20260305-CW10c.md` | Session context |
 | Lessons Learned | `docs/lessons-learned/LESSONS-LOG.md` | Architecture & process insights |

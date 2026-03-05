@@ -132,8 +132,8 @@ In dev mode, the browser loads ES modules natively. No dev server needed — jus
 ## Output Size Guidelines
 
 Current sizes (minified):
-- CSS: ~23KB (minified via esbuild transformSync)
-- JS: ~70KB
-- Total HTML: ~110KB (with embedded project data)
+- CSS: ~28KB (minified via esbuild transformSync)
+- JS: ~85KB
+- Total HTML: ~130KB (with embedded project data)
 
 The single-file output is designed to be shareable via email, USB, or any file transfer. Keep it under 500KB for practical use.

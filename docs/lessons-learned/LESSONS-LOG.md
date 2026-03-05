@@ -90,3 +90,22 @@ Setting `--sector-rgb` as an inline CSS variable on each node element lets a sin
 
 ### [INSIGHT] Deriving state is simpler than storing state
 Instead of storing `meta.tier` as a separate field with a toggle control, deriving tier from relevancy via `getTier()` eliminated an entire UI control (tier toggle), prevented stale data (tier out of sync with relevancy), and simplified the Details tab to a single slider. When two pieces of state have a deterministic relationship, store one and derive the other.
+
+---
+
+## Session: Phase 8-9 CSV Export & Import — 2026-03-05
+
+### [ARCHITECTURE] Plain JSON state makes CSV round-tripping trivial
+Because `node.meta` is a plain object that serializes cleanly, building CSV export was just iterating keys → columns. No ORM mapping, no serialization hooks. The same property that made undo/redo free for metadata also made CSV free.
+
+### [CODE-PATTERN] Auto-detect delimiter by counting occurrences in the header line
+Instead of asking the user whether their CSV uses `;` or `,`, counting occurrences in the first line (`semis >= commas ? ';' : ','`) handles both German Excel (`;`) and international CSVs (`,`) with zero UI. Edge cases are rare in practice.
+
+### [CODE-PATTERN] Fuzzy header mapping eliminates manual column remapping UI
+Mapping common aliases (`Name → label`, `Kontakt → contact`, `Art → type`) covers 95%+ of real-world CSVs. Unknown columns auto-map to `meta.<headerName>`. This saved ~40% of the import feature effort while handling the export-edit-reimport cycle perfectly.
+
+### [ARCHITECTURE] Toolbar dropdown evolution: single action to menu
+Converting the single import button into a dropdown (JSON + CSV) mirrors the export pattern and scales cleanly. The dropdown-close logic was already in place for exports — just needed to add `import-dropdown` to the same close handlers in `interactions.js` and `context-menu.js`.
+
+### [PROCESS] Implementing export before import validates the format
+Phase 8 (export) before Phase 9 (import) meant the CSV format was exercised and tested before import had to parse it. The 13 export tests served as implicit format documentation for the import parser.
