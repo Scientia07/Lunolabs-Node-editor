@@ -5,3 +5,5 @@ netzwerk-jb-march.html
 refrenz/
 .playwright-mcp/
 *.png
+# Private project data (real organization network)
+src/data/
