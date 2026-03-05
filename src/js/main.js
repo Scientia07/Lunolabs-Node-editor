@@ -24,6 +24,8 @@ import { initGradientPopup, showGradientPopup } from './gradient-popup.js';
 import { initFontPopup, showFontPopup } from './font-popup.js';
 import { initToolbar, setTool } from './toolbar.js';
 import { initInteractions, setZoomToRef, editNodeLabel } from './interactions.js';
+import { initQuickAdd } from './quick-add.js';
+import { initConnPopup } from './conn-popup.js';
 import { initKeyboard } from './keyboard.js';
 import { autoSave, autoSaveNow, autoLoad } from './persistence.js';
 import { deleteSelected, duplicateSelected } from './actions.js';
@@ -32,6 +34,7 @@ import { loadFromURL } from './project.js';
 import { nodeIndex, saveSnapshot } from './state.js'; // re-import ok (same module)
 import { initSidebar, refreshSidebar, applyVisibility } from './sidebar.js';
 import { initNodePopup } from './node-popup.js';
+import { runForceLayout } from './force-layout.js';
 
 // ─── Full Render ───
 function fullRender() {
@@ -118,6 +121,8 @@ async function init() {
   // Wire toolbar
   initToolbar();
   initInteractions();
+  initQuickAdd();
+  initConnPopup();
   initKeyboard(setTool);
 
   // Setup context menu
@@ -147,6 +152,11 @@ async function init() {
 
   // Render everything
   fullRender();
+
+  // Run force layout if enabled
+  if (state.physicsLayout) {
+    setTimeout(() => runForceLayout(), 300);
+  }
 
   // Fit to content if project was loaded
   if (projectLoaded && state.nodes.length) {
