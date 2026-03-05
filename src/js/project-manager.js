@@ -1,11 +1,16 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-05
- */
-/**
- * Project Management — save/load/delete/import/download/new
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        project-manager.js
+ * @description Project CRUD — save/load/delete/import/download/new blank project
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8/10
+ * @depends-on  state.js, persistence.js, utils.js, project.js
+ * @used-by     settings-panel.js
+ * @strengths   Clean API, JSON validation on import, URL.revokeObjectURL cleanup,
+ *              slug generation for project keys
+ * @issues      No confirmation dialog before destructive actions (delete, new blank)
+ * ─────────────────────────────────────────────── */
 import { state, rebuildIndex, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { showToast, validateProjectJSON, serializeProject } from './utils.js';

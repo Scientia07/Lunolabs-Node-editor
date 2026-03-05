@@ -1,11 +1,16 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
-/**
- * Sidebar Panel — thin UI shell (init, tabs, connections tab, groups tab, visibility)
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        sidebar.js
+ * @description Sidebar panel — tabs, connections list, groups management, visibility toggling
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7/10
+ * @depends-on  state.js, persistence.js, utils.js, renderer.js, settings-panel.js
+ * @used-by     main.js, keyboard.js
+ * @strengths   Clean tab system, sector auto-groups, O(1) visibility via domCache + connIndex
+ * @issues      innerHTML-heavy rendering (re-renders full tab on every change);
+ *              event listeners re-created on each render (no delegation)
+ * ─────────────────────────────────────────────── */
 import { state, nodeIndex, saveSnapshot, genId, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { esc, safeColor } from './utils.js';

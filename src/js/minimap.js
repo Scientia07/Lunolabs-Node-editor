@@ -1,8 +1,15 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        minimap.js
+ * @description Minimap overview — canvas rendering of nodes/connections + viewport indicator
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8/10
+ * @depends-on  state.js, utils.js
+ * @used-by     main.js, transform.js, interactions.js
+ * @strengths   Cached dimensions (P5), shape-aware rendering, viewport overlay
+ * @issues      Not interactive (no click-to-pan); minimap not clickable for navigation
+ * ─────────────────────────────────────────────── */
 // ─── Minimap ───
 import { state, nodeIndex } from './state.js';
 import { getNodesBoundingBox } from './utils.js';

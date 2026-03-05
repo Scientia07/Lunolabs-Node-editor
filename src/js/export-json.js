@@ -1,8 +1,15 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        export-json.js
+ * @description JSON export/import with validation and toast feedback
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8/10
+ * @depends-on  state.js, utils.js, persistence.js
+ * @used-by     toolbar.js
+ * @strengths   JSON validation on import, URL.revokeObjectURL cleanup, date-stamped filenames
+ * @issues      Export format differs from serializeProject() — no meta/version fields
+ * ─────────────────────────────────────────────── */
 // ─── JSON Export/Import ───
 import { state, saveSnapshot, rebuildIndex } from './state.js';
 import { showToast, validateProjectJSON } from './utils.js';

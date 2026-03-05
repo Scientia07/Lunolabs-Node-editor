@@ -1,8 +1,17 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        interactions.js
+ * @description Mouse interactions — drag, pan, select, connect, resize, endpoint editing
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7/10
+ * @depends-on  state.js, utils.js, renderer.js, transform.js, minimap.js, persistence.js,
+ *              context-menu.js, color-popup.js, gradient-popup.js, constants.js, node-popup.js
+ * @used-by     main.js, keyboard.js
+ * @strengths   RAF-gated mousemove (60fps cap), clean state machine, endpoint drag with snap
+ * @issues      Largest file (540 lines) — consider splitting tool-specific logic;
+ *              findNearestAnchor() O(n) per frame during drag; circular dep workaround via setZoomToRef
+ * ─────────────────────────────────────────────── */
 // ─── Mouse Interactions ───
 import { state, nodeIndex, genId, saveSnapshot, rebuildIndex, emit } from './state.js';
 import { screenToCanvas, snapToGrid } from './utils.js';

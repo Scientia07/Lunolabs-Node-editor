@@ -1,8 +1,15 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        persistence.js
+ * @description localStorage auto-save/load with debounce, v1 migration
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8/10
+ * @depends-on  state.js, utils.js
+ * @used-by     main.js, interactions.js, sidebar.js, toolbar.js, settings-panel.js, keyboard.js
+ * @strengths   500ms debounced save, flush on beforeunload, validation on load, v1 migration
+ * @issues      Silent catch on quota exceeded — no user feedback; no localStorage size monitoring
+ * ─────────────────────────────────────────────── */
 // ─── Persistence (localStorage) ───
 import { state, rebuildIndex } from './state.js';
 import { validateProjectJSON } from './utils.js';

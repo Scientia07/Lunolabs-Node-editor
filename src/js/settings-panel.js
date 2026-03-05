@@ -1,11 +1,17 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-05
- */
-/**
- * Settings Panel — settings tab rendering + event wiring
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        settings-panel.js
+ * @description Settings sidebar tab — project management UI, connection style, grid, theme settings
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7/10
+ * @depends-on  state.js, persistence.js, utils.js, project-manager.js
+ * @used-by     sidebar.js
+ * @strengths   Complete settings UI, project list with badges, inline save dialog
+ * @issues      Full innerHTML rebuild on every render — event listeners not delegated;
+ *              large template string (125 lines) — hard to maintain;
+ *              XSS-safe via esc() but template complexity increases risk
+ * ─────────────────────────────────────────────── */
 import { state, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { esc, safeColor } from './utils.js';

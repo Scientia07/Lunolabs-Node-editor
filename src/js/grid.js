@@ -1,8 +1,15 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        grid.js
+ * @description Canvas grid rendering — theme-aware colors, major/minor lines, cached CSS props
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8.5/10
+ * @depends-on  state.js
+ * @used-by     main.js, toolbar.js, transform.js, keyboard.js
+ * @strengths   CSS property caching (P4), theme-aware grid colors, clean drawing loop
+ * @issues      Full canvas clear+redraw on every call — could skip if unchanged
+ * ─────────────────────────────────────────────── */
 // ─── Grid Drawing (theme-aware) ───
 import { state } from './state.js';
 

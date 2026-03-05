@@ -1,8 +1,15 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        transform.js
+ * @description Pan/zoom transform — updateTransform, zoomTo (pivot-aware), zoomFit (auto-frame)
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8.5/10
+ * @depends-on  state.js, grid.js, minimap.js, persistence.js, renderer.js, utils.js
+ * @used-by     main.js, interactions.js, toolbar.js
+ * @strengths   Pivot-point zoom preserves cursor position, zoomFit auto-frames all nodes
+ * @issues      None significant
+ * ─────────────────────────────────────────────── */
 // ─── Transform (pan/zoom) ───
 import { state } from './state.js';
 import { drawGrid } from './grid.js';

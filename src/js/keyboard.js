@@ -1,8 +1,16 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        keyboard.js
+ * @description Keyboard shortcuts — tools, undo/redo, delete, select-all, sidebar toggle
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8/10
+ * @depends-on  state.js, renderer.js, context-menu.js, actions.js, grid.js, persistence.js,
+ *              interactions.js, sidebar.js, node-popup.js
+ * @used-by     main.js
+ * @strengths   Proper contenteditable/input guard, consistent modifier key handling
+ * @issues      No keyboard shortcut help overlay; shortcuts not configurable
+ * ─────────────────────────────────────────────── */
 // ─── Keyboard Shortcuts ───
 import { state, undo, redo, emit } from './state.js';
 import { renderSelectionState } from './renderer.js';

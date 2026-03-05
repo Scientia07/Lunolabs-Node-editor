@@ -1,8 +1,16 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        context-menu.js
+ * @description Context menu — show/clear/add items + close all menus/popups
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7.5/10
+ * @depends-on  (none — pure DOM)
+ * @used-by     main.js, interactions.js, keyboard.js
+ * @strengths   Clean API, supports shortcuts display, danger items
+ * @issues      closeMenus() knows about ALL popup IDs — tight coupling;
+ *              no keyboard navigation within menu
+ * ─────────────────────────────────────────────── */
 // ─── Context Menu ───
 
 let contextMenu;

@@ -1,8 +1,16 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        build.js
+ * @description Build script — esbuild bundle + CSS concat/minify + HTML inlining + data embedding
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8.5/10
+ * @depends-on  esbuild (npm), src/js/main.js, src/styles/*.css, src/index.html, src/data/*.json
+ * @produces    dist/index.html (single self-contained file), index.html (root copy)
+ * @strengths   Single-file output works from file://, embedded project data, CSS minification,
+ *              clear build log with sizes
+ * @issues      No source maps; no cache busting; sync API (fine for small projects)
+ * ─────────────────────────────────────────────── */
 import { buildSync, transformSync } from 'esbuild';
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, copyFileSync } from 'fs';
 import { join } from 'path';

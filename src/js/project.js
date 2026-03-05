@@ -1,8 +1,16 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        project.js
+ * @description Project loading — single loadProject() source of truth, URL loading, legend rendering
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8.5/10
+ * @depends-on  state.js, theme.js, utils.js
+ * @used-by     main.js, project-manager.js
+ * @strengths   Path traversal prevention in loadFromURL(), embedded project support,
+ *              safeColor() in legend rendering, clean loadProject API with options
+ * @issues      None significant
+ * ─────────────────────────────────────────────── */
 // ─── Project Loading ───
 import { state, rebuildIndex } from './state.js';
 import { applyTheme } from './theme.js';

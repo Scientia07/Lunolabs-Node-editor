@@ -1,8 +1,17 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        node-popup.js
+ * @description Node properties popup — color/gradient, shape type, font, opacity, size editing
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7.5/10
+ * @depends-on  state.js, constants.js, persistence.js
+ * @used-by     main.js, interactions.js, keyboard.js
+ * @strengths   Live editing with ensureSnapshot() (single undo point per session),
+ *              tab system, viewport-clamped positioning, repositionNodePopup during drag
+ * @issues      Duplicates gradient/font logic with gradient-popup.js and font-popup.js;
+ *              many getElementById calls — could cache references
+ * ─────────────────────────────────────────────── */
 // ─── Node Properties Quick-Popup ───
 import { state, nodeIndex, saveSnapshot, rebuildIndex } from './state.js';
 import { PALETTE, FONTS } from './constants.js';

@@ -1,8 +1,15 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        constants.js
+ * @description Shared constants — palette, sticky colors, fonts, defaults
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      9/10
+ * @depends-on  (none)
+ * @used-by     state.js, color-popup.js, gradient-popup.js, font-popup.js, node-popup.js, interactions.js
+ * @strengths   Single source of truth for all magic values, clean and minimal
+ * @issues      None
+ * ─────────────────────────────────────────────── */
 // ─── Constants ───
 
 export const PALETTE = [

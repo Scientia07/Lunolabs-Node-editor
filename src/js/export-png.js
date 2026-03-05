@@ -1,8 +1,17 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        export-png.js
+ * @description PNG export — canvas rendering of all node types + connections at 2x resolution
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7/10
+ * @depends-on  state.js, utils.js, renderer.js
+ * @used-by     toolbar.js
+ * @strengths   2x resolution for crisp output, handles all 7 node types, gradient support
+ * @issues      Hardcoded colors (#1a1a2e, #f0f0f5) ignore theme — always exports "light" style;
+ *              bezier curve rendering doesn't match screen exactly (simplified);
+ *              large function (220 lines) — could split per node type
+ * ─────────────────────────────────────────────── */
 // ─── PNG Export (unified: handles all node types) ───
 import { state, nodeIndex } from './state.js';
 import { getContrastColor, wrapText, roundRect, getNodesBoundingBox, showToast } from './utils.js';

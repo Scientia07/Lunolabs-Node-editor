@@ -1,8 +1,17 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        main.js
+ * @description App entry point — init sequence, event bus wiring, context menu setup
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8/10
+ * @depends-on  state.js, grid.js, renderer.js, minimap.js, transform.js, context-menu.js,
+ *              color-popup.js, gradient-popup.js, font-popup.js, toolbar.js, interactions.js,
+ *              keyboard.js, persistence.js, actions.js, theme.js, project.js, sidebar.js, node-popup.js
+ * @used-by     index.html (entry point)
+ * @strengths   Clear init sequence, deferred non-critical UI via requestAnimationFrame
+ * @issues      Context menu wiring is inline — could be extracted to own module
+ * ─────────────────────────────────────────────── */
 // ─── Main Entry Point ───
 import { state, rebuildIndex, on, emit } from './state.js';
 import { initGrid, drawGrid } from './grid.js';

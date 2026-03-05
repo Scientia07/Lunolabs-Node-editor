@@ -1,8 +1,16 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        renderer.js
+ * @description Node & connection DOM rendering, domCache, anchor geometry, selection state
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7.5/10
+ * @depends-on  state.js, utils.js
+ * @used-by     main.js, interactions.js, export-png.js, sidebar.js, node-popup.js
+ * @strengths   O(1) domCache Map, diff-based renderSelectionState(), anchor auto-detection
+ * @issues      renderNodes() full innerHTML rebuild on every call — bottleneck at 200+ nodes;
+ *              SVG connection rendering also full rebuild per call
+ * ─────────────────────────────────────────────── */
 // ─── Node & Connection Rendering ───
 import { state, nodeIndex } from './state.js';
 import { getContrastColor, getGradientCSS, esc } from './utils.js';

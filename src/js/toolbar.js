@@ -1,8 +1,17 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        toolbar.js
+ * @description Toolbar button wiring — tools, grid, theme, undo/redo, export, import, zoom
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7.5/10
+ * @depends-on  state.js, grid.js, transform.js, persistence.js, utils.js, export-json.js,
+ *              export-png.js, theme.js, node-popup.js
+ * @used-by     main.js
+ * @strengths   Safe getElementById wrapper, clean event wiring
+ * @issues      Local `on()` function shadows event bus `on` — rename to `bindButton()`;
+ *              resize handler should be debounced
+ * ─────────────────────────────────────────────── */
 // ─── Toolbar Wiring ───
 import { state, undo, redo, emit } from './state.js';
 import { drawGrid } from './grid.js';

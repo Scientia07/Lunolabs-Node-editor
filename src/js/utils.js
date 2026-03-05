@@ -1,8 +1,17 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        utils.js
+ * @description Shared utilities — coordinate math, XSS escaping, color helpers, validation, serialization
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      8.5/10
+ * @depends-on  state.js
+ * @used-by     renderer.js, interactions.js, persistence.js, sidebar.js, export-png.js,
+ *              export-json.js, project.js, project-manager.js, settings-panel.js, transform.js
+ * @strengths   esc() for XSS, safeColor() for CSS injection, validateProjectJSON() thorough,
+ *              serializeProject() single source of truth for export format
+ * @issues      wrapText() and roundRect() only used by export-png — could be co-located
+ * ─────────────────────────────────────────────── */
 // ─── Utility Functions ───
 import { state } from './state.js';
 

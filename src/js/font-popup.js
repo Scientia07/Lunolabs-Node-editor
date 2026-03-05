@@ -1,8 +1,15 @@
 /**
- * @ai-generated true
- * @agent claude-code
- * @created 2026-03-04
- */
+ * ─── File Rating ──────────────────────────────
+ * @file        font-popup.js
+ * @description Font picker popup — family selection, size slider, weight dropdown
+ * @version     2.0
+ * @date        2026-03-05
+ * @rating      7.5/10
+ * @depends-on  state.js, constants.js
+ * @used-by     main.js
+ * @strengths   Font preview in option list, clean apply pattern
+ * @issues      Duplicates font logic with node-popup.js; no font search/filter
+ * ─────────────────────────────────────────────── */
 // ─── Font Popup ───
 import { state, nodeIndex, saveSnapshot } from './state.js';
 import { FONTS } from './constants.js';
