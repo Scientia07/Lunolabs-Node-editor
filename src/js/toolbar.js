@@ -4,7 +4,7 @@
  * @created 2026-03-04
  */
 // ─── Toolbar Wiring ───
-import { state, undo, redo } from './state.js';
+import { state, undo, redo, emit } from './state.js';
 import { drawGrid } from './grid.js';
 import { zoomTo, zoomFit } from './transform.js';
 import { autoSave } from './persistence.js';
@@ -13,8 +13,6 @@ import { exportJSON, importJSON } from './export-json.js';
 import { exportPNG } from './export-png.js';
 import { toggleTheme } from './theme.js';
 import { hideNodePopup } from './node-popup.js';
-
-let fullRenderFn;
 
 /** Safe getElementById + addEventListener — skips if element missing */
 function on(id, event, handler) {
@@ -29,8 +27,7 @@ export function setTool(tool) {
   document.getElementById('canvas-container').className = tool === 'connect' ? 'connecting' : '';
 }
 
-export function initToolbar(fullRender) {
-  fullRenderFn = fullRender;
+export function initToolbar() {
 
   // Tool buttons
   document.querySelectorAll('.tb-btn[data-tool]').forEach(btn => {
@@ -66,8 +63,8 @@ export function initToolbar(fullRender) {
   on('theme-toggle', 'click', () => { toggleTheme(); drawGrid(); });
 
   // Undo / Redo
-  on('undo-btn', 'click', () => { hideNodePopup(); undo(fullRenderFn, autoSave); });
-  on('redo-btn', 'click', () => { hideNodePopup(); redo(fullRenderFn, autoSave); });
+  on('undo-btn', 'click', () => { hideNodePopup(); undo(); });
+  on('redo-btn', 'click', () => { hideNodePopup(); redo(); });
 
   // Export dropdown
   on('export-wrap-btn', 'click', (e) => {
@@ -86,7 +83,7 @@ export function initToolbar(fullRender) {
   // Import
   on('import-btn', 'click', () => document.getElementById('file-input')?.click());
   on('file-input', 'change', (e) => {
-    if (e.target.files[0]) importJSON(e.target.files[0], fullRenderFn);
+    if (e.target.files[0]) importJSON(e.target.files[0], () => emit('render'));
     e.target.value = '';
   });
 

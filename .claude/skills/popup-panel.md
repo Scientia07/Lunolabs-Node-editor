@@ -49,7 +49,7 @@ document.addEventListener('click', (e) => {
       && !e.target.closest('.popup-panel')
       && !e.target.closest('.node-popup')
       && !e.target.closest('.ctx-item')) {
-    if (!_popupJustOpened) {
+    if (!popupJustOpened) {
       // Close all popups
     }
   }
@@ -58,15 +58,15 @@ document.addEventListener('click', (e) => {
 
 **When adding a new popup class**, you MUST add it to this whitelist, otherwise clicks inside your popup will close it.
 
-### The `_popupJustOpened` Guard
+### The `popupJustOpened` Guard
 
 If your popup opens on `mousedown`, the subsequent `click` event on the same press will trigger the outside-click handler. Set the guard:
 
 ```javascript
 // In the mousedown handler that opens the popup:
-_popupJustOpened = true;
+popupJustOpened = true;
 showMyPopup(e.clientX, e.clientY);
-// The click handler checks and resets _popupJustOpened
+// The click handler checks and resets popupJustOpened
 ```
 
 ## Popup That Follows Selection (Node Popup Pattern)

@@ -6,12 +6,11 @@
 /**
  * Sidebar Panel — Connections, Groups, Settings, Projects
  */
-import { state, nodeIndex, saveSnapshot, rebuildIndex, genId } from './state.js';
+import { state, nodeIndex, saveSnapshot, rebuildIndex, genId, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { esc, safeColor, showToast, validateProjectJSON, serializeProject } from './utils.js';
 import { domCache } from './renderer.js';
 
-let fullRenderFn;
 let sidebarEl, contentEl;
 let activeTab = 'connections';
 
@@ -19,8 +18,7 @@ let activeTab = 'connections';
 // state.groups = [{ id, name, nodeIds: [], hidden: false }]
 // state.hiddenSectors = new Set()  — auto-group sector IDs that are hidden
 
-export function initSidebar(fullRender) {
-  fullRenderFn = fullRender;
+export function initSidebar() {
   sidebarEl = document.getElementById('sidebar');
   contentEl = sidebarEl.querySelector('.sidebar-content');
 
@@ -119,7 +117,7 @@ function renderConnectionsTab() {
       const cid = parseInt(btn.dataset.connId, 10);
       saveSnapshot();
       state.connections = state.connections.filter(c => c.id !== cid);
-      fullRenderFn();
+      emit('render');
       autoSave();
       refreshSidebar();
     });
@@ -133,7 +131,7 @@ function highlightConnection(connId) {
   state.selectedIds.clear();
   state.selectedIds.add(conn.from);
   state.selectedIds.add(conn.to);
-  fullRenderFn();
+  emit('render');
 
   // Scroll canvas to show the connection midpoint
   const fromNode = nodeIndex.get(conn.from);
@@ -534,7 +532,7 @@ function renderSettingsTab() {
 
   pane.querySelector('#setting-conn-style').addEventListener('change', (e) => {
     state.connectionStyle = e.target.value;
-    fullRenderFn();
+    emit('render');
     autoSave();
   });
 
@@ -642,7 +640,7 @@ function applyProject(project, name) {
   }
 
   rebuildIndex();
-  fullRenderFn();
+  emit('render');
   autoSave();
 }
 
@@ -705,7 +703,7 @@ function newBlankProject() {
   state.panY = window.innerHeight / 2 - 100;
   state.zoom = 1;
   rebuildIndex();
-  fullRenderFn();
+  emit('render');
   autoSave();
 }
 
