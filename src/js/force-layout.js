@@ -15,17 +15,25 @@ import { updateMinimap } from './minimap.js';
 // ── Runtime pin state (not persisted) ──
 const pinnedNodes = new Set();
 
+// ── Size multipliers for sector orbit radius ──
+const SIZE_MULT = { lg: 1.4, md: 1.0, sm: 0.7, xs: 0.5 };
+
+function sizeMultiplier(node) {
+  return SIZE_MULT[node.size] || 1.0;
+}
+
 // ── Simulation config ──
 const CONFIG = {
-  repulsion: 800,
-  springStiffness: 0.005,
-  springLength: 180,
-  hierarchyPull: 0.02,
-  sectorRadius: 250,
-  companyRadius: 120,
-  damping: 0.85,
+  repulsion: 1200,         // stronger repulsion for more spacing
+  springStiffness: 0.008,
+  springLength: 200,
+  hierarchyPull: 0.03,     // stronger pull to keep hierarchy tight
+  companyPull: 0.06,       // even stronger for text labels near parent
+  sectorRadius: 280,       // base sector orbit distance (scaled by size)
+  companyRadius: 70,       // text labels stay close to parent
+  damping: 0.82,
   minEnergy: 0.5,
-  maxTicks: 120,
+  maxTicks: 150,
 };
 
 // ── Velocity storage ──
@@ -64,7 +72,7 @@ export function runForceLayout() {
       forces.set(n.id, { fx: 0, fy: 0 });
     }
 
-    // 1) Repulsion: all pairs
+    // 1) Repulsion: all pairs (reduced for text-style company nodes)
     for (let i = 0; i < state.nodes.length; i++) {
       for (let j = i + 1; j < state.nodes.length; j++) {
         const a = state.nodes[i];
@@ -72,7 +80,11 @@ export function runForceLayout() {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
-        const force = CONFIG.repulsion / (dist * dist);
+        // Text-style companies (parentId) repel less — they're small labels
+        const isTextA = a.type === 'company' && a.parentId != null;
+        const isTextB = b.type === 'company' && b.parentId != null;
+        const repMult = (isTextA && isTextB) ? 0.15 : (isTextA || isTextB) ? 0.4 : 1.0;
+        const force = (CONFIG.repulsion * repMult) / (dist * dist);
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
         forces.get(a.id).fx -= fx;
@@ -100,21 +112,35 @@ export function runForceLayout() {
       forces.get(b.id).fy -= fy;
     }
 
-    // 3) Hierarchy gravity
+    // 3) Hierarchy gravity (size-aware)
     const centerNode = state.nodes.find(n => n.type === 'center');
     if (centerNode) {
       for (const n of state.nodes) {
         if (n === centerNode) continue;
         let target = null;
         let idealDist = CONFIG.springLength;
+        let pullStrength = CONFIG.hierarchyPull;
 
         if (n.type === 'sector') {
+          // Sectors orbit center — distance scales with sector size
           target = centerNode;
-          idealDist = CONFIG.sectorRadius;
+          idealDist = CONFIG.sectorRadius * sizeMultiplier(n);
+          // Check if this sector connects to another sector (not center)
+          const parentConn = state.connections.find(c =>
+            c.to === n.id && nodeIndex.get(c.from)?.type === 'sector'
+          );
+          if (parentConn) {
+            // Sub-sector: orbit parent sector instead of center
+            target = nodeIndex.get(parentConn.from);
+            idealDist = 160 * sizeMultiplier(n);
+          }
         } else if (n.type === 'company' && n.parentId != null) {
+          // Text labels stay tight to their parent sector
           target = nodeIndex.get(n.parentId);
           idealDist = CONFIG.companyRadius;
+          pullStrength = CONFIG.companyPull; // stronger pull for text labels
         } else if (n.type === 'company') {
+          // Unparented company — find connected sector
           const conn = state.connections.find(c => c.from === n.id || c.to === n.id);
           if (conn) {
             const otherId = conn.from === n.id ? conn.to : conn.from;
@@ -122,6 +148,7 @@ export function runForceLayout() {
             if (other && (other.type === 'sector' || other.type === 'center')) {
               target = other;
               idealDist = CONFIG.companyRadius;
+              pullStrength = CONFIG.companyPull;
             }
           }
         }
@@ -130,7 +157,7 @@ export function runForceLayout() {
           const dx = target.x - n.x;
           const dy = target.y - n.y;
           const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
-          const pull = CONFIG.hierarchyPull * (dist - idealDist);
+          const pull = pullStrength * (dist - idealDist);
           forces.get(n.id).fx += (dx / dist) * pull;
           forces.get(n.id).fy += (dy / dist) * pull;
         }

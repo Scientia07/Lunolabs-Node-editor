@@ -1,0 +1,1305 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Netzwerk Jugendbuero March",
+    "theme": "light",
+    "connectionStyle": "straight",
+    "gridEnabled": false,
+    "fonts": [
+      "DM Sans",
+      "Inter",
+      "Poppins",
+      "Outfit",
+      "Nunito",
+      "Space Mono"
+    ],
+    "legend": [
+      {
+        "color": "#4ade80",
+        "label": "Oeffentliche Hand"
+      },
+      {
+        "color": "#60a5fa",
+        "label": "Jugendarbeit"
+      },
+      {
+        "color": "#ef4444",
+        "label": "Bildung"
+      },
+      {
+        "color": "#2dd4bf",
+        "label": "Organisationen"
+      },
+      {
+        "color": "#facc15",
+        "label": "Medien"
+      },
+      {
+        "color": "#818cf8",
+        "label": "Stiftungen"
+      },
+      {
+        "color": "#34d399",
+        "label": "Kirchen / Vereine"
+      },
+      {
+        "color": "#a3e635",
+        "label": "Gewerbe"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "type": "center",
+      "x": 1120,
+      "y": 820,
+      "label": "Netzwerk\nJugendbuero\nMarch",
+      "color": "#4a6cf7",
+      "color2": "#818cf8",
+      "gradAngle": 135
+    },
+    {
+      "id": 2,
+      "type": "sector",
+      "x": 700,
+      "y": 500,
+      "label": "Fachstellen",
+      "color": "#4ade80",
+      "color2": "#86efac",
+      "gradAngle": 135,
+      "size": "lg"
+    },
+    {
+      "id": 4,
+      "type": "company",
+      "x": 640,
+      "y": 552,
+      "label": "Schulpsychologischer Dienst",
+      "parentId": 2
+    },
+    {
+      "id": 5,
+      "type": "company",
+      "x": 638.849470687012,
+      "y": 506.2224836195529,
+      "label": "Kinder- und Jugendpsych. Dienst",
+      "parentId": 2
+    },
+    {
+      "id": 6,
+      "type": "company",
+      "x": 676.2557267467492,
+      "y": 479.80891265204605,
+      "label": "Sozialpsychiatrischer Dienst",
+      "parentId": 2
+    },
+    {
+      "id": 7,
+      "type": "company",
+      "x": 712.287885877973,
+      "y": 451.5496091927548,
+      "label": "Suchtberatung",
+      "parentId": 2
+    },
+    {
+      "id": 8,
+      "type": "company",
+      "x": 807.9422863405995,
+      "y": 507,
+      "label": "tria plus AG",
+      "parentId": 2
+    },
+    {
+      "id": 9,
+      "type": "company",
+      "x": 830.4503908072452,
+      "y": 534.287885877973,
+      "label": "Opferhilfe",
+      "parentId": 2
+    },
+    {
+      "id": 10,
+      "type": "company",
+      "x": 818.6326977710987,
+      "y": 567.6283359900237,
+      "label": "Gesundheit Schwyz",
+      "parentId": 2
+    },
+    {
+      "id": 11,
+      "type": "company",
+      "x": 818.3345911860127,
+      "y": 602.9999999999999,
+      "label": "Gesundheitsregion March",
+      "parentId": 2
+    },
+    {
+      "id": 12,
+      "type": "company",
+      "x": 787.8508848717886,
+      "y": 620.943999880708,
+      "label": "Frauenberatung",
+      "parentId": 2
+    },
+    {
+      "id": 13,
+      "type": "company",
+      "x": 714.3716640099763,
+      "y": 640.6326977710987,
+      "label": "BIZ",
+      "parentId": 2
+    },
+    {
+      "id": 14,
+      "type": "company",
+      "x": 679,
+      "y": 640.3345911860127,
+      "label": "komin",
+      "parentId": 2
+    },
+    {
+      "id": 15,
+      "type": "company",
+      "x": 661.056000119292,
+      "y": 609.8508848717886,
+      "label": "RAV",
+      "parentId": 2
+    },
+    {
+      "id": 16,
+      "type": "sector",
+      "x": 1280,
+      "y": 420,
+      "label": "Gemeinden",
+      "color": "#4ade80",
+      "color2": "#86efac",
+      "gradAngle": 135,
+      "size": "lg"
+    },
+    {
+      "id": 18,
+      "type": "company",
+      "x": 1225.4276641292681,
+      "y": 441.2181871006898,
+      "label": "Liegenschaften",
+      "parentId": 16
+    },
+    {
+      "id": 19,
+      "type": "company",
+      "x": 1231.8634668018642,
+      "y": 406.435663811973,
+      "label": "Freizeit, Sport",
+      "parentId": 16
+    },
+    {
+      "id": 20,
+      "type": "company",
+      "x": 1265,
+      "y": 394.0577136594005,
+      "label": "Sicherheit",
+      "parentId": 16
+    },
+    {
+      "id": 21,
+      "type": "company",
+      "x": 1292.2878858779732,
+      "y": 371.5496091927548,
+      "label": "Kultur",
+      "parentId": 16
+    },
+    {
+      "id": 22,
+      "type": "company",
+      "x": 1387.9422863405994,
+      "y": 426.99999999999994,
+      "label": "Sozial- und Fuersorgeamt",
+      "parentId": 16
+    },
+    {
+      "id": 23,
+      "type": "company",
+      "x": 1412,
+      "y": 472,
+      "label": "Familie Jugend",
+      "parentId": 16
+    },
+    {
+      "id": 24,
+      "type": "sector",
+      "x": 1720,
+      "y": 520,
+      "label": "Schulen",
+      "color": "#ef4444",
+      "color2": "#fca5a5",
+      "gradAngle": 135,
+      "size": "lg"
+    },
+    {
+      "id": 26,
+      "type": "company",
+      "x": 1795,
+      "y": 494.0577136594005,
+      "label": "Kantonsschulen",
+      "parentId": 24
+    },
+    {
+      "id": 27,
+      "type": "company",
+      "x": 1825.8007721986942,
+      "y": 503.74867815139646,
+      "label": "Berufsschulen",
+      "parentId": 24
+    },
+    {
+      "id": 28,
+      "type": "company",
+      "x": 1832.219091187834,
+      "y": 535.393702123178,
+      "label": "Brueckenangebot",
+      "parentId": 24
+    },
+    {
+      "id": 29,
+      "type": "company",
+      "x": 1851.4412333275639,
+      "y": 561.3380967466993,
+      "label": "Leronoase",
+      "parentId": 24
+    },
+    {
+      "id": 30,
+      "type": "company",
+      "x": 1838.0332840660426,
+      "y": 590.7120521735983,
+      "label": "Schuelerparlement",
+      "parentId": 24
+    },
+    {
+      "id": 31,
+      "type": "company",
+      "x": 1838.3345911860129,
+      "y": 622.9999999999999,
+      "label": "Integrationsklasse",
+      "parentId": 24
+    },
+    {
+      "id": 153,
+      "type": "company",
+      "x": 1860,
+      "y": 600,
+      "label": "(Heilpaed. Schule Freienbach)",
+      "parentId": 24
+    },
+    {
+      "id": 32,
+      "type": "company",
+      "x": 1705,
+      "y": 649.9422863405995,
+      "label": "Schulleitung",
+      "parentId": 24
+    },
+    {
+      "id": 33,
+      "type": "company",
+      "x": 1671.8634668018642,
+      "y": 637.564336188027,
+      "label": "Hauswarte",
+      "parentId": 24
+    },
+    {
+      "id": 34,
+      "type": "company",
+      "x": 1665.4276641292684,
+      "y": 602.7818128993102,
+      "label": "(Lehrpersonen)",
+      "parentId": 24
+    },
+    {
+      "id": 35,
+      "type": "sector",
+      "x": 1920,
+      "y": 520,
+      "label": "SSA",
+      "color": "#ef4444",
+      "color2": "#fca5a5",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 37,
+      "type": "company",
+      "x": 2000,
+      "y": 552,
+      "label": "Sek1March",
+      "parentId": 35
+    },
+    {
+      "id": 38,
+      "type": "company",
+      "x": 2001.014083110324,
+      "y": 593,
+      "label": "Primarschulen",
+      "parentId": 35
+    },
+    {
+      "id": 39,
+      "type": "sector",
+      "x": 1360,
+      "y": 570,
+      "label": "Hoch-\nschulen",
+      "color": "#fb923c",
+      "color2": "#fdba74",
+      "gradAngle": 135,
+      "size": "md"
+    },
+    {
+      "id": 41,
+      "type": "company",
+      "x": 1340,
+      "y": 542.717967697245,
+      "label": "ZHAW",
+      "parentId": 39
+    },
+    {
+      "id": 42,
+      "type": "company",
+      "x": 1370.3833813793758,
+      "y": 520.5039856261188,
+      "label": "UZH",
+      "parentId": 39
+    },
+    {
+      "id": 43,
+      "type": "company",
+      "x": 1404.7213595499957,
+      "y": 535.9154786963877,
+      "label": "HSLU",
+      "parentId": 39
+    },
+    {
+      "id": 44,
+      "type": "company",
+      "x": 1441.560015785015,
+      "y": 543.6306760560797,
+      "label": "FHNW",
+      "parentId": 39
+    },
+    {
+      "id": 45,
+      "type": "company",
+      "x": 1453.083636611408,
+      "y": 579.461068553936,
+      "label": "OST",
+      "parentId": 39
+    },
+    {
+      "id": 46,
+      "type": "company",
+      "x": 1472,
+      "y": 612,
+      "label": "hfg",
+      "parentId": 39
+    },
+    {
+      "id": 47,
+      "type": "sector",
+      "x": 980,
+      "y": 720,
+      "label": "Bezirk",
+      "color": "#4ade80",
+      "color2": "#86efac",
+      "gradAngle": 135,
+      "size": "md"
+    },
+    {
+      "id": 49,
+      "type": "company",
+      "x": 1040,
+      "y": 692.717967697245,
+      "label": "Bezirksrat",
+      "parentId": 47
+    },
+    {
+      "id": 50,
+      "type": "company",
+      "x": 1072.9885073067935,
+      "y": 705.9939485311977,
+      "label": "Liegenschaften",
+      "parentId": 47
+    },
+    {
+      "id": 51,
+      "type": "company",
+      "x": 1077.2740661031255,
+      "y": 741.2944763917983,
+      "label": "Bezirkskassieramt",
+      "parentId": 47
+    },
+    {
+      "id": 52,
+      "type": "company",
+      "x": 1091.2129272463906,
+      "y": 774.0084096842447,
+      "label": "Hausabwarte",
+      "parentId": 47
+    },
+    {
+      "id": 53,
+      "type": "company",
+      "x": 1069.2820323027552,
+      "y": 802,
+      "label": "Informatik",
+      "parentId": 47
+    },
+    {
+      "id": 54,
+      "type": "sector",
+      "x": 680,
+      "y": 740,
+      "label": "Kanton",
+      "color": "#4ade80",
+      "color2": "#86efac",
+      "gradAngle": 135,
+      "size": "lg"
+    },
+    {
+      "id": 56,
+      "type": "company",
+      "x": 632.0577136594005,
+      "y": 837,
+      "label": "Berufsbildungsamt",
+      "parentId": 54
+    },
+    {
+      "id": 57,
+      "type": "company",
+      "x": 609.5496091927548,
+      "y": 809.7121141220268,
+      "label": "Amt fuer Kultur",
+      "parentId": 54
+    },
+    {
+      "id": 58,
+      "type": "company",
+      "x": 621.3673022289013,
+      "y": 776.3716640099763,
+      "label": "Staatsanwaltschaft",
+      "parentId": 54
+    },
+    {
+      "id": 59,
+      "type": "company",
+      "x": 621.6654088139873,
+      "y": 741,
+      "label": "Amtsbeistandschaft",
+      "parentId": 54
+    },
+    {
+      "id": 60,
+      "type": "company",
+      "x": 652.1491151282114,
+      "y": 723.056000119292,
+      "label": "Lotteriefonds",
+      "parentId": 54
+    },
+    {
+      "id": 61,
+      "type": "company",
+      "x": 675.1139453807817,
+      "y": 696.1513526798374,
+      "label": "KESB Ausserschwyz",
+      "parentId": 54
+    },
+    {
+      "id": 62,
+      "type": "company",
+      "x": 794.5723358707318,
+      "y": 761.2181871006899,
+      "label": "Amt fuer Migration",
+      "parentId": 54
+    },
+    {
+      "id": 63,
+      "type": "company",
+      "x": 812,
+      "y": 792,
+      "label": "Sportamt",
+      "parentId": 54
+    },
+    {
+      "id": 64,
+      "type": "company",
+      "x": 794.5723358707318,
+      "y": 822.7818128993102,
+      "label": "Amt f. Gesundheit u. Soziales",
+      "parentId": 54
+    },
+    {
+      "id": 65,
+      "type": "company",
+      "x": 788.1365331981358,
+      "y": 857.564336188027,
+      "label": "Kinder, Jugend, Familienfragen",
+      "parentId": 54
+    },
+    {
+      "id": 66,
+      "type": "sector",
+      "x": 750,
+      "y": 950,
+      "label": "KAPO",
+      "color": "#4ade80",
+      "color2": "#86efac",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 68,
+      "type": "company",
+      "x": 690,
+      "y": 982,
+      "label": "Abteilung Praevention",
+      "parentId": 66
+    },
+    {
+      "id": 69,
+      "type": "company",
+      "x": 688.985916889676,
+      "y": 941,
+      "label": "Jugendfahnder KAPO SZ",
+      "parentId": 66
+    },
+    {
+      "id": 70,
+      "type": "sector",
+      "x": 520,
+      "y": 980,
+      "label": "Bund",
+      "color": "#4ade80",
+      "color2": "#86efac",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 72,
+      "type": "company",
+      "x": 460,
+      "y": 1012,
+      "label": "Zivildienst",
+      "parentId": 70
+    },
+    {
+      "id": 73,
+      "type": "sector",
+      "x": 1550,
+      "y": 820,
+      "label": "Jugend-\narbeit",
+      "color": "#60a5fa",
+      "color2": "#93c5fd",
+      "gradAngle": 135,
+      "size": "lg"
+    },
+    {
+      "id": 75,
+      "type": "sector",
+      "x": 1580,
+      "y": 660,
+      "label": "OKJA\nZH",
+      "color": "#60a5fa",
+      "color2": "#93c5fd",
+      "gradAngle": 135,
+      "size": "xs"
+    },
+    {
+      "id": 77,
+      "type": "company",
+      "x": 1583,
+      "y": 622,
+      "label": "(Drehscheibe Horgen)",
+      "parentId": 75
+    },
+    {
+      "id": 78,
+      "type": "company",
+      "x": 1620.5,
+      "y": 620.048094716167,
+      "label": "(JA Waedenswil)",
+      "parentId": 75
+    },
+    {
+      "id": 79,
+      "type": "sector",
+      "x": 1790,
+      "y": 700,
+      "label": "Jugend-\nliche",
+      "color": "#f472b6",
+      "color2": "#f9a8d4",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 81,
+      "type": "company",
+      "x": 1870,
+      "y": 732,
+      "label": "Eltern",
+      "parentId": 79
+    },
+    {
+      "id": 82,
+      "type": "company",
+      "x": 1877.0547949044444,
+      "y": 760.0456517527049,
+      "label": "Geschwister",
+      "parentId": 79
+    },
+    {
+      "id": 83,
+      "type": "company",
+      "x": 1853.6231110183285,
+      "y": 776.9951326780578,
+      "label": "Lehrmeister:in",
+      "parentId": 79
+    },
+    {
+      "id": 84,
+      "type": "sector",
+      "x": 1680,
+      "y": 910,
+      "label": "DOJ",
+      "color": "#c084fc",
+      "color2": "#d8b4fe",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 86,
+      "type": "company",
+      "x": 1760,
+      "y": 942,
+      "label": "Streetsoccer Cup",
+      "parentId": 84
+    },
+    {
+      "id": 87,
+      "type": "company",
+      "x": 1767.0547949044444,
+      "y": 970.0456517527049,
+      "label": "Kebab+",
+      "parentId": 84
+    },
+    {
+      "id": 88,
+      "type": "company",
+      "x": 1743.6231110183285,
+      "y": 986.9951326780578,
+      "label": "Eurodesk",
+      "parentId": 84
+    },
+    {
+      "id": 89,
+      "type": "sector",
+      "x": 1600,
+      "y": 1000,
+      "label": "JA Aussen\nSchwyz",
+      "color": "#60a5fa",
+      "color2": "#93c5fd",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 91,
+      "type": "sector",
+      "x": 1800,
+      "y": 980,
+      "label": "NOJZ",
+      "color": "#c084fc",
+      "color2": "#d8b4fe",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 93,
+      "type": "company",
+      "x": 1880,
+      "y": 1012,
+      "label": "andere NOJZ Mitglieder",
+      "parentId": 91
+    },
+    {
+      "id": 94,
+      "type": "sector",
+      "x": 1800,
+      "y": 1100,
+      "label": "NOJZ\nRegio",
+      "color": "#fb923c",
+      "color2": "#fdba74",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 96,
+      "type": "company",
+      "x": 1880,
+      "y": 1132,
+      "label": "Mojuga Wollerau",
+      "parentId": 94
+    },
+    {
+      "id": 97,
+      "type": "company",
+      "x": 1888.8234590669422,
+      "y": 1154.602263176994,
+      "label": "Seelsorgeraum Berg",
+      "parentId": 94
+    },
+    {
+      "id": 98,
+      "type": "company",
+      "x": 1869.3633667309498,
+      "y": 1169.0943484963243,
+      "label": "JA Freienbach",
+      "parentId": 94
+    },
+    {
+      "id": 99,
+      "type": "company",
+      "x": 1864.8687097214263,
+      "y": 1192.9378756891463,
+      "label": "Kirchl. JA March+Hoefe",
+      "parentId": 94
+    },
+    {
+      "id": 100,
+      "type": "company",
+      "x": 1840.6859802752354,
+      "y": 1194.9155832409417,
+      "label": "JA Einsiedeln",
+      "parentId": 94
+    },
+    {
+      "id": 101,
+      "type": "company",
+      "x": 1824.2391505686883,
+      "y": 1212.754235747001,
+      "label": "JA Altdorf",
+      "parentId": 94
+    },
+    {
+      "id": 102,
+      "type": "company",
+      "x": 1802.6830075712642,
+      "y": 1201.6165326757791,
+      "label": "JA Brunnen",
+      "parentId": 94
+    },
+    {
+      "id": 103,
+      "type": "company",
+      "x": 1779.2822593398953,
+      "y": 1208.0290760744765,
+      "label": "JA Schwyz",
+      "parentId": 94
+    },
+    {
+      "id": 104,
+      "type": "company",
+      "x": 1766.9036967272039,
+      "y": 1187.1607527524704,
+      "label": "Jugendhaus Oase",
+      "parentId": 94
+    },
+    {
+      "id": 105,
+      "type": "company",
+      "x": 1743.6606064612542,
+      "y": 1180.1983906879827,
+      "label": "JA Ingenbohl",
+      "parentId": 94
+    },
+    {
+      "id": 106,
+      "type": "company",
+      "x": 1744.2215165449863,
+      "y": 1155.9414100327967,
+      "label": "YourTime, Arth",
+      "parentId": 94
+    },
+    {
+      "id": 107,
+      "type": "sector",
+      "x": 670,
+      "y": 1160,
+      "label": "Medien",
+      "color": "#facc15",
+      "color2": "#fde68a",
+      "gradAngle": 135,
+      "size": "md"
+    },
+    {
+      "id": 109,
+      "type": "company",
+      "x": 610,
+      "y": 1202,
+      "label": "Soziale Medien",
+      "parentId": 107
+    },
+    {
+      "id": 110,
+      "type": "company",
+      "x": 610.3256628518317,
+      "y": 1156,
+      "label": "lokale Zeitungen",
+      "parentId": 107
+    },
+    {
+      "id": 111,
+      "type": "sector",
+      "x": 930,
+      "y": 1130,
+      "label": "Gewerbe",
+      "color": "#a3e635",
+      "color2": "#d9f99d",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 113,
+      "type": "company",
+      "x": 905,
+      "y": 1101.3782217350893,
+      "label": "HGVLA",
+      "parentId": 111
+    },
+    {
+      "id": 114,
+      "type": "company",
+      "x": 925.7608494313117,
+      "y": 1081.245764252999,
+      "label": "Service Clubs",
+      "parentId": 111
+    },
+    {
+      "id": 115,
+      "type": "company",
+      "x": 952.1553724366851,
+      "y": 1093.0634572891454,
+      "label": "(HGVF)",
+      "parentId": 111
+    },
+    {
+      "id": 116,
+      "type": "sector",
+      "x": 1160,
+      "y": 1180,
+      "label": "Vereine",
+      "color": "#34d399",
+      "color2": "#6ee7b7",
+      "gradAngle": 135,
+      "size": "md"
+    },
+    {
+      "id": 118,
+      "type": "company",
+      "x": 1260,
+      "y": 1222,
+      "label": "Mediothek Lachen",
+      "parentId": 116
+    },
+    {
+      "id": 119,
+      "type": "company",
+      "x": 1264.4758818329851,
+      "y": 1258.4393384756024,
+      "label": "March-Ring",
+      "parentId": 116
+    },
+    {
+      "id": 120,
+      "type": "company",
+      "x": 1234.8993310294986,
+      "y": 1280.189891325844,
+      "label": "Klassik am See",
+      "parentId": 116
+    },
+    {
+      "id": 121,
+      "type": "company",
+      "x": 1211.4658531859616,
+      "y": 1308.4517211123036,
+      "label": "Sport- und Kulturvereine",
+      "parentId": 116
+    },
+    {
+      "id": 122,
+      "type": "company",
+      "x": 1175.3484136871618,
+      "y": 1301.8646526617015,
+      "label": "EV Schubelbach",
+      "parentId": 116
+    },
+    {
+      "id": 123,
+      "type": "company",
+      "x": 1138.7104754215575,
+      "y": 1304.214202909754,
+      "label": "Verkehrsverein Lachen",
+      "parentId": 116
+    },
+    {
+      "id": 124,
+      "type": "company",
+      "x": 1118.7164445504818,
+      "y": 1273.4230087749231,
+      "label": "Frauen- u. Muettergemeinschaft",
+      "parentId": 116
+    },
+    {
+      "id": 125,
+      "type": "sector",
+      "x": 800,
+      "y": 1330,
+      "label": "Stiftungen",
+      "color": "#818cf8",
+      "color2": "#a5b4fc",
+      "gradAngle": 135,
+      "size": "md"
+    },
+    {
+      "id": 127,
+      "type": "company",
+      "x": 750.717967697245,
+      "y": 1412,
+      "label": "Foerdergelder",
+      "parentId": 125
+    },
+    {
+      "id": 128,
+      "type": "company",
+      "x": 729.3976867228769,
+      "y": 1387.9756323453576,
+      "label": "Karl Lamperti Stiftung",
+      "parentId": 125
+    },
+    {
+      "id": 129,
+      "type": "company",
+      "x": 741.2153797590233,
+      "y": 1358.1081457866455,
+      "label": "Asuera Stiftung",
+      "parentId": 125
+    },
+    {
+      "id": 130,
+      "type": "company",
+      "x": 740.3256628518317,
+      "y": 1326,
+      "label": "Paul Schiller Stiftung",
+      "parentId": 125
+    },
+    {
+      "id": 131,
+      "type": "company",
+      "x": 768.5769912250769,
+      "y": 1310.7164445504818,
+      "label": "Gemeinn. Ges. Kt. SZ",
+      "parentId": 125
+    },
+    {
+      "id": 132,
+      "type": "company",
+      "x": 895.1754096628727,
+      "y": 1344.6383885339465,
+      "label": "Unterlagen",
+      "underlined": true,
+      "parentId": 125
+    },
+    {
+      "id": 133,
+      "type": "company",
+      "x": 912,
+      "y": 1372,
+      "label": "Idee Sport",
+      "parentId": 125
+    },
+    {
+      "id": 134,
+      "type": "company",
+      "x": 895.1754096628727,
+      "y": 1399.3616114660535,
+      "label": "Stiftung Spielraum",
+      "parentId": 125
+    },
+    {
+      "id": 135,
+      "type": "company",
+      "x": 890.476088766946,
+      "y": 1431.1364600911616,
+      "label": "Pro Juventute Schweiz",
+      "parentId": 125
+    },
+    {
+      "id": 136,
+      "type": "sector",
+      "x": 1120,
+      "y": 1340,
+      "label": "Organi-\nsationen",
+      "color": "#2dd4bf",
+      "color2": "#5eead4",
+      "gradAngle": 135,
+      "size": "md"
+    },
+    {
+      "id": 138,
+      "type": "company",
+      "x": 1070.7179676972448,
+      "y": 1422,
+      "label": "Genossame",
+      "parentId": 136
+    },
+    {
+      "id": 139,
+      "type": "company",
+      "x": 1049.3976867228769,
+      "y": 1397.9756323453576,
+      "label": "Caritas",
+      "parentId": 136
+    },
+    {
+      "id": 140,
+      "type": "company",
+      "x": 1061.2153797590233,
+      "y": 1368.1081457866455,
+      "label": "Winterhilfe",
+      "parentId": 136
+    },
+    {
+      "id": 141,
+      "type": "company",
+      "x": 1060.3256628518316,
+      "y": 1336,
+      "label": "Blaues Kreuz",
+      "parentId": 136
+    },
+    {
+      "id": 142,
+      "type": "company",
+      "x": 1088.5769912250769,
+      "y": 1320.7164445504818,
+      "label": "Lift",
+      "parentId": 136
+    },
+    {
+      "id": 143,
+      "type": "company",
+      "x": 1108.5341468140384,
+      "y": 1295.5482788876964,
+      "label": "Pro Senectute",
+      "parentId": 136
+    },
+    {
+      "id": 144,
+      "type": "company",
+      "x": 1218.7846202409767,
+      "y": 1368.1081457866455,
+      "label": "Pro Buechberg",
+      "parentId": 136
+    },
+    {
+      "id": 145,
+      "type": "company",
+      "x": 1230.6023132771231,
+      "y": 1397.9756323453576,
+      "label": "Ferienpass March",
+      "parentId": 136
+    },
+    {
+      "id": 146,
+      "type": "company",
+      "x": 1209.2820323027552,
+      "y": 1422,
+      "label": "Chindernetz Kt. SZ",
+      "parentId": 136
+    },
+    {
+      "id": 147,
+      "type": "company",
+      "x": 1199.1364600911616,
+      "y": 1452.4760887669458,
+      "label": "KISS Gen. March",
+      "parentId": 136
+    },
+    {
+      "id": 148,
+      "type": "company",
+      "x": 1167.3616114660535,
+      "y": 1457.1754096628727,
+      "label": "Rotes Kreuz Kt. SZ",
+      "parentId": 136
+    },
+    {
+      "id": 149,
+      "type": "sector",
+      "x": 1580,
+      "y": 1250,
+      "label": "Kirchen",
+      "color": "#c084fc",
+      "color2": "#d8b4fe",
+      "gradAngle": 135,
+      "size": "sm"
+    },
+    {
+      "id": 151,
+      "type": "company",
+      "x": 1660,
+      "y": 1282,
+      "label": "Reformierte Kirche",
+      "parentId": 149
+    },
+    {
+      "id": 152,
+      "type": "company",
+      "x": 1661.014083110324,
+      "y": 1323,
+      "label": "Katholische Kirche",
+      "parentId": 149
+    }
+  ],
+  "connections": [
+    {
+      "id": 3,
+      "from": 1,
+      "to": 2,
+      "color": "#4ade80"
+    },
+    {
+      "id": 17,
+      "from": 1,
+      "to": 16,
+      "color": "#4ade80"
+    },
+    {
+      "id": 25,
+      "from": 1,
+      "to": 24,
+      "color": "#ef4444"
+    },
+    {
+      "id": 36,
+      "from": 24,
+      "to": 35,
+      "color": "#ef4444"
+    },
+    {
+      "id": 40,
+      "from": 1,
+      "to": 39,
+      "color": "#fb923c"
+    },
+    {
+      "id": 48,
+      "from": 1,
+      "to": 47,
+      "color": "#4ade80"
+    },
+    {
+      "id": 55,
+      "from": 1,
+      "to": 54,
+      "color": "#4ade80"
+    },
+    {
+      "id": 67,
+      "from": 1,
+      "to": 66,
+      "color": "#4ade80"
+    },
+    {
+      "id": 71,
+      "from": 1,
+      "to": 70,
+      "color": "#4ade80"
+    },
+    {
+      "id": 74,
+      "from": 1,
+      "to": 73,
+      "color": "#60a5fa"
+    },
+    {
+      "id": 76,
+      "from": 73,
+      "to": 75,
+      "color": "#60a5fa"
+    },
+    {
+      "id": 80,
+      "from": 73,
+      "to": 79,
+      "color": "#f472b6"
+    },
+    {
+      "id": 85,
+      "from": 73,
+      "to": 84,
+      "color": "#c084fc"
+    },
+    {
+      "id": 90,
+      "from": 73,
+      "to": 89,
+      "color": "#60a5fa"
+    },
+    {
+      "id": 92,
+      "from": 73,
+      "to": 91,
+      "color": "#c084fc"
+    },
+    {
+      "id": 95,
+      "from": 91,
+      "to": 94,
+      "color": "#fb923c"
+    },
+    {
+      "id": 108,
+      "from": 1,
+      "to": 107,
+      "color": "#facc15"
+    },
+    {
+      "id": 112,
+      "from": 1,
+      "to": 111,
+      "color": "#a3e635"
+    },
+    {
+      "id": 117,
+      "from": 1,
+      "to": 116,
+      "color": "#34d399"
+    },
+    {
+      "id": 126,
+      "from": 1,
+      "to": 125,
+      "color": "#818cf8"
+    },
+    {
+      "id": 137,
+      "from": 1,
+      "to": 136,
+      "color": "#2dd4bf"
+    },
+    {
+      "id": 150,
+      "from": 1,
+      "to": 149,
+      "color": "#c084fc"
+    }
+  ],
+  "nextId": 154
+}
