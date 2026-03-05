@@ -19,6 +19,7 @@ import {
   getAllProjects, saveProject, deleteSavedProject,
   loadProject, importProjectFile, downloadProject, newBlankProject
 } from './project-manager.js';
+import { runForceLayout, stopForceLayout } from './force-layout.js';
 
 // ─── SVG icon helpers (settings-specific) ───
 const iconSave = `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`;
@@ -114,6 +115,10 @@ export function renderSettingsTab(contentEl, refreshCallback) {
           <option value="dark" ${state.theme === 'dark' ? 'selected' : ''}>Dunkel</option>
           <option value="light" ${state.theme === 'light' ? 'selected' : ''}>Hell</option>
         </select>
+      </div>
+      <div class="settings-row">
+        <span class="settings-row-label">Auto-Layout</span>
+        <button class="toggle-switch ${state.physicsLayout ? 'on' : ''}" id="setting-physics-layout"></button>
       </div>
     </div>
 
@@ -219,6 +224,17 @@ export function renderSettingsTab(contentEl, refreshCallback) {
     state.theme = e.target.value;
     document.documentElement.setAttribute('data-theme', state.theme);
     document.dispatchEvent(new CustomEvent('editor:render'));
+    autoSave();
+  });
+
+  pane.querySelector('#setting-physics-layout').addEventListener('click', (e) => {
+    state.physicsLayout = !state.physicsLayout;
+    e.currentTarget.classList.toggle('on', state.physicsLayout);
+    if (state.physicsLayout) {
+      runForceLayout();
+    } else {
+      stopForceLayout();
+    }
     autoSave();
   });
 }
