@@ -78,7 +78,7 @@ Single application with theme toggle, data loaded from JSON or embedded config.
 - Highlight matching nodes, dim non-matching
 - Click result to pan+zoom to node
 
-### 4.3 Node Metadata System (P0) -- NEW
+### 4.3 Node Metadata System (P0) -- DONE
 Flexible `meta` object on every node. Predefined suggested fields with free-form extension.
 
 **Suggested fields:**
@@ -113,7 +113,7 @@ effectiveOpacity = node.opacity != null
   : (node.meta?.relevancy ?? 10) / 10    // auto from relevancy
 ```
 
-### 4.4 Sidebar Details Tab (P0) -- NEW
+### 4.4 Sidebar Details Tab (P0) -- DONE
 New 4th tab in sidebar: "Details". Shows/edits metadata for selected node.
 - Tier toggle: `[Nah] [Satellit]`
 - Relevancy slider (1-10)
@@ -121,7 +121,7 @@ New 4th tab in sidebar: "Details". Shows/edits metadata for selected node.
 - Custom fields (add/edit/delete key-value pairs)
 - Multi-select: batch-set tier/relevancy
 
-### 4.5 Visual Tier System — Gradient Wash (P0) -- NEW
+### 4.5 Visual Tier System — Gradient Wash (P0) -- DONE
 Company nodes with `meta.tier === "satellit"` receive:
 - Soft gradient wash background using parent sector color at 12-18% opacity
 - Slightly reduced text opacity (0.75) and font size (-1px)
@@ -189,8 +189,12 @@ Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
 - [x] Unit tests (vitest: state, utils, actions, persistence)
 
 ### In Progress
-- [ ] Phase 7: Metadata & Tier System (new — see Roadmap)
-- [ ] Phase 8: CSV Import/Export (new — see Roadmap)
+- [ ] Phase 8: CSV Import/Export (see Roadmap)
+
+### Recently Completed
+- [x] Phase 7: Node Metadata System (M1-M6) — `node.meta`, `SUGGESTED_META_FIELDS`, `getTier()`, relevancy→opacity
+- [x] Phase 7B: Sidebar Details Tab (D1-D8) — 4th tab, relevancy slider, contact fields, custom fields, batch editing
+- [x] Phase 7C: Visual Tier System (V1-V4) — satellite gradient wash, `hexToRgb()`, dark theme variant
 
 ### Pending
 - [ ] F1: Search & filter
@@ -211,6 +215,7 @@ Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
 | Vanilla JS (no framework) | Keep bundle small, existing codebase | 2026-03-04 |
 | localStorage + JSON export | No backend needed, offline-first | 2026-03-04 |
 | Flexible `meta` object (not fixed schema) | Matches Kumu pattern, no schema lock-in | 2026-03-05 |
+| Tier derived from relevancy (no separate toggle) | `relevancy > 5 = nah`, `<= 5 = satellit` — one slider instead of two controls | 2026-03-05 |
 | Semicolon CSV delimiter | German Excel default, avoids comma conflicts | 2026-03-05 |
 | Relevancy (1-10) auto-maps to opacity | Visual importance without extra controls, manual override preserved | 2026-03-05 |
 | UTF-8 BOM for CSV | Required for German Excel to read umlauts correctly | 2026-03-05 |

@@ -143,8 +143,8 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `renderer.js` | DOM node creation, connection SVG rendering, `domCache` Map for O(1) element lookup |
 | `interactions.js` | All mouse events (drag, pan, select, connect, resize) — RAF-gated mousemove |
 | `keyboard.js` | Keyboard shortcuts |
-| `constants.js` | PALETTE, FONTS, STICKY_COLORS, defaults |
-| `utils.js` | screenToCanvas, snapToGrid, showToast, esc, safeColor, validateProjectJSON, getNodesBoundingBox, serializeProject |
+| `constants.js` | PALETTE, FONTS, STICKY_COLORS, SUGGESTED_META_FIELDS, defaults |
+| `utils.js` | screenToCanvas, snapToGrid, showToast, esc, safeColor, validateProjectJSON, getNodesBoundingBox, serializeProject, getTier, hexToRgb |
 | `persistence.js` | localStorage autoSave (debounced 500ms) / autoSaveNow (immediate) / autoLoad |
 | `project.js` | Unified `loadProject(project, opts)`, `loadFromURL()`, legend rendering |
 | `project-manager.js` | Project CRUD — save/load/delete/import/download/new (localStorage) |

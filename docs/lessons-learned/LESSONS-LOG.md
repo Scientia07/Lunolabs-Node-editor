@@ -74,3 +74,19 @@ When splitting sidebar.js into 3 files, settings-panel.js needed to call `refres
 
 ### [PROCESS] Subagent-driven development keeps context clean across sequential tasks
 Dispatching fresh subagents per task (7 refactoring tasks) prevented context pollution from accumulating file reads and edits. Each agent read only the files it needed, made targeted changes, and committed. The controller provided full task text directly (no plan file reading overhead).
+
+---
+
+## Session: Phase 7 Metadata System Implementation — 2026-03-05
+
+### [ARCHITECTURE] Plain JSON objects make new features free for persistence and undo
+Because `state.nodes` is stored/serialized as plain objects and deep-cloned via `JSON.stringify` for undo snapshots, adding `node.meta` required zero changes to persistence, serialization, or undo/redo code. 4 of 12 implementation tasks were "verify it already works" with tests only. Lesson: when designing state shape, keeping it as plain JSON-serializable objects pays compound interest on every new feature.
+
+### [CODE-PATTERN] Split input/change events for slider-driven state changes
+Using `input` for live preview (fires on every drag tick) and `change` for undo snapshots (fires only on release) prevents flooding the undo stack while still giving immediate visual feedback. This split-event pattern generalizes to any slider, color picker, or continuous-input control that drives persistent state.
+
+### [CODE-PATTERN] CSS custom properties as inline style bridge between JS and pseudo-elements
+Setting `--sector-rgb` as an inline CSS variable on each node element lets a single `.node-company--satellite::before` rule handle all sector colors via `rgba(var(--sector-rgb), 0.15)`. This avoids generating unique CSS classes per color and cleanly separates concerns: JS sets the data, CSS handles the visual treatment.
+
+### [INSIGHT] Deriving state is simpler than storing state
+Instead of storing `meta.tier` as a separate field with a toggle control, deriving tier from relevancy via `getTier()` eliminated an entire UI control (tier toggle), prevented stale data (tier out of sync with relevancy), and simplified the Details tab to a single slider. When two pieces of state have a deterministic relationship, store one and derive the other.

@@ -15,72 +15,51 @@
 
 ---
 
-## Phase 7: Node Metadata System (Foundation)
+## Phase 7: Node Metadata System (Foundation) ✅ DONE
 
-> **Depends on**: nothing (can start immediately)
-> **Research**: `docs/research/01-metadata-fields/`
-> **PRD Section**: 4.3
+> **Completed**: 2026-03-05
+> **Plan**: `docs/plans/archive/2026-03-05-metadata-system.md`
 
-| # | Task | Files | Description |
-|---|------|-------|-------------|
-| M1 | Add `meta` object to node data model | `state.js` | Ensure meta survives undo/redo snapshots (createSnapshot/applySnapshot) |
-| M2 | Serialize meta in JSON export | `utils.js` | Update `serializeProject()` to include `node.meta` |
-| M3 | Load meta from JSON import | `persistence.js`, `project.js` | Backward-compatible: missing meta = empty object |
-| M4 | Render `data-tier` attribute on company nodes | `renderer.js` | `el.dataset.tier = n.meta?.tier \|\| 'nah'` |
-| M5 | Relevancy → opacity auto-mapping | `renderer.js` | `effectiveOpacity = node.opacity ?? (node.meta?.relevancy ?? 10) / 10` |
-| M6 | Predefined field suggestions | `constants.js` | `SUGGESTED_META_FIELDS` array with key, label, type, placeholder |
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| M1 | Add `meta` object to node data model | `state.js` | ✅ Done (auto — plain objects) |
+| M2 | Serialize meta in JSON export | `utils.js` | ✅ Done (auto — serializeProject passes nodes through) |
+| M3 | Load meta from JSON import | `persistence.js`, `project.js` | ✅ Done (auto — backward-compatible) |
+| M4 | Render `data-tier` attribute on company nodes | `renderer.js` | ✅ Done — `getTier()` derives from relevancy |
+| M5 | Relevancy → opacity auto-mapping | `renderer.js` | ✅ Done — `effectiveOpacity` logic |
+| M6 | Predefined field suggestions | `constants.js` | ✅ Done — `SUGGESTED_META_FIELDS` (8 fields) |
 
-**Acceptance criteria:**
-- [ ] `node.meta` is saved to localStorage and JSON export
-- [ ] Existing projects without meta load without errors
-- [ ] Undo/redo preserves meta changes
-- [ ] Relevancy auto-maps to opacity; manual opacity overrides it
+**Design decision:** Tier is *derived* from relevancy (`>5 = nah`, `<=5 = satellit`), not a separate toggle. This simplifies the UI to a single slider.
 
 ---
 
-## Phase 7B: Sidebar Details Tab (UI)
+## Phase 7B: Sidebar Details Tab (UI) ✅ DONE
 
-> **Depends on**: Phase 7 (M1-M6)
-> **PRD Section**: 4.4
+> **Completed**: 2026-03-05
 
-| # | Task | Files | Description |
-|---|------|-------|-------------|
-| D1 | Add "Details" tab to sidebar HTML | `index.html` | 4th tab button + tab pane |
-| D2 | Render Details tab content | `sidebar.js` | `renderDetailsTab()`: tier toggle, relevancy slider, contact fields, custom fields |
-| D3 | Tier toggle (Nah / Satellit) | `sidebar.js` | Two-button toggle, updates `node.meta.tier`, triggers render |
-| D4 | Relevancy slider (1-10) | `sidebar.js` | Range input, updates `node.meta.relevancy`, live opacity preview |
-| D5 | Contact fields (predefined) | `sidebar.js` | Input rows for contact, email, phone, tags, notes, website, since |
-| D6 | Custom metadata fields | `sidebar.js` | Key-value list with add/delete buttons |
-| D7 | Multi-select batch editing | `sidebar.js` | When multiple nodes selected: batch-set tier and relevancy |
-| D8 | Sidebar styles for Details tab | `sidebar.css` | Input rows, toggle buttons, field list styling |
-
-**Acceptance criteria:**
-- [ ] Selecting a node shows its metadata in Details tab
-- [ ] Editing a field updates `node.meta` with undo support
-- [ ] Adding/removing custom fields works
-- [ ] Empty state shows "Kein Element ausgewaehlt"
-- [ ] Multi-select shows batch controls
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| D1 | Add "Details" tab to sidebar HTML | `index.html` | ✅ Done |
+| D2 | Render Details tab content | `sidebar.js` | ✅ Done — `renderDetailsTab()` |
+| D3 | Tier badge (derived from relevancy) | `sidebar.js` | ✅ Done — Nah/Satellit badge, auto-derived |
+| D4 | Relevancy slider (1-10) | `sidebar.js` | ✅ Done — live preview + undo on change |
+| D5 | Contact fields (predefined) | `sidebar.js` | ✅ Done — 7 fields from SUGGESTED_META_FIELDS |
+| D6 | Custom metadata fields | `sidebar.js` | ✅ Done — add/edit/delete key-value pairs |
+| D7 | Multi-select batch editing | `sidebar.js` | ✅ Done — batch relevancy slider |
+| D8 | Sidebar styles for Details tab | `sidebar.css` | ✅ Done |
 
 ---
 
-## Phase 7C: Visual Tier System (Gradient Wash)
+## Phase 7C: Visual Tier System (Gradient Wash) ✅ DONE
 
-> **Depends on**: Phase 7 (M4 for data-tier attribute)
-> **Research**: `docs/research/03-visual-tier-system/`
-> **PRD Section**: 4.5
+> **Completed**: 2026-03-05
 
-| # | Task | Files | Description |
-|---|------|-------|-------------|
-| V1 | Satellite CSS class | `nodes.css` | `.node-company--satellite` with gradient wash, reduced opacity, smaller font |
-| V2 | Apply satellite class in renderer | `renderer.js` | Add class when `meta.tier === 'satellit'`, set `--sector-rgb` CSS variable from parent sector color |
-| V3 | Parse sector color to RGB | `utils.js` | `hexToRgb(hex)` helper for CSS variable injection |
-| V4 | Dark theme variant | `nodes.css` | Adjust wash opacity for dark background (slightly higher: 20-25%) |
-
-**Acceptance criteria:**
-- [ ] Satellite nodes have visible gradient wash in sector color
-- [ ] Close nodes look unchanged (current style)
-- [ ] Toggling tier in sidebar immediately updates the visual
-- [ ] Works in both light and dark themes
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| V1 | Satellite CSS class | `nodes.css` | ✅ Done — `.node-company--satellite` with `::before` gradient |
+| V2 | Apply satellite class in renderer | `renderer.js` | ✅ Done — `--sector-rgb` CSS var from parent sector |
+| V3 | Parse sector color to RGB | `utils.js` | ✅ Done — `hexToRgb()` helper |
+| V4 | Dark theme variant | `nodes.css` | ✅ Done — 20%/6% opacity in dark theme |
 
 ---
 
@@ -193,17 +172,17 @@
 ## Implementation Order
 
 ```
-Phase 7  (Metadata)     ← START HERE
+Phase 7  (Metadata)     ✅ DONE
   |
-  +---> Phase 7B (Details Tab)
+  +---> Phase 7B (Details Tab)  ✅ DONE
   |       |
-  |       +---> Phase 7C (Gradient Wash)
+  |       +---> Phase 7C (Gradient Wash)  ✅ DONE
   |
-  +---> Phase 8  (CSV Export)
+  +---> Phase 8  (CSV Export)     ← START HERE
           |
           +---> Phase 9  (CSV Import)
 
-Phase 10 (Search) ← can start after Phase 7, parallel with 8/9
+Phase 10 (Search) ← can start now, parallel with 8/9
 
 Scalability (SC1-SC4, SC6) ← when needed for 500+ nodes
 Features (F2, F4-F6) ← fill in as time allows
