@@ -81,6 +81,7 @@ export function initInteractions() {
     if (!e.target.closest('.dropdown-wrap')) {
       document.getElementById('shapes-dropdown').classList.remove('open');
       document.getElementById('export-dropdown').classList.remove('open');
+      document.getElementById('import-dropdown').classList.remove('open');
     }
   });
 }

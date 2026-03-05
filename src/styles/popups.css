@@ -310,3 +310,108 @@
 .np-pane .color-swatches { margin-bottom: 6px; }
 .np-pane .gradient-preview { margin-top: 8px; margin-bottom: 0; }
 .np-pane .font-list { max-height: 160px; }
+
+/* ── CSV Import Modal ── */
+.csv-import-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+}
+.csv-import-modal.open { display: flex; }
+
+.csv-modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  max-width: 700px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+.csv-modal-content h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.csv-summary {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.csv-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+}
+.csv-badge-new { background: #22c55e22; color: #4ade80; }
+.csv-badge-update { background: #3b82f622; color: #60a5fa; }
+
+.csv-table-wrap {
+  overflow: auto;
+  flex: 1;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.csv-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.csv-preview-table th,
+.csv-preview-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  color: var(--text);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.csv-preview-table th {
+  background: var(--bg-elevated);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+.csv-mapped-to {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.csv-more-rows {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.csv-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.csv-modal-actions .popup-btn {
+  width: auto;
+  padding: 8px 20px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+}
+.csv-btn-primary {
+  background: var(--accent) !important;
+  color: #fff !important;
+}

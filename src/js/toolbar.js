@@ -20,6 +20,7 @@ import { showToast } from './utils.js';
 import { exportJSON, importJSON } from './export-json.js';
 import { exportPNG } from './export-png.js';
 import { exportCSV } from './csv-export.js';
+import { openCSVImport } from './csv-import.js';
 import { toggleTheme } from './theme.js';
 import { hideNodePopup } from './node-popup.js';
 import { relayout } from './force-layout.js';
@@ -97,8 +98,19 @@ export function initToolbar() {
     exportCSV();
   });
 
-  // Import
-  bindButton('import-btn', 'click', () => document.getElementById('file-input')?.click());
+  // Import dropdown
+  bindButton('import-wrap-btn', 'click', (e) => {
+    document.getElementById('import-dropdown')?.classList.toggle('open');
+    e.stopPropagation();
+  });
+  bindButton('import-json-btn', 'click', () => {
+    document.getElementById('import-dropdown')?.classList.remove('open');
+    document.getElementById('file-input')?.click();
+  });
+  bindButton('import-csv-btn', 'click', () => {
+    document.getElementById('import-dropdown')?.classList.remove('open');
+    openCSVImport();
+  });
   bindButton('file-input', 'change', (e) => {
     if (e.target.files[0]) importJSON(e.target.files[0], () => emit('render'));
     e.target.value = '';

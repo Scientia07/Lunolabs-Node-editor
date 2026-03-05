@@ -61,4 +61,5 @@ export function closeMenus() {
   if (fontPopup) fontPopup.classList.remove('open');
   document.getElementById('shapes-dropdown').classList.remove('open');
   document.getElementById('export-dropdown').classList.remove('open');
+  document.getElementById('import-dropdown').classList.remove('open');
 }

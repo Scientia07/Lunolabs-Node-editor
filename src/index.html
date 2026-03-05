@@ -105,9 +105,23 @@
     </div>
   </div>
 
-  <button class="tb-btn icon-only" id="import-btn" title="Importieren">
-    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-  </button>
+  <div class="dropdown-wrap">
+    <button class="tb-btn" id="import-wrap-btn" title="Importieren">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Import</span>
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:-2px"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="export-dropdown" id="import-dropdown">
+      <div class="dropdown-item" id="import-json-btn">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        JSON importieren
+      </div>
+      <div class="dropdown-item" id="import-csv-btn">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+        CSV importieren
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- CANVAS -->
@@ -337,8 +351,14 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- HIDDEN FILE INPUT -->
+<!-- CSV Import Modal -->
+<div class="csv-import-modal" id="csv-import-modal">
+  <div class="csv-modal-content"></div>
+</div>
+
+<!-- HIDDEN FILE INPUTS -->
 <input type="file" id="file-input" accept=".json" style="display:none">
+<input type="file" id="csv-file-input" accept=".csv,.txt" style="display:none">
 
 <script type="module" src="js/main.js"></script>
 </body>
