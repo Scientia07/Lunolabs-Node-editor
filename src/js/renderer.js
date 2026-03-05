@@ -13,7 +13,7 @@
  * ─────────────────────────────────────────────── */
 // ─── Node & Connection Rendering ───
 import { state, nodeIndex } from './state.js';
-import { getContrastColor, getGradientCSS, esc } from './utils.js';
+import { getContrastColor, getGradientCSS, esc, getTier, hexToRgb } from './utils.js';
 
 let nodesLayer, svgLayer;
 
@@ -56,7 +56,8 @@ export function createNodeElement(n) {
   if (n.font) el.style.fontFamily = n.font;
   if (n.fontSize) el.style.fontSize = n.fontSize + 'px';
   if (n.fontWeight) el.style.fontWeight = n.fontWeight;
-  if (n.opacity != null && n.opacity !== 1) el.style.opacity = n.opacity;
+  const effectiveOpacity = n.opacity != null ? n.opacity : (n.meta?.relevancy ?? 10) / 10;
+  if (effectiveOpacity !== 1) el.style.opacity = effectiveOpacity;
 
   if (n.type === 'center') {
     el.className = 'node node-center';
@@ -116,6 +117,20 @@ export function createNodeElement(n) {
 
   } else if (n.type === 'textbox') {
     el.className = 'node node-textbox';
+  }
+
+  // Metadata-driven visuals for company nodes
+  if (n.type === 'company') {
+    const tier = getTier(n);
+    el.dataset.tier = tier;
+    if (tier === 'satellit') {
+      el.classList.add('node-company--satellite');
+      const parent = n.parentId != null ? nodeIndex.get(n.parentId) : null;
+      if (parent?.color) {
+        const rgb = hexToRgb(parent.color);
+        if (rgb) el.style.setProperty('--sector-rgb', `${rgb.r},${rgb.g},${rgb.b}`);
+      }
+    }
   }
 
   // Label

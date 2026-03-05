@@ -13,7 +13,8 @@
  * ─────────────────────────────────────────────── */
 import { state, nodeIndex, saveSnapshot, genId, emit } from './state.js';
 import { autoSave } from './persistence.js';
-import { esc, safeColor } from './utils.js';
+import { esc, safeColor, getTier } from './utils.js';
+import { SUGGESTED_META_FIELDS } from './constants.js';
 import { domCache } from './renderer.js';
 import { renderSettingsTab } from './settings-panel.js';
 
@@ -61,6 +62,7 @@ export function refreshSidebar() {
   if (!document.body.classList.contains('sidebar-open')) return;
   if (activeTab === 'connections') renderConnectionsTab();
   else if (activeTab === 'groups') renderGroupsTab();
+  else if (activeTab === 'details') renderDetailsTab();
   else if (activeTab === 'settings') renderSettingsTab(contentEl, refreshSidebar);
 }
 
@@ -331,6 +333,172 @@ function toggleCustomGroupVisibility(groupId) {
   applyVisibility();
   autoSave();
   renderGroupsTab();
+}
+
+// ─── Details Tab ───
+function renderDetailsTab() {
+  const pane = contentEl.querySelector('[data-tab="details"]');
+  const selectedNodes = [...state.selectedIds].map(id => nodeIndex.get(id)).filter(Boolean);
+
+  if (selectedNodes.length === 0) {
+    pane.innerHTML = '<div class="conn-empty">Kein Element ausgewaehlt</div>';
+    return;
+  }
+
+  if (selectedNodes.length > 1) {
+    renderBatchDetails(pane, selectedNodes);
+    return;
+  }
+
+  const node = selectedNodes[0];
+  if (!node.meta) node.meta = {};
+  const meta = node.meta;
+  const tier = getTier(node);
+
+  let html = '';
+
+  html += `<div class="details-header">${esc(node.label || 'Ohne Titel')}</div>`;
+
+  html += `<div class="details-tier">
+    <span class="details-tier-badge details-tier-badge--${tier}">${tier === 'nah' ? 'Nah' : 'Satellit'}</span>
+    <span class="details-tier-hint">wird aus Relevanz abgeleitet</span>
+  </div>`;
+
+  const relevancy = meta.relevancy ?? 10;
+  html += `<div class="details-field">
+    <label class="details-label">Relevanz: <span class="details-value" id="details-relevancy-val">${relevancy}</span></label>
+    <input type="range" id="details-relevancy" class="settings-range" min="1" max="10" value="${relevancy}">
+  </div>`;
+
+  for (const field of SUGGESTED_META_FIELDS) {
+    if (field.key === 'relevancy') continue;
+    const val = meta[field.key] ?? '';
+    if (field.type === 'textarea') {
+      html += `<div class="details-field">
+        <label class="details-label">${esc(field.label)}</label>
+        <textarea class="details-textarea" data-meta-key="${field.key}" placeholder="${esc(field.placeholder || '')}">${esc(val)}</textarea>
+      </div>`;
+    } else {
+      html += `<div class="details-field">
+        <label class="details-label">${esc(field.label)}</label>
+        <input class="details-input" type="${field.type}" data-meta-key="${field.key}" value="${esc(val)}" placeholder="${esc(field.placeholder || '')}">
+      </div>`;
+    }
+  }
+
+  const predefinedKeys = new Set(SUGGESTED_META_FIELDS.map(f => f.key));
+  const customKeys = Object.keys(meta).filter(k => !predefinedKeys.has(k));
+
+  html += `<div class="details-section-title">Eigene Felder</div>`;
+  for (const key of customKeys) {
+    html += `<div class="details-custom-row">
+      <span class="details-custom-key">${esc(key)}</span>
+      <input class="details-input details-custom-val" data-custom-key="${key}" value="${esc(meta[key] ?? '')}">
+      <button class="details-custom-delete" data-delete-key="${key}" title="Entfernen">&times;</button>
+    </div>`;
+  }
+
+  html += `<div class="details-add-row">
+    <input class="details-input details-add-key" id="details-new-key" placeholder="Schluessel">
+    <input class="details-input details-add-val" id="details-new-val" placeholder="Wert">
+    <button class="details-add-btn" id="details-add-field">${iconPlus}</button>
+  </div>`;
+
+  pane.innerHTML = html;
+  wireDetailsEvents(pane, node);
+}
+
+function renderBatchDetails(pane, nodes) {
+  const count = nodes.length;
+  let html = `<div class="details-header">${count} Elemente ausgewaehlt</div>`;
+
+  html += `<div class="details-field">
+    <label class="details-label">Relevanz fuer alle: <span class="details-value" id="details-batch-relevancy-val">—</span></label>
+    <input type="range" id="details-batch-relevancy" class="settings-range" min="1" max="10" value="5">
+  </div>`;
+  html += `<button class="group-add-btn" id="details-batch-apply">Auf alle anwenden</button>`;
+
+  pane.innerHTML = html;
+
+  const slider = pane.querySelector('#details-batch-relevancy');
+  const valSpan = pane.querySelector('#details-batch-relevancy-val');
+  slider.addEventListener('input', () => { valSpan.textContent = slider.value; });
+
+  pane.querySelector('#details-batch-apply').addEventListener('click', () => {
+    saveSnapshot();
+    const val = parseInt(slider.value, 10);
+    for (const node of nodes) {
+      if (!node.meta) node.meta = {};
+      node.meta.relevancy = val;
+    }
+    emit('render');
+    autoSave();
+  });
+}
+
+function wireDetailsEvents(pane, node) {
+  const slider = pane.querySelector('#details-relevancy');
+  const valSpan = pane.querySelector('#details-relevancy-val');
+  if (slider) {
+    slider.addEventListener('input', () => {
+      valSpan.textContent = slider.value;
+      node.meta.relevancy = parseInt(slider.value, 10);
+      emit('render');
+    });
+    slider.addEventListener('change', () => {
+      saveSnapshot();
+      node.meta.relevancy = parseInt(slider.value, 10);
+      emit('render');
+      autoSave();
+    });
+  }
+
+  pane.querySelectorAll('[data-meta-key]').forEach(input => {
+    const key = input.dataset.metaKey;
+    input.addEventListener('change', () => {
+      saveSnapshot();
+      const val = input.value.trim();
+      if (val) {
+        node.meta[key] = val;
+      } else {
+        delete node.meta[key];
+      }
+      autoSave();
+      refreshSidebar();
+    });
+  });
+
+  pane.querySelectorAll('[data-custom-key]').forEach(input => {
+    input.addEventListener('change', () => {
+      saveSnapshot();
+      node.meta[input.dataset.customKey] = input.value;
+      autoSave();
+    });
+  });
+
+  pane.querySelectorAll('[data-delete-key]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      saveSnapshot();
+      delete node.meta[btn.dataset.deleteKey];
+      autoSave();
+      renderDetailsTab();
+    });
+  });
+
+  const addBtn = pane.querySelector('#details-add-field');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const keyInput = pane.querySelector('#details-new-key');
+      const valInput = pane.querySelector('#details-new-val');
+      const key = keyInput.value.trim();
+      const val = valInput.value.trim();
+      if (!key) return;
+      saveSnapshot();
+      node.meta[key] = val;
+      autoSave();
+      renderDetailsTab();
+    });
+  }
 }
 
 /** Apply hidden state to node DOM elements and connections */

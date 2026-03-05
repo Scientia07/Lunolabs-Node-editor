@@ -88,6 +88,32 @@ describe('persistence.js', () => {
     });
   });
 
+  describe('meta backward compatibility', () => {
+    it('loads nodes with meta from localStorage', () => {
+      const data = {
+        nodes: [{ id: 1, x: 0, y: 0, type: 'company', meta: { relevancy: 8, contact: 'Test' } }],
+        connections: [],
+        nextId: 2,
+      };
+      localStorage.setItem('network-editor-state', JSON.stringify(data));
+      const result = autoLoad();
+      expect(result).toBe(true);
+      expect(state.nodes[0].meta).toEqual({ relevancy: 8, contact: 'Test' });
+    });
+
+    it('loads old projects without meta gracefully', () => {
+      const data = {
+        nodes: [{ id: 1, x: 0, y: 0, type: 'company' }],
+        connections: [],
+        nextId: 2,
+      };
+      localStorage.setItem('network-editor-state', JSON.stringify(data));
+      const result = autoLoad();
+      expect(result).toBe(true);
+      expect(state.nodes[0].meta).toBeUndefined();
+    });
+  });
+
   describe('autoSave debounce', () => {
     it('autoSave debounces — multiple calls result in one save', async () => {
       state.nodes = [{ id: 1, x: 0, y: 0, type: 'rect' }];

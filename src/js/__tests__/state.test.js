@@ -70,6 +70,17 @@ describe('state.js', () => {
       expect(state.nodes[0].x).toBe(99);
     });
 
+    it('preserves node.meta through undo/redo', () => {
+      state.nodes = [{ id: 1, x: 0, y: 0, type: 'company', meta: { relevancy: 8 } }];
+      rebuildIndex();
+      saveSnapshot();
+      state.nodes[0].meta.relevancy = 3;
+      undo();
+      expect(state.nodes[0].meta.relevancy).toBe(8);
+      redo();
+      expect(state.nodes[0].meta.relevancy).toBe(3);
+    });
+
     it('saveSnapshot clears redo stack', () => {
       saveSnapshot();
       state.redoStack.push('something');

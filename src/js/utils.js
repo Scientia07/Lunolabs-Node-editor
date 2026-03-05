@@ -147,6 +147,23 @@ export function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+/** Derive tier from relevancy: > 5 = "nah", <= 5 = "satellit" */
+export function getTier(node) {
+  const r = node.meta?.relevancy;
+  if (r == null) return 'nah';
+  return r > 5 ? 'nah' : 'satellit';
+}
+
+/** Parse hex color to {r, g, b}. Returns null on invalid input. */
+export function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return null;
+  const m = hex.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+  if (!m) return null;
+  let h = m[1];
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+}
+
 /** Build a project data object from current state for save/export */
 export function serializeProject(state, title) {
   return {

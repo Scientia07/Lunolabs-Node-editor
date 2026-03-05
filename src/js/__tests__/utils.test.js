@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { esc, safeColor, validateProjectJSON, getContrastColor, getGradientCSS, serializeProject } from '../utils.js';
+import { esc, safeColor, validateProjectJSON, getContrastColor, getGradientCSS, serializeProject, getTier, hexToRgb } from '../utils.js';
 
 describe('utils.js', () => {
   describe('esc', () => {
@@ -130,6 +130,69 @@ describe('utils.js', () => {
       expect(result.meta.theme).toBe('dark');
       expect(result.nodes).toEqual([{ id: 1 }]);
       expect(result.nextId).toBe(2);
+    });
+
+    it('preserves node.meta in serialized output', () => {
+      const mockState = {
+        nodes: [{ id: 1, x: 0, y: 0, type: 'company', label: 'Test', meta: { relevancy: 7, contact: 'Max' } }],
+        connections: [],
+        nextId: 2,
+        projectTitle: 'Test',
+        theme: 'dark',
+        connectionStyle: 'bezier',
+        gridEnabled: true,
+      };
+      const result = serializeProject(mockState, 'Test');
+      expect(result.nodes[0].meta).toEqual({ relevancy: 7, contact: 'Max' });
+    });
+
+    it('handles nodes without meta', () => {
+      const mockState = {
+        nodes: [{ id: 1, x: 0, y: 0, type: 'rect' }],
+        connections: [],
+        nextId: 2,
+        projectTitle: '',
+        theme: 'dark',
+        connectionStyle: 'bezier',
+        gridEnabled: true,
+      };
+      const result = serializeProject(mockState, '');
+      expect(result.nodes[0].meta).toBeUndefined();
+    });
+  });
+
+  describe('getTier', () => {
+    it('returns "nah" for relevancy > 5', () => {
+      expect(getTier({ meta: { relevancy: 8 } })).toBe('nah');
+      expect(getTier({ meta: { relevancy: 6 } })).toBe('nah');
+    });
+
+    it('returns "satellit" for relevancy <= 5', () => {
+      expect(getTier({ meta: { relevancy: 5 } })).toBe('satellit');
+      expect(getTier({ meta: { relevancy: 1 } })).toBe('satellit');
+    });
+
+    it('returns "nah" for missing meta or relevancy', () => {
+      expect(getTier({})).toBe('nah');
+      expect(getTier({ meta: {} })).toBe('nah');
+      expect(getTier({ meta: { relevancy: undefined } })).toBe('nah');
+    });
+  });
+
+  describe('hexToRgb', () => {
+    it('parses 6-digit hex', () => {
+      expect(hexToRgb('#ff0000')).toEqual({ r: 255, g: 0, b: 0 });
+      expect(hexToRgb('#6c8aff')).toEqual({ r: 108, g: 138, b: 255 });
+    });
+
+    it('parses 3-digit hex', () => {
+      expect(hexToRgb('#f00')).toEqual({ r: 255, g: 0, b: 0 });
+    });
+
+    it('returns null for invalid input', () => {
+      expect(hexToRgb('red')).toBeNull();
+      expect(hexToRgb('')).toBeNull();
+      expect(hexToRgb(null)).toBeNull();
     });
   });
 });

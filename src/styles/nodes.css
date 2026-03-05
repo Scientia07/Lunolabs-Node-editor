@@ -118,6 +118,51 @@
 .node-company--text .node-label { outline: none; color: inherit; }
 .node-company--text.underlined .node-label { text-decoration: underline; font-weight: 500; }
 
+/* Company: satellite variant (low relevancy) */
+.node-company--satellite {
+  position: relative;
+}
+.node-company--satellite::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--sector-rgb, 108,138,255), 0.15) 0%,
+    rgba(var(--sector-rgb, 108,138,255), 0.04) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.node-company--satellite .node-label {
+  opacity: 0.75;
+  position: relative;
+  z-index: 1;
+}
+.node-company--satellite .color-dot {
+  position: relative;
+  z-index: 1;
+}
+
+/* Text-variant satellite */
+.node-company--text.node-company--satellite {
+  color: var(--text-muted);
+}
+.node-company--text.node-company--satellite .node-label {
+  opacity: 0.65;
+  font-size: 10px;
+}
+
+/* Dark theme: slightly more visible wash */
+[data-theme="dark"] .node-company--satellite::before {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--sector-rgb, 108,138,255), 0.20) 0%,
+    rgba(var(--sector-rgb, 108,138,255), 0.06) 100%
+  );
+}
+
 /* ── Sticky Note ── */
 .node-sticky {
   width: 160px;

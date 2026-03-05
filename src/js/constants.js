@@ -37,3 +37,14 @@ export const FONTS = [
 export const DEFAULT_CONNECTION_COLOR = '#6c8aff';
 export const DEFAULT_GRID_SIZE = 40;
 export const MAX_UNDO = 80;
+
+export const SUGGESTED_META_FIELDS = [
+  { key: 'relevancy', label: 'Relevanz',        type: 'range',  min: 1, max: 10, default: 10 },
+  { key: 'contact',   label: 'Kontaktperson',   type: 'text',   placeholder: 'Name' },
+  { key: 'email',     label: 'E-Mail',          type: 'email',  placeholder: 'name@example.ch' },
+  { key: 'phone',     label: 'Telefon',         type: 'tel',    placeholder: '+41 79 ...' },
+  { key: 'tags',      label: 'Tags',            type: 'text',   placeholder: 'Praevention, Beratung' },
+  { key: 'notes',     label: 'Notizen',         type: 'textarea', placeholder: 'Freitext...' },
+  { key: 'website',   label: 'Website',         type: 'url',    placeholder: 'https://...' },
+  { key: 'since',     label: 'Seit',            type: 'date',   placeholder: 'YYYY-MM-DD' },
+];
