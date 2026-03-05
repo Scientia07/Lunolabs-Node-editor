@@ -3,3 +3,5 @@ dist/
 index.html
 netzwerk-jb-march.html
 refrenz/
+.playwright-mcp/
+*.png
