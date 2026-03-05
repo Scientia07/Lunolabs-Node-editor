@@ -9,8 +9,7 @@
  *              export-png.js, theme.js, node-popup.js
  * @used-by     main.js
  * @strengths   Safe getElementById wrapper, clean event wiring
- * @issues      Local `on()` function shadows event bus `on` — rename to `bindButton()`;
- *              resize handler should be debounced
+ * @issues      resize handler should be debounced
  * ─────────────────────────────────────────────── */
 // ─── Toolbar Wiring ───
 import { state, undo, redo, emit } from './state.js';
@@ -24,7 +23,7 @@ import { toggleTheme } from './theme.js';
 import { hideNodePopup } from './node-popup.js';
 
 /** Safe getElementById + addEventListener — skips if element missing */
-function on(id, event, handler) {
+function bindButton(id, event, handler) {
   const el = document.getElementById(id);
   if (el) el.addEventListener(event, handler);
   else console.warn(`Toolbar: #${id} not found`);
@@ -61,7 +60,7 @@ export function initToolbar() {
   });
 
   // Grid toggle
-  on('grid-toggle', 'click', () => {
+  bindButton('grid-toggle', 'click', () => {
     state.gridEnabled = !state.gridEnabled;
     document.getElementById('grid-toggle')?.classList.toggle('active', state.gridEnabled);
     drawGrid();
@@ -69,37 +68,37 @@ export function initToolbar() {
   });
 
   // Theme toggle
-  on('theme-toggle', 'click', () => { toggleTheme(); drawGrid(); });
+  bindButton('theme-toggle', 'click', () => { toggleTheme(); drawGrid(); });
 
   // Undo / Redo
-  on('undo-btn', 'click', () => { hideNodePopup(); undo(); });
-  on('redo-btn', 'click', () => { hideNodePopup(); redo(); });
+  bindButton('undo-btn', 'click', () => { hideNodePopup(); undo(); });
+  bindButton('redo-btn', 'click', () => { hideNodePopup(); redo(); });
 
   // Export dropdown
-  on('export-wrap-btn', 'click', (e) => {
+  bindButton('export-wrap-btn', 'click', (e) => {
     document.getElementById('export-dropdown')?.classList.toggle('open');
     e.stopPropagation();
   });
-  on('export-json-btn', 'click', () => {
+  bindButton('export-json-btn', 'click', () => {
     document.getElementById('export-dropdown')?.classList.remove('open');
     exportJSON();
   });
-  on('export-png-btn', 'click', () => {
+  bindButton('export-png-btn', 'click', () => {
     document.getElementById('export-dropdown')?.classList.remove('open');
     exportPNG();
   });
 
   // Import
-  on('import-btn', 'click', () => document.getElementById('file-input')?.click());
-  on('file-input', 'change', (e) => {
+  bindButton('import-btn', 'click', () => document.getElementById('file-input')?.click());
+  bindButton('file-input', 'change', (e) => {
     if (e.target.files[0]) importJSON(e.target.files[0], () => emit('render'));
     e.target.value = '';
   });
 
   // Zoom
-  on('zoom-in', 'click', () => zoomTo(state.zoom * 1.2));
-  on('zoom-out', 'click', () => zoomTo(state.zoom / 1.2));
-  on('zoom-fit', 'click', zoomFit);
+  bindButton('zoom-in', 'click', () => zoomTo(state.zoom * 1.2));
+  bindButton('zoom-out', 'click', () => zoomTo(state.zoom / 1.2));
+  bindButton('zoom-fit', 'click', zoomFit);
 
   // Resize
   window.addEventListener('resize', () => { drawGrid(); });
