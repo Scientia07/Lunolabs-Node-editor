@@ -12,6 +12,7 @@
  * ─────────────────────────────────────────────── */
 // ─── Node Actions ───
 import { state, nodeIndex, genId, saveSnapshot, rebuildIndex } from './state.js';
+import { runForceLayout } from './force-layout.js';
 
 export function deleteSelected(fullRender) {
   if (!state.selectedIds.size) return;
@@ -21,6 +22,7 @@ export function deleteSelected(fullRender) {
   state.selectedIds.clear();
   rebuildIndex();
   fullRender();
+  if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
 }
 
 export function duplicateSelected(fullRender) {
@@ -45,4 +47,5 @@ export function duplicateSelected(fullRender) {
   newIds.forEach(id => state.selectedIds.add(id));
   rebuildIndex();
   fullRender();
+  if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
 }

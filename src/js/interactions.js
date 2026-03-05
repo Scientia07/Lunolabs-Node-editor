@@ -228,6 +228,7 @@ function onMouseDown(e, canvasContainer, selRect) {
         state.nodes.push(node);
         rebuildIndex();
         emit('render');
+        if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
         setTimeout(() => editNodeLabel(node.id), 100);
       });
       return;
@@ -247,6 +248,7 @@ function onMouseDown(e, canvasContainer, selRect) {
       }
       rebuildIndex();
       emit('render');
+      if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
       setTimeout(() => editNodeLabel(node.id), 100);
       return;
     }
@@ -257,6 +259,7 @@ function onMouseDown(e, canvasContainer, selRect) {
       state.nodes.push(node);
       rebuildIndex();
       emit('render');
+      if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
       setTimeout(() => editNodeLabel(node.id), 100);
       return;
     }
@@ -267,6 +270,7 @@ function onMouseDown(e, canvasContainer, selRect) {
       state.nodes.push(node);
       rebuildIndex();
       emit('render');
+      if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
       setTimeout(() => editNodeLabel(node.id), 100);
       return;
     }
