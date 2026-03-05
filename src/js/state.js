@@ -35,6 +35,7 @@ export const state = {
   connectionStyle: 'bezier', // 'bezier' | 'straight'
   projectKey: null,          // localStorage key suffix
   theme: 'dark',
+  physicsLayout: false,    // force-directed auto-layout enabled
   // Sidebar: groups & visibility
   groups: [],               // [{ id, name, nodeIds: [], hidden: false }]
   hiddenSectors: new Set(), // sector IDs hidden via sidebar

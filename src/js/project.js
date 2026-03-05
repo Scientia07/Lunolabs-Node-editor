@@ -46,6 +46,7 @@ export function loadProject(project, opts = {}) {
     if (project.meta.theme) applyTheme(project.meta.theme);
     if (project.meta.connectionStyle) state.connectionStyle = project.meta.connectionStyle;
     if (project.meta.gridEnabled !== undefined) state.gridEnabled = project.meta.gridEnabled;
+    if (project.meta.physicsLayout !== undefined) state.physicsLayout = project.meta.physicsLayout;
     if (project.meta.legend) renderLegend(project.meta.legend);
   }
 

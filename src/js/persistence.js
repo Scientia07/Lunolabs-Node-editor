@@ -47,6 +47,7 @@ function flushSave() {
       groups: state.groups || [],
       hiddenSectors: state.hiddenSectors ? [...state.hiddenSectors] : [],
       projectTitle: state.projectTitle || '',
+      physicsLayout: state.physicsLayout || false,
     }));
   } catch (_e) { /* quota exceeded or private mode */ }
 }
@@ -68,6 +69,7 @@ export function autoLoad() {
     state.groups = d.groups || [];
     state.hiddenSectors = new Set(d.hiddenSectors || []);
     state.projectTitle = d.projectTitle || '';
+    state.physicsLayout = d.physicsLayout || false;
     rebuildIndex();
     return true;
   } catch (_e) {
