@@ -34,6 +34,7 @@ import { loadFromURL } from './project.js';
 import { nodeIndex, saveSnapshot } from './state.js'; // re-import ok (same module)
 import { initSidebar, refreshSidebar, applyVisibility } from './sidebar.js';
 import { initNodePopup } from './node-popup.js';
+import { initSearch } from './search.js';
 import { runForceLayout } from './force-layout.js';
 
 // ─── Full Render ───
@@ -130,6 +131,7 @@ async function init() {
 
   // Init sidebar panel
   initSidebar();
+  initSearch();
 
   // Apply default theme
   applyTheme(state.theme);

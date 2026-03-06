@@ -17,6 +17,7 @@ import { esc, safeColor, getTier } from './utils.js';
 import { SUGGESTED_META_FIELDS } from './constants.js';
 import { domCache } from './renderer.js';
 import { renderSettingsTab } from './settings-panel.js';
+import { renderSearchTab } from './search.js';
 
 let sidebarEl, contentEl;
 let activeTab = 'connections';
@@ -63,6 +64,7 @@ export function refreshSidebar() {
   if (activeTab === 'connections') renderConnectionsTab();
   else if (activeTab === 'groups') renderGroupsTab();
   else if (activeTab === 'details') renderDetailsTab();
+  else if (activeTab === 'search') renderSearchTab(contentEl);
   else if (activeTab === 'settings') renderSettingsTab(contentEl, refreshSidebar);
 }
 
