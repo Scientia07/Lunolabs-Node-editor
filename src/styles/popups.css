@@ -109,13 +109,27 @@
   display: none;
 }
 .color-popup.open { display: block; }
-.color-popup h4 {
+.color-popup .popup-heading {
+  display: block;
   font-size: 11px;
   font-weight: 500;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 8px;
+}
+
+/* Screen-reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .color-swatches {
@@ -157,7 +171,8 @@
   min-width: 240px;
 }
 .popup-panel.open { display: block; }
-.popup-panel h4 {
+.popup-panel .popup-heading {
+  display: block;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-dim);
@@ -224,6 +239,12 @@
   font-family: var(--font-body);
 }
 .popup-btn:hover { opacity: 0.9; }
+
+/* Range inputs fill their container */
+.popup-panel input[type="range"],
+.np-pane input[type="range"] {
+  width: 100%;
+}
 
 /* ── Node Properties Popup ── */
 .node-popup {

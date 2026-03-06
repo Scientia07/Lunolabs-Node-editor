@@ -91,14 +91,65 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   padding: 7px 10px;
+  border: none;
+  background: none;
   border-radius: 6px;
+  font-family: var(--font-body);
   font-size: 12px;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.1s;
+  text-align: left;
 }
 .dropdown-item:hover {
   background: var(--bg-elevated);
   color: var(--text);
+}
+
+/* Dropdown icon (inline SVG inside dropdown items) */
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  flex-shrink: 0;
+}
+
+/* Chevron icon (small arrow for dropdown triggers) */
+.chevron-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: -2px;
+}
+
+/* Zoom button icon */
+.zoom-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Zoom fit label */
+.zoom-fit-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* Font weight select in popups */
+.popup-select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+/* Hex color label in popup panels */
+.popup-hex-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
 }
