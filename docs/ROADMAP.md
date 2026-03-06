@@ -111,25 +111,25 @@
 
 ---
 
-## Phase 10: Search & Filter (F1)
+## Phase 10: Search & Filter (F1) ✅ DONE
 
-> **Depends on**: Phase 7 (search should query metadata too)
-> **PRD Section**: 4.2
+> **Completed**: 2026-03-06
+> **Plan**: `docs/plans/2026-03-05-search-filter-design.md`
 
-| # | Task | Files | Description |
-|---|------|-------|-------------|
-| S1 | Search bar HTML | `index.html` | Input in toolbar or overlay, Ctrl+K shortcut |
-| S2 | Fuzzy matching | NEW `search.js` | Match on label + meta.contact + meta.tags + meta.notes |
-| S3 | Results dropdown | `search.js` | Show top 10 matches with node type icon + sector color |
-| S4 | Navigate to result | `search.js` | Pan+zoom to node, select it, open Details tab |
-| S5 | Dim non-matching | `search.js` | Reduce opacity of non-matching nodes while search active |
-| S6 | Search styles | `toolbar.css` | Search input, results dropdown styling |
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| S1 | Suche sidebar tab HTML | `index.html` | Done |
+| S2 | Fuzzy matching | `search.js` | Done — lightweight char-in-order matching |
+| S3 | Results list in sidebar | `search.js` | Done — color dots, type badges, highlighted chars |
+| S4 | Navigate to result | `search.js` | Done — pan+zoom to node, select it |
+| S5 | Dim non-matching | `renderer.js`, `nodes.css` | Done — .search-dimmed (15% opacity) |
+| S6 | Search styles | `sidebar.css` | Done — input, results, highlight ring |
 
 **Acceptance criteria:**
-- [ ] Ctrl+K opens search, Escape closes
-- [ ] Typing filters nodes in real-time
-- [ ] Clicking result navigates to node
-- [ ] Search queries metadata fields, not just labels
+- [x] Ctrl+K opens search, Escape closes
+- [x] Typing filters nodes in real-time
+- [x] Clicking result navigates to node
+- [x] Search queries metadata fields, not just labels
 
 ---
 
@@ -182,7 +182,7 @@ Phase 7  (Metadata)     ✅ DONE
           |
           +---> Phase 9  (CSV Import)  ✅ DONE
 
-Phase 10 (Search) ← START HERE
+Phase 10 (Search)              ✅ DONE
 
 Scalability (SC1-SC4, SC6) ← when needed for 500+ nodes
 Features (F2, F4-F6) ← fill in as time allows
