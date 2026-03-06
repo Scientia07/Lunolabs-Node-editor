@@ -8,7 +8,7 @@ trigger: When adding a new sidebar tab, creating a new sidebar panel, or extendi
 
 ## Architecture
 
-The sidebar has 5 tabs: Verbindungen, Gruppen, Details, Suche, Einstellungen. Each tab is a `<button>` in a `<div class="sidebar-tabs">` tablist, with a matching `<div class="tab-pane">` content area.
+The sidebar sits on the **left side** of the screen (slides in from left edge). It has 5 tabs: Verbindungen, Gruppen, Details, Suche, Einstellungen. Each tab is a `<button>` in a `<div class="sidebar-tabs">` tablist, with a matching `<div class="tab-pane">` content area. The sidebar is **resizable** — drag the right edge to adjust width (200-600px, stored in `--sidebar-w` CSS custom property).
 
 Tab switching is handled by `sidebar.js:initSidebar()` — clicking a tab button sets `activeTab` and toggles `.active` classes on both the button and its pane.
 
@@ -112,7 +112,11 @@ Follow the existing pattern: `var(--bg)` for input backgrounds, `var(--border)` 
 
 ## Important Notes
 
+- The sidebar is on the **left side** — CSS uses `left: 0`, `transform: translateX(-100%)` (closed) / `translateX(0)` (open)
+- Width is controlled by `--sidebar-w` CSS custom property (default 280px, resizable 200-600px)
+- When centering on a node (e.g. search navigate), account for left-side offset: `panX = sidebarW + cw/2 - ...`
 - The sidebar only renders when open (`document.body.classList.contains('sidebar-open')`)
 - `refreshSidebar()` is called on every `emit('render')` via the `editor:render` DOM event
 - Avoid re-creating event listeners on every render — check if structure exists first
 - Tab content is lazy: only the active tab's render function runs
+- On first load, the toggle button plays a bounce animation (CSS `sidebar-bounce` keyframes) to draw attention

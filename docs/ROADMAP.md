@@ -1,6 +1,6 @@
 # Roadmap — Netzwerk-Editor
 
-**Last Updated**: 2026-03-05
+**Last Updated**: 2026-03-06
 **Master PRD**: `docs/prd/2026-03-04-master-prd-netzwerk-editor.md`
 **Research**: `docs/research/INDEX.md`
 
@@ -184,8 +184,10 @@ Phase 7  (Metadata)     ✅ DONE
 
 Phase 10 (Search)              ✅ DONE
 
+UI: Sidebar left-side + resize + bounce  ✅ DONE
+
 Scalability (SC1-SC4, SC6) ← when needed for 500+ nodes
-Features (F2, F4-F6) ← fill in as time allows
+Features (F5 legend editor) ← fill in as time allows
 ```
 
 ---
@@ -200,5 +202,5 @@ Features (F2, F4-F6) ← fill in as time allows
 | CSV Import/Export | `docs/research/02-csv-import-export/` | Format design, Excel compatibility |
 | Visual Tier System | `docs/research/03-visual-tier-system/` | Gradient wash design |
 | Integration Roadmap | `docs/research/04-integration-roadmap/` | Original phased plan (superseded by this file) |
-| Latest Handoff | `docs/handoffs/HANDOFF-20260305-CW10c.md` | Session context |
+| Latest Handoff | `docs/handoffs/HANDOFF-20260306-CW10d.md` | Session context |
 | Lessons Learned | `docs/lessons-learned/LESSONS-LOG.md` | Architecture & process insights |

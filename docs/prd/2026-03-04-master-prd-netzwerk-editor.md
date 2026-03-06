@@ -1,6 +1,6 @@
 # Master PRD: Netzwerk-Editor
 
-**Date**: 2026-03-04 (created) | 2026-03-05 (last updated)
+**Date**: 2026-03-04 (created) | 2026-03-06 (last updated)
 **Status**: Living Document
 **Owner**: Jugendbuero March / LunoLabs
 **Version**: 3.0
@@ -18,7 +18,7 @@ A fully modular vanilla JS editor with:
 - Node properties popup (color/gradient, shape, font, opacity)
 - Connection properties popup (color, style, dash, thickness, outline, hidden)
 - Drag-to-create from anchors
-- Sidebar with connections, groups, and settings tabs
+- Left-side sidebar (resizable, 200-600px) with connections, groups, details, search, and settings tabs
 - Dark/light theme, minimap, legend
 - JSON import/export, PNG export
 - Single-file build (`dist/index.html`) works from `file://`
@@ -72,7 +72,7 @@ A fully modular vanilla JS editor with:
 ### 4.1 Unified Codebase (P0) -- DONE
 Single application with theme toggle, data loaded from JSON or embedded config.
 
-### 4.2 Search & Filter (P1) -- PENDING
+### 4.2 Search & Filter (P1) -- DONE
 - Search bar in toolbar (Ctrl+K to focus)
 - Fuzzy matching on node labels + metadata fields
 - Highlight matching nodes, dim non-matching
@@ -188,20 +188,20 @@ Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
 - [x] Node properties popup (color/form/font/opacity)
 - [x] Unit tests (vitest: state, utils, actions, persistence)
 
-### In Progress
-- [ ] Phase 8: CSV Import/Export (see Roadmap)
-
 ### Recently Completed
 - [x] Phase 7: Node Metadata System (M1-M6) — `node.meta`, `SUGGESTED_META_FIELDS`, `getTier()`, relevancy→opacity
 - [x] Phase 7B: Sidebar Details Tab (D1-D8) — 4th tab, relevancy slider, contact fields, custom fields, batch editing
 - [x] Phase 7C: Visual Tier System (V1-V4) — satellite gradient wash, `hexToRgb()`, dark theme variant
+- [x] Phase 8: CSV Export — semicolon-delimited, BOM, dynamic meta columns
+- [x] Phase 9: CSV Import — auto-delimiter, fuzzy header mapping, preview modal, conflict resolution
+- [x] Phase 10: Search & Filter — fuzzy match, sidebar Suche tab, Ctrl+K, canvas dimming
+- [x] F2: Group management UX — per-node hide, sector→child hierarchy
+- [x] F4: Export with visibility — modal confirmation for hidden nodes
+- [x] F6: No-data-loss project loading — `isDirty` flag + confirm dialog
+- [x] Sidebar moved to left side, drag-to-resize (200-600px), bounce animation on first load
 
 ### Pending
-- [ ] F1: Search & filter
-- [ ] F2: Group management UX
-- [ ] F4: Export with visibility
 - [ ] F5: Legend integration
-- [ ] F6: No-data-loss project loading
 - [ ] SC1-SC4, SC6: Scalability improvements
 - [ ] SVG export, auto-layout, touch support
 
@@ -219,6 +219,9 @@ Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
 | Semicolon CSV delimiter | German Excel default, avoids comma conflicts | 2026-03-05 |
 | Relevancy (1-10) auto-maps to opacity | Visual importance without extra controls, manual override preserved | 2026-03-05 |
 | UTF-8 BOM for CSV | Required for German Excel to read umlauts correctly | 2026-03-05 |
+| Search as sidebar tab (not Spotlight overlay) | Results stay visible during canvas navigation | 2026-03-06 |
+| Sidebar on left side (not right) | User preference; matches typical IDE layout | 2026-03-06 |
+| Sidebar drag-to-resize via CSS custom property | `--sidebar-w` updates all dependents automatically | 2026-03-06 |
 
 ---
 
