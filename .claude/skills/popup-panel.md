@@ -16,6 +16,7 @@ trigger: When creating a new popup, modal, floating panel, picker, or properties
 | Popup panel | `.popup-panel` | 2500 | Gradient popup, font popup |
 | Node popup | `.node-popup` | 2500 | Tabbed node properties popup |
 | Conn popup | `.node-popup` (`#conn-popup`) | 2500 | Tabbed connection properties popup |
+| Modal overlay | `.modal-overlay` | 5000 | Visibility export confirm, CSV import |
 
 ## Show/Hide Lifecycle
 
@@ -235,3 +236,32 @@ export function showQuickAdd(screenX, screenY, canvasPos, fromId, fromAnchor) {
 ```
 
 **Key difference from other popups:** Quick-add uses `document.addEventListener('mousedown', onOutside, true)` (capture phase) for outside-click dismissal instead of the global click handler in `initInteractions()`. This is because the popup is ephemeral and self-cleaning — no need to add it to the global whitelist.
+
+## Modal Overlay Pattern (Visibility Export, CSV Import)
+
+For centered modal dialogs with backdrop:
+
+```html
+<div id="my-modal" class="modal-overlay" style="display:none" role="dialog" aria-label="..." aria-modal="true">
+  <div class="modal-box" style="max-width:360px">
+    <h3>Title</h3>
+    <p>Message</p>
+    <div class="modal-actions">
+      <button class="modal-btn primary">OK</button>
+      <button class="modal-btn cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+```
+
+Show/hide via `style.display`:
+```javascript
+modal.style.display = '';      // show (CSS handles flex centering)
+modal.style.display = 'none';  // hide
+```
+
+**Standard features:**
+- Escape key closes: `document.addEventListener('keydown', onKey)` — remove on cleanup
+- Backdrop click closes: `modal.onclick = (e) => { if (e.target === modal) cleanup(); }`
+- z-index 5000 (above all popups)
+- Reusable CSS classes: `.modal-overlay`, `.modal-box`, `.modal-btn`, `.modal-btn.primary`, `.modal-btn.cancel`

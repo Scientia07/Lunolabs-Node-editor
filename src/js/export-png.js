@@ -17,12 +17,17 @@ import { state, nodeIndex } from './state.js';
 import { getContrastColor, wrapText, roundRect, getNodesBoundingBox, showToast } from './utils.js';
 import { getNodeCenter, getNodesLayer, domCache } from './renderer.js';
 
-export function exportPNG() {
-  if (!state.nodes.length) { showToast('Keine Elemente zum Exportieren'); return; }
+export function exportPNG(excludeNodeIds) {
+  const nodes = excludeNodeIds ? state.nodes.filter(n => !excludeNodeIds.has(n.id)) : state.nodes;
+  const connections = excludeNodeIds
+    ? state.connections.filter(c => !excludeNodeIds.has(c.from) && !excludeNodeIds.has(c.to))
+    : state.connections;
+
+  if (!nodes.length) { showToast('Keine Elemente zum Exportieren'); return; }
   showToast('PNG wird erstellt...');
 
   const nodesLayer = getNodesLayer();
-  const box = getNodesBoundingBox(state.nodes, nodesLayer);
+  const box = getNodesBoundingBox(nodes, nodesLayer);
   if (!box) { showToast('Keine Elemente zum Exportieren'); return; }
   const { minX, minY, maxX, maxY } = box;
   const canvasW = maxX - minX;
@@ -42,7 +47,7 @@ export function exportPNG() {
   const connStyle = state.connectionStyle || 'bezier';
 
   // Draw connections
-  state.connections.forEach(conn => {
+  connections.forEach(conn => {
     const fromNode = nodeIndex.get(conn.from);
     const toNode = nodeIndex.get(conn.to);
     if (!fromNode || !toNode) return;
@@ -73,7 +78,7 @@ export function exportPNG() {
   });
 
   // Draw nodes
-  state.nodes.forEach(n => {
+  nodes.forEach(n => {
     const el = domCache.get(n.id);
     const w = el ? el.offsetWidth : (n.width || 140);
     const h = el ? el.offsetHeight : (n.height || 60);

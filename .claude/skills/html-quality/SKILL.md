@@ -43,6 +43,10 @@ When writing or modifying HTML (in `.html` files or JS-generated markup), apply 
   - `.popup-select` — styled select in popup panels
   - `.popup-hex-label` — hex color display text
   - `.sr-only` — visually hidden but screen-reader accessible
+  - `.modal-overlay` — fixed fullscreen backdrop (z-index 5000)
+  - `.modal-box` — centered modal content container
+  - `.modal-btn` / `.modal-btn.primary` / `.modal-btn.cancel` — modal action buttons
+  - `.modal-actions` — flex row for modal buttons
 - If no utility class exists, **create one in the appropriate CSS file** before using it
 - Range inputs (`<input type="range">`) are auto-sized via `.popup-panel input[type="range"]` and `.np-pane input[type="range"]` — no inline `width:100%` needed
 

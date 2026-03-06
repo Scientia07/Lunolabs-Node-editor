@@ -33,6 +33,7 @@ export function loadProject(project, opts = {}) {
   if (resetState) {
     state.groups = [];
     state.hiddenSectors = new Set();
+    state.hiddenNodes = new Set();
     state.selectedIds.clear();
     state.undoStack = [];
     state.redoStack = [];

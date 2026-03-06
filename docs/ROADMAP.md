@@ -150,11 +150,11 @@
 
 | # | Task | Status |
 |---|------|--------|
-| F1 | Search & filter | Pending (→ Phase 10) |
-| F2 | Group management UX | Pending |
-| F4 | Export with visibility | Pending |
+| F1 | Search & filter | Done (→ Phase 10) |
+| F2 | Group management UX | Done |
+| F4 | Export with visibility | Done |
 | F5 | Legend integration | Pending |
-| F6 | No-data-loss project loading | Pending |
+| F6 | No-data-loss project loading | Done |
 
 ### Future
 

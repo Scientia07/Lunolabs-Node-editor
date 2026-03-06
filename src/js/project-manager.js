@@ -13,7 +13,7 @@
  * ─────────────────────────────────────────────── */
 import { state, rebuildIndex, emit } from './state.js';
 import { autoSave } from './persistence.js';
-import { showToast, validateProjectJSON, serializeProject } from './utils.js';
+import { showToast, validateProjectJSON, serializeProject, confirmIfDirty } from './utils.js';
 import { loadProject as loadProjectData } from './project.js';
 
 const SAVED_PROJECTS_KEY = 'network-editor-saved-projects';
@@ -46,6 +46,7 @@ export function saveProject(name) {
     saved[slug] = projectData;
     localStorage.setItem(SAVED_PROJECTS_KEY, JSON.stringify(saved));
     state.projectTitle = name;
+    state.isDirty = false;
   } catch (e) { console.warn('Failed to save project:', e); }
 }
 
@@ -60,7 +61,7 @@ export function deleteSavedProject(key) {
 
 /** Load a project (embedded or saved) */
 export function loadProject(projectEntry) {
-  applyProject(projectEntry.data, projectEntry.key);
+  confirmIfDirty(() => applyProject(projectEntry.data, projectEntry.key));
 }
 
 function applyProject(project, name) {
@@ -71,32 +72,34 @@ function applyProject(project, name) {
 
 /** Import a JSON file via the file picker */
 export function importProjectFile(refreshCallback) {
-  const input = document.getElementById('file-input');
-  const handler = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const project = JSON.parse(reader.result);
-        const check = validateProjectJSON(project);
-        if (!check.valid) {
-          showToast('Ungueltige Datei: ' + check.error);
-          return;
-        }
-        const name = project.meta?.title || file.name.replace('.json', '');
-        applyProject(project, name);
-        // Auto-save imported project so it persists
-        saveProject(name);
-        refreshCallback?.();
-      } catch { showToast('Fehler beim Import — ungueltige JSON-Datei'); }
+  confirmIfDirty(() => {
+    const input = document.getElementById('file-input');
+    const handler = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const project = JSON.parse(reader.result);
+          const check = validateProjectJSON(project);
+          if (!check.valid) {
+            showToast('Ungueltige Datei: ' + check.error);
+            return;
+          }
+          const name = project.meta?.title || file.name.replace('.json', '');
+          applyProject(project, name);
+          // Auto-save imported project so it persists
+          saveProject(name);
+          refreshCallback?.();
+        } catch { showToast('Fehler beim Import — ungueltige JSON-Datei'); }
+      };
+      reader.readAsText(file);
+      input.value = '';
+      input.removeEventListener('change', handler);
     };
-    reader.readAsText(file);
-    input.value = '';
-    input.removeEventListener('change', handler);
-  };
-  input.addEventListener('change', handler);
-  input.click();
+    input.addEventListener('change', handler);
+    input.click();
+  });
 }
 
 /** Also download a copy as .json file */
@@ -115,19 +118,22 @@ export function downloadProject() {
 
 /** Clear the canvas for a new project */
 export function newBlankProject() {
-  state.nodes = [];
-  state.connections = [];
-  state.nextId = 1;
-  state.groups = [];
-  state.hiddenSectors = new Set();
-  state.projectTitle = '';
-  state.selectedIds.clear();
-  state.undoStack = [];
-  state.redoStack = [];
-  state.panX = window.innerWidth / 2 - 200;
-  state.panY = window.innerHeight / 2 - 100;
-  state.zoom = 1;
-  rebuildIndex();
-  emit('render');
-  autoSave();
+  confirmIfDirty(() => {
+    state.nodes = [];
+    state.connections = [];
+    state.nextId = 1;
+    state.groups = [];
+    state.hiddenSectors = new Set();
+    state.hiddenNodes = new Set();
+    state.projectTitle = '';
+    state.selectedIds.clear();
+    state.undoStack = [];
+    state.redoStack = [];
+    state.panX = window.innerWidth / 2 - 200;
+    state.panY = window.innerHeight / 2 - 100;
+    state.zoom = 1;
+    rebuildIndex();
+    emit('render');
+    autoSave();
+  });
 }

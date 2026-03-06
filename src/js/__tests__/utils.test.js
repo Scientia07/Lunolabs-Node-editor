@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { esc, safeColor, validateProjectJSON, getContrastColor, getGradientCSS, serializeProject, getTier, hexToRgb } from '../utils.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { esc, safeColor, validateProjectJSON, getContrastColor, getGradientCSS, serializeProject, getTier, hexToRgb, confirmIfDirty } from '../utils.js';
+import { state } from '../state.js';
 
 describe('utils.js', () => {
   describe('esc', () => {
@@ -176,6 +177,36 @@ describe('utils.js', () => {
       expect(getTier({})).toBe('nah');
       expect(getTier({ meta: {} })).toBe('nah');
       expect(getTier({ meta: { relevancy: undefined } })).toBe('nah');
+    });
+  });
+
+  describe('confirmIfDirty', () => {
+    beforeEach(() => {
+      state.isDirty = false;
+    });
+
+    it('calls callback immediately when not dirty', () => {
+      const fn = vi.fn();
+      confirmIfDirty(fn);
+      expect(fn).toHaveBeenCalledOnce();
+    });
+
+    it('calls callback when dirty and user confirms', () => {
+      state.isDirty = true;
+      globalThis.confirm = vi.fn(() => true);
+      const fn = vi.fn();
+      confirmIfDirty(fn);
+      expect(globalThis.confirm).toHaveBeenCalled();
+      expect(fn).toHaveBeenCalledOnce();
+    });
+
+    it('does NOT call callback when dirty and user cancels', () => {
+      state.isDirty = true;
+      globalThis.confirm = vi.fn(() => false);
+      const fn = vi.fn();
+      confirmIfDirty(fn);
+      expect(globalThis.confirm).toHaveBeenCalled();
+      expect(fn).not.toHaveBeenCalled();
     });
   });
 

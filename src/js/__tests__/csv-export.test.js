@@ -141,4 +141,12 @@ describe('csv-export', () => {
     // Should not throw
     expect(csv).toContain('No Meta');
   });
+
+  it('excludeNodeIds filters out specified nodes', () => {
+    addNode({ id: 10, label: 'Visible', type: 'company' });
+    addNode({ id: 20, label: 'Hidden', type: 'company' });
+    const csv = buildCSV(new Set([20]));
+    expect(csv).toContain('Visible');
+    expect(csv).not.toContain('Hidden');
+  });
 });

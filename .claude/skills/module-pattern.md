@@ -145,8 +145,8 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `interactions.js` | All mouse events (drag, pan, select, connect, resize) — RAF-gated mousemove |
 | `keyboard.js` | Keyboard shortcuts |
 | `constants.js` | PALETTE, FONTS, STICKY_COLORS, SUGGESTED_META_FIELDS, defaults |
-| `utils.js` | screenToCanvas, snapToGrid, showToast, esc, safeColor, validateProjectJSON, getNodesBoundingBox, serializeProject, getTier, hexToRgb |
-| `persistence.js` | localStorage autoSave (debounced 500ms) / autoSaveNow (immediate) / autoLoad |
+| `utils.js` | screenToCanvas, snapToGrid, showToast, esc, safeColor, validateProjectJSON, getNodesBoundingBox, serializeProject, getTier, hexToRgb, confirmIfDirty |
+| `persistence.js` | localStorage autoSave (debounced 500ms) / autoSaveNow (immediate) / autoLoad, clears isDirty |
 | `project.js` | Unified `loadProject(project, opts)`, `loadFromURL()`, legend rendering |
 | `project-manager.js` | Project CRUD — save/load/delete/import/download/new (localStorage) |
 | `settings-panel.js` | Settings tab rendering — theme, grid, connection style, project list |

@@ -29,7 +29,9 @@ export const state = {
   theme: 'dark',
   groups: [],
   hiddenSectors: new Set(),
+  hiddenNodes: new Set(),    // individual node IDs hidden via sidebar
   projectTitle: '',
+  isDirty: false,            // true after saveSnapshot(), cleared on save
   // Search
   searchQuery: '',       // Current search text (empty = inactive)
   searchMatches: null,   // Set<nodeId> or null when search inactive
@@ -146,6 +148,7 @@ function createSnapshot() {
     nextId: state.nextId,
     groups: state.groups,
     hiddenSectors: [...state.hiddenSectors],
+    hiddenNodes: [...state.hiddenNodes],
   });
 }
 
@@ -156,6 +159,7 @@ function applySnapshot(snap) {
   state.nextId = snap.nextId;
   if (snap.groups) state.groups = snap.groups;
   if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
+  state.hiddenNodes = new Set(snap.hiddenNodes || []);
   state.selectedIds.clear();
   rebuildIndex();
 }
@@ -163,6 +167,7 @@ function applySnapshot(snap) {
 export function saveSnapshot() {
   state.undoStack.push(createSnapshot());
   state.redoStack = [];
+  state.isDirty = true;
   if (state.undoStack.length > MAX_UNDO) state.undoStack.shift();
 }
 
@@ -254,10 +259,28 @@ This replaces the old pattern of passing `fullRender` as a callback to init func
 
 ## Persistence (`src/js/persistence.js`)
 
-- `autoSave()` serializes state to `localStorage` (debounced)
+- `autoSave()` serializes state to `localStorage` (debounced) — clears `isDirty`
 - `autoLoad()` restores from `localStorage` on startup
 - Both serialize the full `state.nodes` array, so new properties are automatically persisted
+- `hiddenNodes` is serialized as `[...state.hiddenNodes]` and restored as `new Set()`
 - Project JSON files (`src/data/*.json`) are loaded via `project.js:loadFromURL()`
+
+## Dirty Flag & Data Loss Prevention
+
+- `state.isDirty` is set `true` in `saveSnapshot()`, cleared in `flushSave()` and `saveProject()`
+- `confirmIfDirty(callback)` in `utils.js` wraps destructive actions (load, new, import)
+- Shows native `confirm()` dialog if dirty — "Ungespeicherte Aenderungen gehen verloren. Fortfahren?"
+- Used in `project-manager.js`: `loadProject()`, `newBlankProject()`, `importProjectFile()`
+
+## Visibility System
+
+Three layers of hiding, all feeding into `getHiddenNodeIds()` → `applyVisibility()`:
+
+1. `state.hiddenSectors` (Set) — whole sectors hidden via sidebar Groups tab
+2. `state.groups[].hidden` (boolean) — custom groups hidden
+3. `state.hiddenNodes` (Set) — individual nodes hidden via sidebar Groups tab
+
+`getHiddenNodeIds()` (exported from `sidebar.js`) computes the union. Used by both DOM visibility and export filtering.
 
 ## Important Rules
 

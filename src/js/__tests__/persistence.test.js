@@ -13,6 +13,8 @@ describe('persistence.js', () => {
     state.gridEnabled = true;
     state.groups = [];
     state.hiddenSectors = new Set();
+    state.hiddenNodes = new Set();
+    state.isDirty = false;
     state.projectTitle = '';
     state.projectKey = null;
     nodeIndex.clear();
@@ -111,6 +113,24 @@ describe('persistence.js', () => {
       const result = autoLoad();
       expect(result).toBe(true);
       expect(state.nodes[0].meta).toBeUndefined();
+    });
+  });
+
+  describe('isDirty', () => {
+    it('autoSaveNow clears isDirty', () => {
+      state.isDirty = true;
+      state.nodes = [{ id: 1, x: 0, y: 0, type: 'rect' }];
+      autoSaveNow();
+      expect(state.isDirty).toBe(false);
+    });
+
+    it('hiddenNodes is persisted and restored', () => {
+      state.nodes = [{ id: 1, x: 0, y: 0, type: 'company' }];
+      state.hiddenNodes = new Set([1]);
+      autoSaveNow();
+      state.hiddenNodes = new Set();
+      autoLoad();
+      expect(state.hiddenNodes.has(1)).toBe(true);
     });
   });
 

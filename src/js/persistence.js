@@ -46,9 +46,11 @@ function flushSave() {
       gridEnabled: state.gridEnabled,
       groups: state.groups || [],
       hiddenSectors: state.hiddenSectors ? [...state.hiddenSectors] : [],
+      hiddenNodes: state.hiddenNodes ? [...state.hiddenNodes] : [],
       projectTitle: state.projectTitle || '',
       physicsLayout: state.physicsLayout || false,
     }));
+    state.isDirty = false;
   } catch (_e) { /* quota exceeded or private mode */ }
 }
 
@@ -68,6 +70,7 @@ export function autoLoad() {
     state.gridEnabled = d.gridEnabled !== false;
     state.groups = d.groups || [];
     state.hiddenSectors = new Set(d.hiddenSectors || []);
+    state.hiddenNodes = new Set(d.hiddenNodes || []);
     state.projectTitle = d.projectTitle || '';
     state.physicsLayout = d.physicsLayout || false;
     rebuildIndex();

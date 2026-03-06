@@ -39,10 +39,12 @@ export const state = {
   // Sidebar: groups & visibility
   groups: [],               // [{ id, name, nodeIds: [], hidden: false }]
   hiddenSectors: new Set(), // sector IDs hidden via sidebar
+  hiddenNodes: new Set(),   // individual node IDs hidden via sidebar
   projectTitle: '',         // editable project title
   // Search
   searchQuery: '',
   searchMatches: null,        // Set<nodeId> or null when search inactive
+  isDirty: false,
 };
 
 // O(1) node lookup by id
@@ -69,6 +71,7 @@ function createSnapshot() {
     nextId: state.nextId,
     groups: state.groups,
     hiddenSectors: [...state.hiddenSectors],
+    hiddenNodes: [...state.hiddenNodes],
   });
 }
 
@@ -79,6 +82,7 @@ function applySnapshot(snap) {
   state.nextId = snap.nextId;
   if (snap.groups) state.groups = snap.groups;
   if (snap.hiddenSectors) state.hiddenSectors = new Set(snap.hiddenSectors);
+  state.hiddenNodes = new Set(snap.hiddenNodes || []);
   state.selectedIds.clear();
   rebuildIndex();
 }
@@ -87,6 +91,7 @@ export function saveSnapshot() {
   state.undoStack.push(createSnapshot());
   state.redoStack = [];
   if (state.undoStack.length > MAX_UNDO) state.undoStack.shift();
+  state.isDirty = true;
 }
 
 export function undo() {

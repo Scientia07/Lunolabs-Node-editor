@@ -24,12 +24,34 @@ import { openCSVImport } from './csv-import.js';
 import { toggleTheme } from './theme.js';
 import { hideNodePopup } from './node-popup.js';
 import { relayout } from './force-layout.js';
+import { getHiddenNodeIds } from './sidebar.js';
 
 /** Safe getElementById + addEventListener — skips if element missing */
 function bindButton(id, event, handler) {
   const el = document.getElementById(id);
   if (el) el.addEventListener(event, handler);
   else console.warn(`Toolbar: #${id} not found`);
+}
+
+function confirmVisibilityExport(exportAll, exportFiltered) {
+  const hidden = getHiddenNodeIds();
+  if (hidden.size === 0) { exportAll(); return; }
+
+  const modal = document.getElementById('visibility-modal');
+  modal.style.display = '';
+
+  const cleanup = () => {
+    modal.style.display = 'none';
+    document.removeEventListener('keydown', onKey);
+  };
+
+  const onKey = (e) => { if (e.key === 'Escape') cleanup(); };
+  document.addEventListener('keydown', onKey);
+  modal.onclick = (e) => { if (e.target === modal) cleanup(); };
+
+  document.getElementById('vis-export-all').onclick = () => { cleanup(); exportAll(); };
+  document.getElementById('vis-export-visible').onclick = () => { cleanup(); exportFiltered(hidden); };
+  document.getElementById('vis-export-cancel').onclick = cleanup;
 }
 
 export function setTool(tool) {
@@ -87,15 +109,15 @@ export function initToolbar() {
   });
   bindButton('export-json-btn', 'click', () => {
     document.getElementById('export-dropdown')?.classList.remove('open');
-    exportJSON();
+    confirmVisibilityExport(() => exportJSON(), (hidden) => exportJSON(hidden));
   });
   bindButton('export-png-btn', 'click', () => {
     document.getElementById('export-dropdown')?.classList.remove('open');
-    exportPNG();
+    confirmVisibilityExport(() => exportPNG(), (hidden) => exportPNG(hidden));
   });
   bindButton('export-csv-btn', 'click', () => {
     document.getElementById('export-dropdown')?.classList.remove('open');
-    exportCSV();
+    confirmVisibilityExport(() => exportCSV(), (hidden) => exportCSV(hidden));
   });
 
   // Import dropdown

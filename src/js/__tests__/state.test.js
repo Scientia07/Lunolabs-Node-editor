@@ -11,6 +11,8 @@ describe('state.js', () => {
     state.selectedIds.clear();
     state.groups = [];
     state.hiddenSectors = new Set();
+    state.hiddenNodes = new Set();
+    state.isDirty = false;
     nodeIndex.clear();
   });
 
@@ -86,6 +88,36 @@ describe('state.js', () => {
       state.redoStack.push('something');
       saveSnapshot();
       expect(state.redoStack.length).toBe(0);
+    });
+  });
+
+  describe('isDirty', () => {
+    it('starts as false', () => {
+      expect(state.isDirty).toBe(false);
+    });
+
+    it('is set to true after saveSnapshot', () => {
+      state.nodes = [{ id: 1, x: 0, y: 0, type: 'rect' }];
+      rebuildIndex();
+      saveSnapshot();
+      expect(state.isDirty).toBe(true);
+    });
+  });
+
+  describe('hiddenNodes', () => {
+    it('exists as empty Set in initial state', () => {
+      expect(state.hiddenNodes).toBeInstanceOf(Set);
+      expect(state.hiddenNodes.size).toBe(0);
+    });
+
+    it('is included in undo snapshots', () => {
+      state.nodes = [{ id: 1, x: 0, y: 0, type: 'company' }];
+      rebuildIndex();
+      state.hiddenNodes = new Set([1]);
+      saveSnapshot();
+      state.hiddenNodes = new Set();
+      undo();
+      expect(state.hiddenNodes.has(1)).toBe(true);
     });
   });
 

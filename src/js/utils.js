@@ -164,6 +164,13 @@ export function hexToRgb(hex) {
   return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
 }
 
+export function confirmIfDirty(callback) {
+  if (state.isDirty) {
+    if (!confirm('Ungespeicherte Aenderungen gehen verloren. Fortfahren?')) return;
+  }
+  callback();
+}
+
 /** Build a project data object from current state for save/export */
 export function serializeProject(state, title) {
   return {

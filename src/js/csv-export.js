@@ -38,8 +38,8 @@ function getCustomMetaKeys(nodes) {
 }
 
 /** Build CSV string from current state */
-export function buildCSV() {
-  const nodes = state.nodes;
+export function buildCSV(excludeNodeIds) {
+  const nodes = excludeNodeIds ? state.nodes.filter(n => !excludeNodeIds.has(n.id)) : state.nodes;
 
   // Fixed columns: suggested meta fields in defined order
   const suggestedKeys = SUGGESTED_META_FIELDS.map(f => f.key);
@@ -75,8 +75,8 @@ export function buildCSV() {
 }
 
 /** Trigger CSV file download */
-export function exportCSV() {
-  const csv = buildCSV();
+export function exportCSV(excludeNodeIds) {
+  const csv = buildCSV(excludeNodeIds);
   const date = new Date().toISOString().slice(0, 10);
   const name = state.projectTitle || 'netzwerk';
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
