@@ -109,3 +109,22 @@ Converting the single import button into a dropdown (JSON + CSV) mirrors the exp
 
 ### [PROCESS] Implementing export before import validates the format
 Phase 8 (export) before Phase 9 (import) meant the CSV format was exercised and tested before import had to parse it. The 13 export tests served as implicit format documentation for the import parser.
+
+---
+
+## Session: Phase 10 Search & Filter — 2026-03-06
+
+### [ARCHITECTURE] Pure functions first, UI layer second
+Splitting `fuzzyMatch()` and `searchNodes()` as pure functions (no DOM, no imports from other modules) made them fully testable with Vitest without mocking. The UI layer (`renderSearchTab`, `navigateToNode`) was added in a later task, building on tested primitives. This separation also means the matching logic can be reused (e.g., for a future command palette) without dragging in DOM dependencies.
+
+### [CODE-PATTERN] CSS classes for search state, not inline styles
+Using `.search-dimmed` and `.search-highlight` CSS classes instead of manipulating `el.style.opacity` directly keeps the search visual layer composable with other visual states (selection, satellite wash, hidden sectors). The `!important` on `.search-dimmed` opacity is intentional — it must override per-node relevancy opacity to create a clear visual distinction.
+
+### [ARCHITECTURE] Sidebar tab beats toolbar overlay for persistent search
+A sidebar "Suche" tab keeps results visible while navigating the canvas — users can click through results one by one without re-opening the search. A Spotlight-style overlay would dismiss on each navigation, requiring re-search. The trade-off is sidebar real estate, but with 5 tabs the UI stays clean.
+
+### [CODE-PATTERN] Debounce-free search works fine at 130 nodes
+At the current scale (131 nodes), running `searchNodes()` on every keystroke with no debounce produces instant results. The fuzzy match is O(n*m) where n=nodes and m=max(label+meta lengths), which stays under 1ms for 131 nodes. Debouncing would add latency for no benefit — only add it if the node count exceeds ~500.
+
+### [PROCESS] Subagent-per-task keeps implementation focused
+Dispatching 5 fresh subagents (one per task) prevented context pollution. Each agent read only the files it needed and made targeted changes. The controller provided full task specs inline — no plan-file reading overhead. Total wall time was ~5 minutes for the full feature.

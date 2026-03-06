@@ -30,6 +30,9 @@ export const state = {
   groups: [],
   hiddenSectors: new Set(),
   projectTitle: '',
+  // Search
+  searchQuery: '',       // Current search text (empty = inactive)
+  searchMatches: null,   // Set<nodeId> or null when search inactive
 };
 ```
 

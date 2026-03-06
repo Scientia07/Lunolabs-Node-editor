@@ -78,6 +78,7 @@ initQuickAdd()      — drag-to-create popup
 initKeyboard()      — keyboard shortcuts
 setupContextMenu()  — contextmenu event wiring (uses imports from above)
 initSidebar()       — sidebar panel
+initSearch()        — search & filter (sidebar tab)
 ```
 
 **Rule:** If your module needs a DOM element, init it BEFORE `initInteractions`. If it needs to respond to tool changes or selections, wire it in `interactions.js` or `keyboard.js`.
@@ -154,3 +155,4 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `quick-add.js` | Drag-to-create popup — Sektor/Eintrag from anchor drag to empty canvas |
 | `csv-export.js` | CSV export — buildCSV() + exportCSV(), semicolons + BOM, dynamic meta columns |
 | `csv-import.js` | CSV import — parser, auto-mapping, preview modal, conflict resolution |
+| `search.js` | Search & filter — fuzzyMatch, searchNodes, sidebar tab, navigate-to-node, Ctrl+K |
