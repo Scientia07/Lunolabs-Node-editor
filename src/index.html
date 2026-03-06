@@ -19,192 +19,193 @@
 <body>
 
 <!-- TOOLBAR -->
-<div id="toolbar">
+<div id="toolbar" role="toolbar" aria-label="Werkzeugleiste">
   <button class="tb-btn active" data-tool="select" title="Auswahl (V)">
-    <svg viewBox="0 0 24 24"><path d="M4 4l7 17 2.5-6.5L20 12z"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l7 17 2.5-6.5L20 12z"/></svg>
     <span>Auswahl</span>
   </button>
-  <div class="sep"></div>
-  <button class="tb-btn" data-tool="sector" title="Sektor hinzufuegen">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+  <div class="sep" role="separator"></div>
+  <button class="tb-btn" data-tool="sector" title="Sektor hinzufügen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     <span>Sektor</span>
   </button>
-  <button class="tb-btn" data-tool="company" title="Firma/Eintrag hinzufuegen">
-    <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+  <button class="tb-btn" data-tool="company" title="Firma/Eintrag hinzufügen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
     <span>Eintrag</span>
   </button>
-  <div class="sep"></div>
+  <div class="sep" role="separator"></div>
   <button class="tb-btn" data-tool="sticky" title="Sticky Note">
-    <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h9l5-5V5a2 2 0 00-2-2z"/><polyline points="14 17 14 21 19 16"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h9l5-5V5a2 2 0 00-2-2z"/><polyline points="14 17 14 21 19 16"/></svg>
     <span>Sticky</span>
   </button>
   <div class="dropdown-wrap">
-    <button class="tb-btn" data-tool="shapes" id="shapes-btn" title="Formen">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><circle cx="17" cy="17" r="4"/></svg>
+    <button class="tb-btn" data-tool="shapes" id="shapes-btn" title="Formen" aria-expanded="false" aria-controls="shapes-dropdown">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><circle cx="17" cy="17" r="4"/></svg>
       <span>Formen</span>
-      <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:-2px"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg viewBox="0 0 24 24" class="chevron-icon" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="dropdown-menu" id="shapes-dropdown">
-      <div class="dropdown-item" data-shape="rect">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><rect x="4" y="6" width="16" height="12" rx="2"/></svg>
+    <div class="dropdown-menu" id="shapes-dropdown" role="menu">
+      <button class="dropdown-item" data-shape="rect" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"/></svg>
         Rechteck
-      </div>
-      <div class="dropdown-item" data-shape="circle">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><circle cx="12" cy="12" r="8"/></svg>
+      </button>
+      <button class="dropdown-item" data-shape="circle" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>
         Kreis
-      </div>
-      <div class="dropdown-item" data-shape="textbox">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+      </button>
+      <button class="dropdown-item" data-shape="textbox" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
         Textbox
-      </div>
+      </button>
     </div>
   </div>
   <button class="tb-btn" data-tool="connect" title="Verbindung (C)">
-    <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="5" r="2" fill="currentColor"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="19" x2="19" y2="5"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="5" r="2" fill="currentColor"/></svg>
     <span>Verbinden</span>
   </button>
-  <div class="sep"></div>
-  <button class="tb-btn icon-only" id="grid-toggle" title="Raster (G)">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="3" x2="3" y2="21"/><line x1="21" y1="3" x2="21" y2="21"/><line x1="3" y1="3" x2="21" y2="3"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+  <div class="sep" role="separator"></div>
+  <button class="tb-btn icon-only" id="grid-toggle" title="Raster (G)" aria-label="Raster umschalten">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="3" x2="3" y2="21"/><line x1="21" y1="3" x2="21" y2="21"/><line x1="3" y1="3" x2="21" y2="3"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
   </button>
-  <button class="tb-btn icon-only" id="theme-toggle" title="Theme umschalten">
-    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+  <button class="tb-btn icon-only" id="theme-toggle" title="Theme umschalten" aria-label="Theme umschalten">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
   </button>
-  <div class="sep"></div>
-  <button class="tb-btn icon-only" id="undo-btn" title="Ctrl+Z">
-    <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.64-8.36L1 10"/></svg>
+  <div class="sep" role="separator"></div>
+  <button class="tb-btn icon-only" id="undo-btn" title="Rückgängig (Ctrl+Z)" aria-label="Rückgängig">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.64-8.36L1 10"/></svg>
   </button>
-  <button class="tb-btn icon-only" id="redo-btn" title="Ctrl+Y">
-    <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-5.64-8.36L23 10"/></svg>
+  <button class="tb-btn icon-only" id="redo-btn" title="Wiederherstellen (Ctrl+Y)" aria-label="Wiederherstellen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-5.64-8.36L23 10"/></svg>
   </button>
-  <button class="tb-btn icon-only" id="relayout-btn" title="Auto-Layout neu berechnen">
-    <svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+  <button class="tb-btn icon-only" id="relayout-btn" title="Auto-Layout neu berechnen" aria-label="Auto-Layout neu berechnen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
   </button>
-  <div class="sep"></div>
+  <div class="sep" role="separator"></div>
 
   <!-- Export dropdown -->
   <div class="dropdown-wrap">
-    <button class="tb-btn" id="export-wrap-btn" title="Exportieren">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <button class="tb-btn" id="export-wrap-btn" title="Exportieren" aria-expanded="false" aria-controls="export-dropdown">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       <span>Export</span>
-      <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:-2px"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg viewBox="0 0 24 24" class="chevron-icon" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="export-dropdown" id="export-dropdown">
-      <div class="dropdown-item" id="export-json-btn">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <div class="export-dropdown" id="export-dropdown" role="menu">
+      <button class="dropdown-item" id="export-json-btn" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         JSON speichern
-      </div>
-      <div class="dropdown-item" id="export-png-btn">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </button>
+      <button class="dropdown-item" id="export-png-btn" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         PNG exportieren
-      </div>
-      <div class="dropdown-item" id="export-csv-btn">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+      </button>
+      <button class="dropdown-item" id="export-csv-btn" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
         CSV exportieren
-      </div>
+      </button>
     </div>
   </div>
 
   <div class="dropdown-wrap">
-    <button class="tb-btn" id="import-wrap-btn" title="Importieren">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <button class="tb-btn" id="import-wrap-btn" title="Importieren" aria-expanded="false" aria-controls="import-dropdown">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       <span>Import</span>
-      <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:-2px"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg viewBox="0 0 24 24" class="chevron-icon" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="export-dropdown" id="import-dropdown">
-      <div class="dropdown-item" id="import-json-btn">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <div class="export-dropdown" id="import-dropdown" role="menu">
+      <button class="dropdown-item" id="import-json-btn" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         JSON importieren
-      </div>
-      <div class="dropdown-item" id="import-csv-btn">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+      </button>
+      <button class="dropdown-item" id="import-csv-btn" role="menuitem">
+        <svg viewBox="0 0 24 24" class="dropdown-icon" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
         CSV importieren
-      </div>
+      </button>
     </div>
   </div>
 </div>
 
 <!-- CANVAS -->
 <div id="canvas-container">
-  <canvas id="grid-canvas"></canvas>
+  <canvas id="grid-canvas" aria-hidden="true"></canvas>
   <div id="canvas">
-    <svg id="connections-layer"></svg>
+    <svg id="connections-layer" aria-hidden="true"></svg>
     <div id="nodes-layer"></div>
   </div>
-  <div id="selection-rect"></div>
+  <div id="selection-rect" aria-hidden="true"></div>
 </div>
 
 <!-- LEGEND (populated by project.js) -->
-<div id="legend"></div>
+<div id="legend" aria-label="Legende"></div>
 
 <!-- MINIMAP -->
-<div id="minimap">
-  <canvas id="minimap-canvas"></canvas>
-  <div id="minimap-viewport"></div>
+<div id="minimap" aria-label="Minimap">
+  <canvas id="minimap-canvas" aria-hidden="true"></canvas>
+  <div id="minimap-viewport" aria-hidden="true"></div>
 </div>
 
 <!-- ZOOM CONTROLS -->
-<div id="zoom-indicator">
-  <button class="tb-btn" id="zoom-out">
-    <svg viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+<div id="zoom-indicator" role="group" aria-label="Zoom-Steuerung">
+  <button class="tb-btn" id="zoom-out" aria-label="Herauszoomen">
+    <svg viewBox="0 0 24 24" class="zoom-icon" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
   <span id="zoom-level">100%</span>
-  <button class="tb-btn" id="zoom-in">
-    <svg viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  <button class="tb-btn" id="zoom-in" aria-label="Hineinzoomen">
+    <svg viewBox="0 0 24 24" class="zoom-icon" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
-  <button class="tb-btn" id="zoom-fit" style="font-size:10px;font-family:var(--font-mono)">FIT</button>
+  <button class="tb-btn zoom-fit-label" id="zoom-fit" aria-label="Ansicht anpassen">FIT</button>
 </div>
 
 <!-- QUICK-ADD POPUP (drag-to-create from anchor) -->
-<div id="quick-add-popup" class="quick-add-popup">
+<div id="quick-add-popup" class="quick-add-popup" role="dialog" aria-label="Neuen Knoten erstellen">
   <button class="quick-add-btn" data-type="sector">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     Sektor
   </button>
   <button class="quick-add-btn" data-type="company">
-    <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
     Eintrag
   </button>
 </div>
 
 <!-- CONTEXT MENU -->
-<div id="context-menu"></div>
+<div id="context-menu" role="menu"></div>
 
 <!-- COLOR POPUP (simple swatch picker) -->
-<div class="color-popup" id="color-popup">
-  <h4>Farbe waehlen</h4>
+<div class="color-popup" id="color-popup" role="dialog" aria-label="Farbwähler">
+  <strong class="popup-heading">Farbe wählen</strong>
   <div class="color-swatches" id="color-swatches"></div>
+  <label for="custom-color" class="sr-only">Eigene Farbe</label>
   <input type="color" id="custom-color" value="#6c8aff">
 </div>
 
 <!-- GRADIENT POPUP -->
-<div class="popup-panel" id="gradient-popup">
-  <h4>Farbe / Verlauf</h4>
-  <div class="gradient-preview" id="gradient-preview"></div>
+<div class="popup-panel" id="gradient-popup" role="dialog" aria-label="Farbverlauf">
+  <strong class="popup-heading">Farbe / Verlauf</strong>
+  <div class="gradient-preview" id="gradient-preview" aria-hidden="true"></div>
   <div class="color-swatches" id="grad-swatches"></div>
-  <label>Farbe 1</label>
+  <label for="grad-color1">Farbe 1</label>
   <div class="color-row">
     <input type="color" id="grad-color1" value="#6c8aff">
-    <span id="grad-hex1" style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono)">#6c8aff</span>
+    <span id="grad-hex1" class="popup-hex-label">#6c8aff</span>
   </div>
-  <label>Farbe 2 (Verlauf)</label>
+  <label for="grad-color2">Farbe 2 (Verlauf)</label>
   <div class="color-row">
     <input type="color" id="grad-color2" value="#6c8aff">
-    <span id="grad-hex2" style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono)">#6c8aff</span>
+    <span id="grad-hex2" class="popup-hex-label">#6c8aff</span>
   </div>
-  <label>Winkel: <span id="grad-angle-val">135</span>&deg;</label>
-  <input type="range" id="grad-angle" min="0" max="360" value="135" style="width:100%">
+  <label for="grad-angle">Winkel: <span id="grad-angle-val">135</span>&deg;</label>
+  <input type="range" id="grad-angle" min="0" max="360" value="135">
   <button class="popup-btn" id="grad-apply">Anwenden</button>
 </div>
 
 <!-- FONT POPUP -->
-<div class="popup-panel" id="font-popup">
-  <h4>Schriftart</h4>
+<div class="popup-panel" id="font-popup" role="dialog" aria-label="Schriftart">
+  <strong class="popup-heading">Schriftart</strong>
   <div class="font-list" id="font-list"></div>
-  <label style="margin-top:12px">Groesse: <span id="font-size-val">13</span>px</label>
-  <input type="range" id="font-size" min="9" max="24" value="13" style="width:100%">
-  <label>Staerke</label>
-  <select id="font-weight" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px">
+  <label for="font-size">Grösse: <span id="font-size-val">13</span>px</label>
+  <input type="range" id="font-size" min="9" max="24" value="13">
+  <label for="font-weight">Stärke</label>
+  <select id="font-weight" class="popup-select">
     <option value="300">Light</option>
     <option value="400" selected>Regular</option>
     <option value="500">Medium</option>
@@ -215,37 +216,39 @@
 </div>
 
 <!-- SIDEBAR TOGGLE -->
-<button id="sidebar-toggle" title="Seitenleiste">
-  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+<button id="sidebar-toggle" title="Seitenleiste" aria-label="Seitenleiste ein-/ausblenden">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
 </button>
 
 <!-- SIDEBAR -->
-<div id="sidebar">
-  <div class="sidebar-tabs">
-    <button class="sidebar-tab active" data-tab="connections">Verbindungen</button>
-    <button class="sidebar-tab" data-tab="groups">Gruppen</button>
-    <button class="sidebar-tab" data-tab="details">Details</button>
-    <button class="sidebar-tab" data-tab="settings">Einstellungen</button>
+<aside id="sidebar" aria-label="Seitenleiste">
+  <div class="sidebar-tabs" role="tablist">
+    <button class="sidebar-tab active" data-tab="connections" role="tab" aria-selected="true" aria-controls="tab-connections">Verbindungen</button>
+    <button class="sidebar-tab" data-tab="groups" role="tab" aria-selected="false" aria-controls="tab-groups">Gruppen</button>
+    <button class="sidebar-tab" data-tab="details" role="tab" aria-selected="false" aria-controls="tab-details">Details</button>
+    <button class="sidebar-tab" data-tab="search" role="tab" aria-selected="false" aria-controls="tab-search">Suche</button>
+    <button class="sidebar-tab" data-tab="settings" role="tab" aria-selected="false" aria-controls="tab-settings">Einstellungen</button>
   </div>
   <div class="sidebar-content">
-    <div class="tab-pane active" data-tab="connections"></div>
-    <div class="tab-pane" data-tab="groups"></div>
-    <div class="tab-pane" data-tab="details"></div>
-    <div class="tab-pane" data-tab="settings"></div>
+    <div class="tab-pane active" data-tab="connections" id="tab-connections" role="tabpanel"></div>
+    <div class="tab-pane" data-tab="groups" id="tab-groups" role="tabpanel"></div>
+    <div class="tab-pane" data-tab="details" id="tab-details" role="tabpanel"></div>
+    <div class="tab-pane" data-tab="search" id="tab-search" role="tabpanel"></div>
+    <div class="tab-pane" data-tab="settings" id="tab-settings" role="tabpanel"></div>
   </div>
-</div>
+</aside>
 
 <!-- CONNECTION PROPERTIES POPUP -->
-<div class="node-popup" id="conn-popup">
-  <div class="np-tabs">
-    <button class="np-tab active" data-np-tab="cp-color">Farbe</button>
-    <button class="np-tab" data-np-tab="cp-style">Stil</button>
+<div class="node-popup" id="conn-popup" role="dialog" aria-label="Verbindungs-Eigenschaften">
+  <div class="np-tabs" role="tablist">
+    <button class="np-tab active" data-np-tab="cp-color" role="tab" aria-selected="true">Farbe</button>
+    <button class="np-tab" data-np-tab="cp-style" role="tab" aria-selected="false">Stil</button>
   </div>
 
   <!-- Farbe (Color) Tab -->
-  <div class="np-pane active" data-np-pane="cp-color">
+  <div class="np-pane active" data-np-pane="cp-color" role="tabpanel">
     <div class="color-swatches" id="cp-swatches"></div>
-    <label>Farbe</label>
+    <label for="cp-color">Farbe</label>
     <div class="color-row">
       <input type="color" id="cp-color" value="#6c8aff">
       <span id="cp-hex" class="np-hex">#6c8aff</span>
@@ -253,28 +256,28 @@
   </div>
 
   <!-- Stil (Style) Tab -->
-  <div class="np-pane" data-np-pane="cp-style">
-    <label>Linienstil</label>
+  <div class="np-pane" data-np-pane="cp-style" role="tabpanel">
+    <label for="cp-line-style">Linienstil</label>
     <select id="cp-line-style" class="np-select">
       <option value="bezier">Bezier</option>
       <option value="straight">Gerade</option>
     </select>
-    <label>Strichtyp</label>
+    <label for="cp-dash">Strichtyp</label>
     <select id="cp-dash" class="np-select">
       <option value="">Durchgehend</option>
       <option value="6,4">Gestrichelt</option>
       <option value="2,3">Gepunktet</option>
       <option value="10,4,2,4">Strich-Punkt</option>
     </select>
-    <label>Dicke: <span id="cp-width-val">2</span>px</label>
-    <input type="range" id="cp-width" min="1" max="8" value="2" style="width:100%">
-    <label>Rand</label>
+    <label for="cp-width">Dicke: <span id="cp-width-val">2</span>px</label>
+    <input type="range" id="cp-width" min="1" max="8" value="2">
+    <label for="cp-outline-color">Rand</label>
     <div class="color-row">
       <input type="color" id="cp-outline-color" value="#000000">
       <span id="cp-outline-hex" class="np-hex">keiner</span>
     </div>
-    <label>Randdicke: <span id="cp-outline-w-val">0</span>px</label>
-    <input type="range" id="cp-outline-w" min="0" max="6" value="0" style="width:100%">
+    <label for="cp-outline-w">Randdicke: <span id="cp-outline-w-val">0</span>px</label>
+    <input type="range" id="cp-outline-w" min="0" max="6" value="0">
     <label class="cp-toggle-row">
       <input type="checkbox" id="cp-hidden">
       <span>Unsichtbar</span>
@@ -283,36 +286,36 @@
 </div>
 
 <!-- NODE PROPERTIES POPUP -->
-<div class="node-popup" id="node-popup">
-  <div class="np-tabs">
-    <button class="np-tab active" data-np-tab="color">Farbe</button>
-    <button class="np-tab" data-np-tab="form">Form</button>
-    <button class="np-tab" data-np-tab="font">Schrift</button>
+<div class="node-popup" id="node-popup" role="dialog" aria-label="Knoten-Eigenschaften">
+  <div class="np-tabs" role="tablist">
+    <button class="np-tab active" data-np-tab="color" role="tab" aria-selected="true">Farbe</button>
+    <button class="np-tab" data-np-tab="form" role="tab" aria-selected="false">Form</button>
+    <button class="np-tab" data-np-tab="font" role="tab" aria-selected="false">Schrift</button>
   </div>
 
   <!-- Farbe (Color) Tab -->
-  <div class="np-pane active" data-np-pane="color">
+  <div class="np-pane active" data-np-pane="color" role="tabpanel">
     <div class="color-swatches" id="np-swatches"></div>
-    <label>Farbe 1</label>
+    <label for="np-color1">Farbe 1</label>
     <div class="color-row">
       <input type="color" id="np-color1" value="#6c8aff">
       <span id="np-hex1" class="np-hex">#6c8aff</span>
     </div>
-    <label>Farbe 2 (Verlauf)</label>
+    <label for="np-color2">Farbe 2 (Verlauf)</label>
     <div class="color-row">
       <input type="color" id="np-color2" value="#6c8aff">
       <span id="np-hex2" class="np-hex">#6c8aff</span>
     </div>
-    <label>Winkel: <span id="np-angle-val">135</span>&deg;</label>
-    <input type="range" id="np-angle" min="0" max="360" value="135" style="width:100%">
-    <label>Deckkraft: <span id="np-opacity-val">100</span>%</label>
-    <input type="range" id="np-opacity" min="0" max="100" value="100" style="width:100%">
-    <div class="gradient-preview" id="np-grad-preview"></div>
+    <label for="np-angle">Winkel: <span id="np-angle-val">135</span>&deg;</label>
+    <input type="range" id="np-angle" min="0" max="360" value="135">
+    <label for="np-opacity">Deckkraft: <span id="np-opacity-val">100</span>%</label>
+    <input type="range" id="np-opacity" min="0" max="100" value="100">
+    <div class="gradient-preview" id="np-grad-preview" aria-hidden="true"></div>
   </div>
 
   <!-- Form (Shape) Tab -->
-  <div class="np-pane" data-np-pane="form">
-    <label>Typ</label>
+  <div class="np-pane" data-np-pane="form" role="tabpanel">
+    <label for="np-type">Typ</label>
     <select id="np-type" class="np-select">
       <option value="sector">Sektor</option>
       <option value="company">Eintrag</option>
@@ -321,23 +324,23 @@
       <option value="circle">Kreis</option>
       <option value="textbox">Textbox</option>
     </select>
-    <label>Rahmenfarbe</label>
+    <label for="np-border-color">Rahmenfarbe</label>
     <div class="color-row">
       <input type="color" id="np-border-color" value="#d0d0dd">
       <span id="np-border-hex" class="np-hex">#d0d0dd</span>
     </div>
-    <label>Breite</label>
+    <label for="np-width">Breite</label>
     <input type="number" id="np-width" class="np-number" min="40" max="800" step="10">
-    <label>Hoehe</label>
+    <label for="np-height">Höhe</label>
     <input type="number" id="np-height" class="np-number" min="30" max="800" step="10">
   </div>
 
   <!-- Schrift (Font) Tab -->
-  <div class="np-pane" data-np-pane="font">
+  <div class="np-pane" data-np-pane="font" role="tabpanel">
     <div class="font-list" id="np-font-list"></div>
-    <label>Groesse: <span id="np-fsize-val">13</span>px</label>
-    <input type="range" id="np-fsize" min="9" max="24" value="13" style="width:100%">
-    <label>Staerke</label>
+    <label for="np-fsize">Grösse: <span id="np-fsize-val">13</span>px</label>
+    <input type="range" id="np-fsize" min="9" max="24" value="13">
+    <label for="np-fweight">Stärke</label>
     <select id="np-fweight" class="np-select">
       <option value="300">Light</option>
       <option value="400" selected>Regular</option>
@@ -349,16 +352,16 @@
 </div>
 
 <!-- TOAST -->
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <!-- CSV Import Modal -->
-<div class="csv-import-modal" id="csv-import-modal">
+<div class="csv-import-modal" id="csv-import-modal" role="dialog" aria-label="CSV Import" aria-modal="true">
   <div class="csv-modal-content"></div>
 </div>
 
 <!-- HIDDEN FILE INPUTS -->
-<input type="file" id="file-input" accept=".json" style="display:none">
-<input type="file" id="csv-file-input" accept=".csv,.txt" style="display:none">
+<input type="file" id="file-input" accept=".json" hidden aria-hidden="true">
+<input type="file" id="csv-file-input" accept=".csv,.txt" hidden aria-hidden="true">
 
 <script type="module" src="js/main.js"></script>
 </body>
