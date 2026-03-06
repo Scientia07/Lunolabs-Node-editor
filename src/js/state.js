@@ -40,6 +40,9 @@ export const state = {
   groups: [],               // [{ id, name, nodeIds: [], hidden: false }]
   hiddenSectors: new Set(), // sector IDs hidden via sidebar
   projectTitle: '',         // editable project title
+  // Search
+  searchQuery: '',
+  searchMatches: null,        // Set<nodeId> or null when search inactive
 };
 
 // O(1) node lookup by id

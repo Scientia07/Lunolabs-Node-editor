@@ -153,6 +153,16 @@ export function createNodeElement(n) {
   });
 
   if (state.selectedIds.has(n.id)) el.classList.add('selected');
+
+    // Search highlight/dim
+    if (state.searchMatches) {
+      if (state.searchMatches.has(n.id)) {
+        el.classList.add('search-highlight');
+      } else {
+        el.classList.add('search-dimmed');
+      }
+    }
+
   return el;
 }
 

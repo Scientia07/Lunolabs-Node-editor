@@ -299,3 +299,18 @@
   cursor: nwse-resize;
   z-index: 5;
 }
+
+/* ── Search highlight / dim ── */
+.node.search-dimmed {
+  opacity: 0.15 !important;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.node.search-highlight {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  box-shadow: 0 0 16px rgba(108, 138, 255, 0.35);
+}
+.node.search-highlight.selected {
+  outline-width: 3px;
+}
