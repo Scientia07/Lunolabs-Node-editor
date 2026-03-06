@@ -21,6 +21,7 @@ import { autoSave } from './persistence.js';
 import { setSpaceHeld } from './interactions.js';
 import { toggleSidebar } from './sidebar.js';
 import { hideNodePopup } from './node-popup.js';
+import { focusSearch, clearSearch } from './search.js';
 
 let setToolFn;
 
@@ -32,6 +33,13 @@ export function initKeyboard(setTool) {
 }
 
 function onKeyDown(e) {
+  // Ctrl+K: focus search (works even when in input)
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    focusSearch();
+    return;
+  }
+
   if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
 
   if (e.key === ' ') { setSpaceHeld(true); e.preventDefault(); }
@@ -54,6 +62,7 @@ function onKeyDown(e) {
   }
   if (e.key === 'p' || e.key === 'P') { toggleSidebar(); }
   if (e.key === 'Escape') {
+    clearSearch();
     state.selectedIds.clear();
     renderSelectionState();
     closeMenus();
