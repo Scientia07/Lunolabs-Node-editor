@@ -3,16 +3,16 @@
 
 #sidebar {
   position: fixed;
-  top: 0; right: 0;
+  top: 0; left: 0;
   width: var(--sidebar-w);
   height: 100vh;
   padding-top: var(--toolbar-h);
   background: var(--bg-surface);
-  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   z-index: 950;
   display: flex;
   flex-direction: column;
-  transform: translateX(100%);
+  transform: translateX(-100%);
   transition: transform 0.25s ease;
   font-family: var(--font-body);
   font-size: 12px;
@@ -20,42 +20,66 @@
 }
 body.sidebar-open #sidebar { transform: translateX(0); }
 
-/* Push canvas and fixed panels when sidebar is open */
-body.sidebar-open #canvas-container { right: var(--sidebar-w); }
-#canvas-container { transition: right 0.25s ease; }
-body.sidebar-open #minimap { right: calc(var(--sidebar-w) + 16px); }
-#minimap { transition: right 0.25s ease; }
-body.sidebar-open #zoom-indicator { right: calc(var(--sidebar-w) + var(--minimap-w) + 28px); }
-#zoom-indicator { transition: right 0.25s ease; }
+/* Push canvas when sidebar is open */
+body.sidebar-open #canvas-container { left: var(--sidebar-w); }
+#canvas-container { transition: left 0.25s ease; }
 
-/* Toggle button (always visible on right edge) */
+/* Toggle button (always visible on left edge) */
 #sidebar-toggle {
   position: fixed;
   top: 50%;
-  right: 0;
+  left: 0;
   transform: translateY(-50%);
   z-index: 960;
   width: 24px;
   height: 48px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-right: none;
-  border-radius: 6px 0 0 6px;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  transition: right 0.25s ease, background 0.15s, color 0.15s;
+  transition: left 0.25s ease, background 0.15s, color 0.15s;
 }
 #sidebar-toggle:hover { background: var(--bg-elevated); color: var(--text); }
-body.sidebar-open #sidebar-toggle { right: var(--sidebar-w); }
+body.sidebar-open #sidebar-toggle { left: var(--sidebar-w); }
 #sidebar-toggle svg {
   width: 14px; height: 14px;
   stroke: currentColor; fill: none; stroke-width: 2;
   transition: transform 0.25s ease;
 }
 body.sidebar-open #sidebar-toggle svg { transform: rotate(180deg); }
+
+/* ── Bounce animation (first load) ── */
+@keyframes sidebar-bounce {
+  0%, 100% { transform: translateY(-50%); }
+  20% { transform: translateY(-50%) translateX(10px); }
+  40% { transform: translateY(-50%); }
+  60% { transform: translateY(-50%) translateX(7px); }
+  80% { transform: translateY(-50%); }
+}
+#sidebar-toggle.bounce {
+  animation: sidebar-bounce 1.2s ease-in-out;
+}
+
+/* ── Resize handle (right edge of sidebar) ── */
+#sidebar-resize {
+  position: absolute;
+  top: 0; right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  background: transparent;
+}
+#sidebar-resize:hover,
+#sidebar-resize.active {
+  background: var(--accent);
+  opacity: 0.4;
+}
 
 /* ── Tabs ── */
 .sidebar-tabs {
@@ -205,6 +229,26 @@ body.sidebar-open #sidebar-toggle svg { transform: rotate(180deg); }
   color: var(--text-dim);
   font-family: var(--font-mono);
 }
+/* Child nodes under sectors */
+.group-child {
+  display: flex;
+  align-items: center;
+  padding: 3px 8px 3px 28px;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+  border-radius: 4px;
+}
+.group-child:hover { background: var(--accent-dim); }
+.group-child.hidden-group { opacity: 0.45; }
+.group-child-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.group-child-eye { margin-left: auto; }
+
 .group-eye {
   background: none;
   border: none;

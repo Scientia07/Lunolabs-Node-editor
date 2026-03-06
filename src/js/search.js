@@ -230,7 +230,7 @@ function navigateToNode(nodeId) {
   const vh = window.innerHeight;
   const targetZoom = Math.max(state.zoom, 1);
   state.zoom = targetZoom;
-  state.panX = vw / 2 - (node.x + w / 2) * targetZoom;
+  state.panX = sidebarW + vw / 2 - (node.x + w / 2) * targetZoom;
   state.panY = vh / 2 - (node.y + h / 2) * targetZoom;
   updateTransform();
   emit('render');

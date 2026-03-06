@@ -217,11 +217,12 @@
 
 <!-- SIDEBAR TOGGLE -->
 <button id="sidebar-toggle" title="Seitenleiste" aria-label="Seitenleiste ein-/ausblenden">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 </button>
 
 <!-- SIDEBAR -->
 <aside id="sidebar" aria-label="Seitenleiste">
+  <div id="sidebar-resize" aria-hidden="true"></div>
   <div class="sidebar-tabs" role="tablist">
     <button class="sidebar-tab active" data-tab="connections" role="tab" aria-selected="true" aria-controls="tab-connections">Verbindungen</button>
     <button class="sidebar-tab" data-tab="groups" role="tab" aria-selected="false" aria-controls="tab-groups">Gruppen</button>
@@ -357,6 +358,19 @@
 <!-- CSV Import Modal -->
 <div class="csv-import-modal" id="csv-import-modal" role="dialog" aria-label="CSV Import" aria-modal="true">
   <div class="csv-modal-content"></div>
+</div>
+
+<!-- Visibility export modal -->
+<div id="visibility-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:360px">
+    <h3>Export</h3>
+    <p>Ausgeblendete Elemente einschliessen?</p>
+    <div class="modal-actions" style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button id="vis-export-all" class="modal-btn primary">Ja</button>
+      <button id="vis-export-visible" class="modal-btn">Nein</button>
+      <button id="vis-export-cancel" class="modal-btn cancel">Abbrechen</button>
+    </div>
+  </div>
 </div>
 
 <!-- HIDDEN FILE INPUTS -->

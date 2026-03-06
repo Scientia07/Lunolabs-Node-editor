@@ -45,7 +45,17 @@ export function initSidebar() {
   });
 
   // Toggle button
-  document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  toggleBtn.addEventListener('click', toggleSidebar);
+
+  // Bounce the toggle button to draw attention on first load
+  setTimeout(() => {
+    toggleBtn.classList.add('bounce');
+    toggleBtn.addEventListener('animationend', () => toggleBtn.classList.remove('bounce'), { once: true });
+  }, 800);
+
+  // Drag-to-resize sidebar
+  initSidebarResize(toggleBtn);
 
   // Listen for state changes
   document.addEventListener('editor:render', () => refreshSidebar());
@@ -57,6 +67,42 @@ export function toggleSidebar() {
   setTimeout(() => {
     window.dispatchEvent(new Event('resize'));
   }, 280);
+}
+
+function initSidebarResize(toggleBtn) {
+  const handle = document.getElementById('sidebar-resize');
+  if (!handle) return;
+  const MIN_W = 200;
+  const MAX_W = 600;
+
+  let startX, startW;
+
+  handle.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startX = e.clientX;
+    startW = sidebarEl.offsetWidth;
+    handle.classList.add('active');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const onMove = (ev) => {
+      const dx = ev.clientX - startX;
+      const newW = Math.min(MAX_W, Math.max(MIN_W, startW + dx));
+      document.documentElement.style.setProperty('--sidebar-w', newW + 'px');
+    };
+
+    const onUp = () => {
+      handle.classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      window.dispatchEvent(new Event('resize'));
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 }
 
 export function refreshSidebar() {
@@ -149,9 +195,10 @@ function highlightConnection(connId) {
   if (fromNode && toNode) {
     const midX = (fromNode.x + toNode.x) / 2;
     const midY = (fromNode.y + toNode.y) / 2;
-    const cw = window.innerWidth - (document.body.classList.contains('sidebar-open') ? 280 : 0);
+    const sidebarW = document.body.classList.contains('sidebar-open') ? 280 : 0;
+    const cw = window.innerWidth - sidebarW;
     const ch = window.innerHeight;
-    state.panX = cw / 2 - midX * state.zoom;
+    state.panX = sidebarW + cw / 2 - midX * state.zoom;
     state.panY = ch / 2 - midY * state.zoom;
     document.dispatchEvent(new CustomEvent('editor:render'));
   }
@@ -196,6 +243,22 @@ function renderGroupsTab() {
           ${isHidden ? iconEyeOff : iconEye}
         </button>
       </div>`;
+
+      // Child nodes under this sector
+      const children = getNodesConnectedTo(s.id)
+        .map(id => nodeIndex.get(id))
+        .filter(n => n && n.type !== 'sector' && n.type !== 'center')
+        .sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+
+      for (const child of children) {
+        const nodeHidden = state.hiddenNodes.has(child.id);
+        html += `<div class="group-child ${nodeHidden ? 'hidden-group' : ''}" data-node-id="${child.id}">
+          <span class="group-child-name">${esc(child.label || 'Node ' + child.id)}</span>
+          <button class="group-eye group-child-eye" data-hide-node="${child.id}" title="${nodeHidden ? 'Einblenden' : 'Ausblenden'}">
+            ${nodeHidden ? iconEyeOff : iconEye}
+          </button>
+        </div>`;
+      }
     }
     html += '</div>';
   }
@@ -280,6 +343,22 @@ function renderGroupsTab() {
       for (const id of state.selectedIds) {
         if (!g.nodeIds.includes(id)) g.nodeIds.push(id);
       }
+      autoSave();
+      renderGroupsTab();
+    });
+  });
+
+  // Wire individual node hide toggle
+  pane.querySelectorAll('[data-hide-node]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nid = parseInt(btn.dataset.hideNode, 10);
+      if (state.hiddenNodes.has(nid)) {
+        state.hiddenNodes.delete(nid);
+      } else {
+        state.hiddenNodes.add(nid);
+      }
+      applyVisibility();
       autoSave();
       renderGroupsTab();
     });
@@ -503,15 +582,13 @@ function wireDetailsEvents(pane, node) {
   }
 }
 
-/** Apply hidden state to node DOM elements and connections */
-export function applyVisibility() {
+/** Compute set of all node IDs that should be hidden */
+export function getHiddenNodeIds() {
   const hiddenNodeIds = new Set();
 
-  // Hidden sectors + their connected nodes
   for (const sid of state.hiddenSectors) {
     hiddenNodeIds.add(sid);
     for (const nid of getNodesConnectedTo(sid)) {
-      // Only hide if the node isn't connected to any visible sector
       const otherSectors = getNodesConnectedTo(nid).filter(
         id => (nodeIndex.get(id)?.type === 'sector' || nodeIndex.get(id)?.type === 'center') && !state.hiddenSectors.has(id)
       );
@@ -519,12 +596,22 @@ export function applyVisibility() {
     }
   }
 
-  // Hidden custom groups
   for (const g of state.groups) {
     if (g.hidden) {
       for (const nid of g.nodeIds) hiddenNodeIds.add(nid);
     }
   }
+
+  for (const nid of state.hiddenNodes) {
+    hiddenNodeIds.add(nid);
+  }
+
+  return hiddenNodeIds;
+}
+
+/** Apply hidden state to node DOM elements and connections */
+export function applyVisibility() {
+  const hiddenNodeIds = getHiddenNodeIds();
 
   // Apply to DOM using domCache for O(1) lookups
   for (const n of state.nodes) {
@@ -532,7 +619,6 @@ export function applyVisibility() {
     if (el) el.style.display = hiddenNodeIds.has(n.id) ? 'none' : '';
   }
 
-  // P6: Build connection index for O(1) lookup instead of Array.find per SVG element
   const connIndex = new Map();
   for (const c of state.connections) connIndex.set(c.id, c);
 
