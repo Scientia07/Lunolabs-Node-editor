@@ -188,6 +188,7 @@ function onMouseDown(e, canvasContainer, selRect) {
       state.selectedIds.add(nid);
     }
     renderSelectionState();
+    renderConnections(); // Re-render to show focus effect on sector/center connections
 
     // Hide connection popup when selecting nodes
     hideConnPopup();
@@ -286,6 +287,7 @@ function onMouseDown(e, canvasContainer, selRect) {
     if (state.tool === 'select') {
       if (!e.shiftKey) state.selectedIds.clear();
       renderSelectionState();
+      renderConnections(); // Clear focus effect
       hideNodePopup();
       isSelecting = true;
       dragStartX = e.clientX;

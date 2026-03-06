@@ -189,21 +189,47 @@ export function renderConnections() {
   svgLayer.innerHTML = '';
   const connStyle = state.connectionStyle || 'bezier';
 
+  // Detect if a sector/center node is selected → focus its connections
+  const focusedNodeIds = new Set();
+  for (const id of state.selectedIds) {
+    const n = nodeIndex.get(id);
+    if (n && (n.type === 'sector' || n.type === 'center')) focusedNodeIds.add(id);
+  }
+  const hasFocus = focusedNodeIds.size > 0;
+  const focusedConnIds = new Set();
+  if (hasFocus) {
+    for (const c of state.connections) {
+      if (focusedNodeIds.has(c.from) || focusedNodeIds.has(c.to)) focusedConnIds.add(c.id);
+    }
+  }
+
   state.connections.forEach(c => {
     const pts = getConnectionEndpoints(c);
     if (!pts) return;
     const { fc, tc } = pts;
     const style = c.style || connStyle;
     const isSelected = state.selectedConnId === c.id;
+    const isFocused = focusedConnIds.has(c.id);
 
-    // Hidden connections: only show as ghost when selected
-    if (c.hidden && !isSelected) return;
+    // Hidden connections: only show as ghost when selected or focused
+    if (c.hidden && !isSelected && !isFocused) return;
 
     const baseWidth = c.width || (style === 'straight' ? 1.5 : 2);
-    const strokeW = isSelected ? Math.max(baseWidth + 1, 3) : baseWidth;
-    const strokeOp = c.hidden ? '0.15' : (isSelected ? '0.9' : (style === 'straight' ? '0.45' : '0.6'));
+    let strokeW = isSelected ? Math.max(baseWidth + 1, 3) : baseWidth;
+    let strokeOp = c.hidden ? '0.15' : (isSelected ? '0.9' : (style === 'straight' ? '0.45' : '0.6'));
 
+    // Focus mode: emphasize connections of selected sector/center
+    if (isFocused && !isSelected) {
+      strokeW = Math.max(baseWidth + 0.5, 2.5);
+      strokeOp = '0.85';
+    } else if (hasFocus && !isFocused && !isSelected) {
+      strokeOp = '0.12';
+    }
+
+    // Focused connections: show as dotted with glow
+    const dashVal = isFocused && !c.dash ? '6,4' : c.dash;
     const hasOutline = c.outlineColor && c.outlineWidth > 0;
+    const focusFilter = isFocused && !isSelected ? 'drop-shadow(0 0 4px currentColor)' : null;
 
     if (style === 'straight') {
       // Invisible wider hit area
@@ -225,7 +251,7 @@ export function renderConnections() {
         outline.setAttribute('stroke-width', strokeW + c.outlineWidth * 2);
         outline.setAttribute('stroke-opacity', strokeOp);
         outline.setAttribute('stroke-linecap', 'round');
-        if (c.dash) outline.setAttribute('stroke-dasharray', c.dash);
+        if (dashVal) outline.setAttribute('stroke-dasharray', dashVal);
         outline.dataset.id = c.id;
         svgLayer.appendChild(outline);
       }
@@ -239,7 +265,8 @@ export function renderConnections() {
       line.setAttribute('stroke-width', strokeW);
       line.setAttribute('stroke-opacity', strokeOp);
       line.setAttribute('stroke-linecap', 'round');
-      if (c.dash) line.setAttribute('stroke-dasharray', c.dash);
+      if (dashVal) line.setAttribute('stroke-dasharray', dashVal);
+      if (focusFilter) line.style.filter = focusFilter;
       line.dataset.id = c.id;
       svgLayer.appendChild(line);
     } else {
@@ -271,7 +298,7 @@ export function renderConnections() {
         outline.setAttribute('fill', 'none');
         outline.setAttribute('stroke-opacity', strokeOp);
         outline.setAttribute('stroke-linecap', 'round');
-        if (c.dash) outline.setAttribute('stroke-dasharray', c.dash);
+        if (dashVal) outline.setAttribute('stroke-dasharray', dashVal);
         outline.dataset.id = c.id;
         svgLayer.appendChild(outline);
       }
@@ -283,7 +310,8 @@ export function renderConnections() {
       path.setAttribute('fill', 'none');
       path.setAttribute('stroke-opacity', strokeOp);
       path.setAttribute('stroke-linecap', 'round');
-      if (c.dash) path.setAttribute('stroke-dasharray', c.dash);
+      if (dashVal) path.setAttribute('stroke-dasharray', dashVal);
+      if (focusFilter) path.style.filter = focusFilter;
       path.dataset.id = c.id;
       svgLayer.appendChild(path);
     }
