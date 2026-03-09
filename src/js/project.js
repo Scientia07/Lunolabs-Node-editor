@@ -40,9 +40,17 @@ export function loadProject(project, opts = {}) {
 }
 
 // Load project from URL parameter: ?project=netzwerk-jb-march
+// If no param given, auto-loads the first embedded project (customer mode)
 export async function loadFromURL() {
   const params = new URLSearchParams(window.location.search);
-  const projectName = params.get('project');
+  let projectName = params.get('project');
+
+  // Auto-load first embedded project when no URL param given
+  if (!projectName && window.__EMBEDDED_PROJECTS__) {
+    const keys = Object.keys(window.__EMBEDDED_PROJECTS__);
+    if (keys.length === 1) projectName = keys[0];
+  }
+
   if (!projectName) return false;
 
   // Validate project name to prevent path traversal / injection
