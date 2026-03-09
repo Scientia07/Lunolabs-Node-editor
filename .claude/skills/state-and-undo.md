@@ -32,6 +32,7 @@ export const state = {
   hiddenNodes: new Set(),    // individual node IDs hidden via sidebar
   projectTitle: '',
   isDirty: false,            // true after saveSnapshot(), cleared on save
+  showLegend: true,          // auto-generated legend from sector colors
   // Search
   searchQuery: '',       // Current search text (empty = inactive)
   searchMatches: null,   // Set<nodeId> or null when search inactive

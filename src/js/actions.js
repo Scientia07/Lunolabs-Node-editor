@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        actions.js
- * @description Node actions — delete selected, duplicate selected (with connection cloning)
- * @version     2.0
- * @date        2026-03-05
- * @rating      8.5/10
- * @depends-on  state.js
- * @used-by     main.js, keyboard.js
- * @strengths   Clean, focused module; duplicate preserves internal connections via idMap
- * @issues      None — could add bulk operations later (align, distribute)
- * ─────────────────────────────────────────────── */
 // ─── Node Actions ───
 import { state, nodeIndex, genId, saveSnapshot, rebuildIndex } from './state.js';
 import { runForceLayout } from './force-layout.js';
@@ -22,7 +10,7 @@ export function deleteSelected(fullRender) {
   state.selectedIds.clear();
   rebuildIndex();
   fullRender();
-  if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
+  if (state.physicsLayout) setTimeout(() => runForceLayout({ alpha: 0.5 }), 50);
 }
 
 export function duplicateSelected(fullRender) {
@@ -47,5 +35,5 @@ export function duplicateSelected(fullRender) {
   newIds.forEach(id => state.selectedIds.add(id));
   rebuildIndex();
   fullRender();
-  if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
+  if (state.physicsLayout) setTimeout(() => runForceLayout({ alpha: 0.5 }), 50);
 }

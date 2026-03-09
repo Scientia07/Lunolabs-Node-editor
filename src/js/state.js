@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        state.js
- * @description Central app state, O(1) node index, undo/redo stack, event bus
- * @version     2.0
- * @date        2026-03-05
- * @rating      9/10
- * @depends-on  constants.js
- * @used-by     ALL modules (core dependency)
- * @strengths   Clean state object, efficient Map-based index, minimal event bus
- * @issues      None significant — solid foundational module
- * ─────────────────────────────────────────────── */
 // ─── Application State ───
 import { DEFAULT_CONNECTION_COLOR, DEFAULT_GRID_SIZE, MAX_UNDO } from './constants.js';
 
@@ -45,6 +33,7 @@ export const state = {
   searchQuery: '',
   searchMatches: null,        // Set<nodeId> or null when search inactive
   isDirty: false,
+  showLegend: true,           // auto-generated legend from sector colors
 };
 
 // O(1) node lookup by id

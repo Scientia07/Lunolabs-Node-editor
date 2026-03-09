@@ -191,7 +191,7 @@
 
 | Feature | Priority |
 |---------|----------|
-| SVG export | P2 |
+| ~~SVG export~~ | Done |
 | Auto-layout (force-directed) | P2 |
 | Touch support (Pointer Events) | P2 |
 | ~~Connection labels~~ | Done |
@@ -229,7 +229,12 @@ Security fix (safeMetaKey)                     ✅ DONE
 Performance (adjacency index, slider debounce) ✅ DONE
 Connection labels                              ✅ DONE
 
-Next: Architecture cleanup (A2, A3), scalability (SC1-SC4, SC6), testing gaps
+Architecture cleanup (A2 + A1)                 ✅ DONE
+  — graph-utils.js (BFS, adjacency, visibility)
+  — node-creation.js (tool creation logic)
+SVG export                                     ✅ DONE
+
+Next: Testing gaps, A3 (shared popup helpers), scalability (SC1-SC4, SC6)
 ```
 
 ---

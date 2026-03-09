@@ -164,3 +164,16 @@ When `getNodesConnectedTo(id)` scans all connections for every node in a loop (B
 
 ### [PERFORMANCE] requestAnimationFrame is the right debounce for render-triggering inputs
 `setTimeout` adds arbitrary latency and can still fire multiple times per frame. `requestAnimationFrame` guarantees exactly 1 render per browser paint cycle — zero wasted work, zero perceptible lag. For slider/color picker `input` events that trigger full re-renders, this is the optimal coalescing strategy.
+
+---
+
+## Session: Architecture Cleanup + SVG Export — 2026-03-09
+
+### [ARCHITECTURE] Pure function extraction is the highest-ROI refactoring pattern
+Moving `buildHierarchyLayers()`, `computeHiddenNodeIds()`, and `buildAdjacencyMap()` from sidebar.js to graph-utils.js required zero behavioral changes — the functions were already pure in practice, just trapped in a module with DOM concerns. Making them explicitly pure (data parameters instead of module-level state access) yielded 20 independently testable functions with zero mocking.
+
+### [CODE-PATTERN] SVG export maps 1:1 from Canvas 2D API with two exceptions
+`ctx.measureText()` has no SVG equivalent (estimated via char-width heuristic), and `ctx.shadowBlur` becomes an SVG `<filter>` element. Everything else — gradients, bezier curves, rounded rects, text anchoring — has a direct SVG counterpart. Porting export-png.js to export-svg.js was mechanical translation.
+
+### [ARCHITECTURE] Tool-specific creation logic is a natural extraction boundary
+The sector/company/sticky/shape creation handlers in onMouseDown shared no state with the surrounding mouse event routing code. Extracting them to node-creation.js reduced interactions.js by 128 LOC while making it clear where to add new node types.

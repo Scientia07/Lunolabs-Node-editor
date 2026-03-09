@@ -37,7 +37,7 @@ All nodes are plain objects with these fields:
   width: 140,         // Explicit width (sticky, rect, circle)
   height: 80,         // Explicit height (sticky, rect)
   borderColor: '#d0d0dd', // Border color (rect, circle)
-  font: "'Inter', sans-serif",
+  font: "'DM Sans', sans-serif",
   fontSize: 14,
   fontWeight: 600,
 
@@ -154,7 +154,7 @@ if (newType === 'mytype' && !n.width) { n.width = 140; n.height = 80; }
 
 ### Step 6: Context Menu
 
-No changes needed — the context menu uses the same items for all node types (edit, color, font, duplicate, delete).
+No changes needed — the context menu uses the same items for all node types (edit, color/gradient, duplicate, delete). Font editing is done via the node popup's inline font tab.
 
 ## Type Variants
 

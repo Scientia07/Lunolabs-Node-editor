@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        color-popup.js
- * @description Simple swatch color picker popup with custom color input
- * @version     2.0
- * @date        2026-03-05
- * @rating      7.5/10
- * @depends-on  constants.js
- * @used-by     main.js, interactions.js
- * @strengths   Clean callback pattern, viewport clamping for positioning
- * @issues      Rebuilds swatch DOM on every show; onchange assignment overwrites previous handler
- * ─────────────────────────────────────────────── */
 // ─── Color Popup (simple swatch picker) ───
 import { PALETTE } from './constants.js';
 

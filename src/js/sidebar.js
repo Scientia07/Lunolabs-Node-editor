@@ -5,6 +5,7 @@ import { SUGGESTED_META_FIELDS } from './constants.js';
 import { domCache } from './renderer.js';
 import { renderSettingsTab } from './settings-panel.js';
 import { renderSearchTab } from './search.js';
+import { buildAdjacencyMap, getNeighbors, buildHierarchyLayers, computeHiddenNodeIds } from './graph-utils.js';
 
 let sidebarEl, contentEl;
 let activeTab = 'groups';
@@ -96,7 +97,7 @@ function initSidebarResize(toggleBtn) {
 
 export function refreshSidebar() {
   if (!document.body.classList.contains('sidebar-open')) return;
-  rebuildAdjMap();
+  _adjMap = buildAdjacencyMap(state.connections);
   if (activeTab === 'groups') renderGroupsTab();
   else if (activeTab === 'details') renderDetailsTab();
   else if (activeTab === 'search') renderSearchTab(contentEl);
@@ -128,7 +129,8 @@ function renderGroupsTab() {
   let html = '';
 
   // ── Hierarchical scaffold (layers by connection distance) ──
-  const layers = buildHierarchyLayers();
+  if (!_adjMap) _adjMap = buildAdjacencyMap(state.connections);
+  const layers = buildHierarchyLayers(state.nodes, state.connections, nodeIndex, _adjMap);
   if (layers.length) {
     html += `<div class="group-section">
       <div class="group-section-title">Netzwerk-Hierarchie</div>`;
@@ -145,7 +147,7 @@ function renderGroupsTab() {
 
       if (!isCollapsed) {
         for (const n of layerNodes) {
-          const connCount = getNodesConnectedTo(n.id).length;
+          const connCount = getNeighbors(_adjMap, n.id, nodeIndex).length;
           const isSector = n.type === 'sector' || n.type === 'center';
           const isHiddenSector = isSector && state.hiddenSectors.has(n.id);
           const isHiddenNode = !isSector && state.hiddenNodes.has(n.id);
@@ -311,76 +313,8 @@ function showGroupEditRow() {
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') create(); if (e.key === 'Escape') area.innerHTML = ''; });
 }
 
-// ─── Connection adjacency index (P1 perf fix: O(1) lookups instead of O(n)) ───
+// ─── Connection adjacency cache (rebuilt at entry points via graph-utils.js) ───
 let _adjMap = null;
-
-/** Rebuild adjacency map from current connections. Call at entry points. */
-function rebuildAdjMap() {
-  _adjMap = new Map();
-  for (const c of state.connections) {
-    if (!_adjMap.has(c.from)) _adjMap.set(c.from, new Set());
-    if (!_adjMap.has(c.to)) _adjMap.set(c.to, new Set());
-    _adjMap.get(c.from).add(c.to);
-    _adjMap.get(c.to).add(c.from);
-  }
-}
-
-function getNodesConnectedTo(nodeId) {
-  if (!_adjMap) rebuildAdjMap();
-  const neighbors = _adjMap.get(nodeId);
-  if (!neighbors) return [];
-  return [...neighbors].filter(id => nodeIndex.has(id));
-}
-
-/** BFS from the most-connected node to build layers by graph distance */
-function buildHierarchyLayers() {
-  if (!state.nodes.length) return [];
-
-  // Count connections per node
-  const connCounts = new Map();
-  for (const n of state.nodes) connCounts.set(n.id, 0);
-  for (const c of state.connections) {
-    if (connCounts.has(c.from)) connCounts.set(c.from, connCounts.get(c.from) + 1);
-    if (connCounts.has(c.to)) connCounts.set(c.to, connCounts.get(c.to) + 1);
-  }
-
-  // Start BFS from the node with the most connections
-  const sorted = [...connCounts.entries()].sort((a, b) => b[1] - a[1]);
-  if (!sorted.length) return [];
-
-  const visited = new Set();
-  const layers = [];
-  const queue = [sorted[0][0]]; // start with highest-connected node
-  visited.add(sorted[0][0]);
-
-  while (queue.length) {
-    const layerNodes = queue.map(id => nodeIndex.get(id)).filter(Boolean);
-    // Sort within layer: most connections first
-    layerNodes.sort((a, b) => (connCounts.get(b.id) || 0) - (connCounts.get(a.id) || 0));
-    layers.push(layerNodes);
-
-    const nextQueue = [];
-    for (const id of queue) {
-      for (const neighborId of getNodesConnectedTo(id)) {
-        if (!visited.has(neighborId)) {
-          visited.add(neighborId);
-          nextQueue.push(neighborId);
-        }
-      }
-    }
-    queue.length = 0;
-    queue.push(...nextQueue);
-  }
-
-  // Add disconnected nodes as a final layer
-  const disconnected = state.nodes.filter(n => !visited.has(n.id));
-  if (disconnected.length) {
-    disconnected.sort((a, b) => (a.label || '').localeCompare(b.label || ''));
-    layers.push(disconnected);
-  }
-
-  return layers;
-}
 
 function toggleSectorVisibility(sectorId) {
   if (state.hiddenSectors.has(sectorId)) {
@@ -590,30 +524,14 @@ function wireDetailsEvents(pane, node) {
 
 /** Compute set of all node IDs that should be hidden */
 export function getHiddenNodeIds() {
-  rebuildAdjMap();
-  const hiddenNodeIds = new Set();
-
-  for (const sid of state.hiddenSectors) {
-    hiddenNodeIds.add(sid);
-    for (const nid of getNodesConnectedTo(sid)) {
-      const otherSectors = getNodesConnectedTo(nid).filter(
-        id => (nodeIndex.get(id)?.type === 'sector' || nodeIndex.get(id)?.type === 'center') && !state.hiddenSectors.has(id)
-      );
-      if (otherSectors.length === 0) hiddenNodeIds.add(nid);
-    }
-  }
-
-  for (const g of state.groups) {
-    if (g.hidden) {
-      for (const nid of g.nodeIds) hiddenNodeIds.add(nid);
-    }
-  }
-
-  for (const nid of state.hiddenNodes) {
-    hiddenNodeIds.add(nid);
-  }
-
-  return hiddenNodeIds;
+  _adjMap = buildAdjacencyMap(state.connections);
+  return computeHiddenNodeIds({
+    hiddenSectors: state.hiddenSectors,
+    groups: state.groups,
+    hiddenNodes: state.hiddenNodes,
+    adjMap: _adjMap,
+    nodeIndex
+  });
 }
 
 /** Apply hidden state to node DOM elements and connections */

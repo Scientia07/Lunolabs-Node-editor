@@ -1,17 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        settings-panel.js
- * @description Settings sidebar tab — project management UI, connection style, grid, theme settings
- * @version     2.0
- * @date        2026-03-05
- * @rating      7/10
- * @depends-on  state.js, persistence.js, utils.js, project-manager.js
- * @used-by     sidebar.js
- * @strengths   Complete settings UI, project list with badges, inline save dialog
- * @issues      Full innerHTML rebuild on every render — event listeners not delegated;
- *              large template string (125 lines) — hard to maintain;
- *              XSS-safe via esc() but template complexity increases risk
- * ─────────────────────────────────────────────── */
 import { state, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { esc, safeColor } from './utils.js';
@@ -21,6 +7,7 @@ import {
   loadProject, importProjectFile, downloadProject, newBlankProject
 } from './project-manager.js';
 import { runForceLayout, stopForceLayout } from './force-layout.js';
+import { updateLegend } from './project.js';
 
 // ─── SVG icon helpers (settings-specific) ───
 const iconSave = `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`;
@@ -120,6 +107,10 @@ export function renderSettingsTab(contentEl, refreshCallback) {
       <div class="settings-row">
         <span class="settings-row-label">Auto-Layout</span>
         <button class="toggle-switch ${state.physicsLayout ? 'on' : ''}" id="setting-physics-layout"></button>
+      </div>
+      <div class="settings-row">
+        <span class="settings-row-label">Legende</span>
+        <button class="toggle-switch ${state.showLegend ? 'on' : ''}" id="setting-show-legend"></button>
       </div>
     </div>
 
@@ -250,6 +241,13 @@ export function renderSettingsTab(contentEl, refreshCallback) {
     } else {
       stopForceLayout();
     }
+    autoSave();
+  });
+
+  pane.querySelector('#setting-show-legend').addEventListener('click', (e) => {
+    state.showLegend = !state.showLegend;
+    e.currentTarget.classList.toggle('on', state.showLegend);
+    updateLegend();
     autoSave();
   });
 }

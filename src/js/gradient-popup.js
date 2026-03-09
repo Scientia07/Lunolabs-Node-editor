@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        gradient-popup.js
- * @description Gradient color picker — dual color inputs, angle slider, preview, override handler
- * @version     2.0
- * @date        2026-03-05
- * @rating      7/10
- * @depends-on  state.js, constants.js
- * @used-by     main.js, interactions.js
- * @strengths   Live preview, override mechanism for sector creation, viewport clamping
- * @issues      Duplicates gradient preview logic with node-popup.js
- * ─────────────────────────────────────────────── */
 // ─── Gradient Popup ───
 import { state, nodeIndex, saveSnapshot } from './state.js';
 import { PALETTE } from './constants.js';

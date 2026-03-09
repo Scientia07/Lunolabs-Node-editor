@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        persistence.js
- * @description localStorage auto-save/load with debounce, v1 migration
- * @version     2.0
- * @date        2026-03-05
- * @rating      8/10
- * @depends-on  state.js, utils.js
- * @used-by     main.js, interactions.js, sidebar.js, toolbar.js, settings-panel.js, keyboard.js
- * @strengths   500ms debounced save, flush on beforeunload, validation on load, v1 migration
- * @issues      Silent catch on quota exceeded — no user feedback; no localStorage size monitoring
- * ─────────────────────────────────────────────── */
 // ─── Persistence (localStorage) ───
 import { state, rebuildIndex } from './state.js';
 import { validateProjectJSON } from './utils.js';
@@ -49,6 +37,7 @@ function flushSave() {
       hiddenNodes: state.hiddenNodes ? [...state.hiddenNodes] : [],
       projectTitle: state.projectTitle || '',
       physicsLayout: state.physicsLayout || false,
+      showLegend: state.showLegend !== false,
     }));
     state.isDirty = false;
   } catch (_e) { /* quota exceeded or private mode */ }
@@ -73,6 +62,7 @@ export function autoLoad() {
     state.hiddenNodes = new Set(d.hiddenNodes || []);
     state.projectTitle = d.projectTitle || '';
     state.physicsLayout = d.physicsLayout || false;
+    state.showLegend = d.showLegend !== false;
     rebuildIndex();
     return true;
   } catch (_e) {

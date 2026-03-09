@@ -4,7 +4,9 @@
  * @created 2026-03-05
  *
  * @file        force-layout.js
- * @description Force-directed layout engine — repulsion, springs, hierarchy gravity
+ * @description Force-directed layout engine using d3-style alpha cooling.
+ *              Repulsion (Coulomb), link springs (Hooke), radial hierarchy gravity.
+ *              Company nodes orbit their parent sector; radius scales with sibling count.
  * @depends-on  state.js, renderer.js, minimap.js
  * @used-by     main.js, interactions.js, toolbar.js, settings-panel.js, actions.js
  */
@@ -17,23 +19,36 @@ const pinnedNodes = new Set();
 
 // ── Size multipliers for sector orbit radius ──
 const SIZE_MULT = { lg: 1.4, md: 1.0, sm: 0.7, xs: 0.5 };
+function sizeMultiplier(node) { return SIZE_MULT[node.size] || 1.0; }
 
-function sizeMultiplier(node) {
-  return SIZE_MULT[node.size] || 1.0;
-}
-
-// ── Simulation config ──
+// ── Simulation config (d3-inspired) ──
 const CONFIG = {
-  repulsion: 1200,         // stronger repulsion for more spacing
-  springStiffness: 0.008,
-  springLength: 200,
-  hierarchyPull: 0.03,     // stronger pull to keep hierarchy tight
-  companyPull: 0.06,       // even stronger for text labels near parent
-  sectorRadius: 280,       // base sector orbit distance (scaled by size)
-  companyRadius: 70,       // text labels stay close to parent
-  damping: 0.82,
-  minEnergy: 0.5,
-  maxTicks: 150,
+  // Alpha cooling — forces weaken over time so the graph settles
+  alphaStart: 1.0,
+  alphaMin: 0.001,
+  alphaDecay: 0.028,        // ~250 ticks to cool (slightly faster than d3 default)
+
+  // Velocity decay — friction each tick (d3 default = 0.4)
+  velocityDecay: 0.4,
+
+  // Repulsion (Coulomb charge)
+  repulsion: 600,            // sector/center repulsion strength
+  companyRepulsion: 350,     // company-company repulsion (they need to spread!)
+
+  // Link springs (Hooke)
+  springStiffness: 0.06,
+  companySpringStiffness: 0.12, // companies track parent faster
+  sectorSpringLength: 300,   // sector↔center or sector↔sector
+  companySpringLength: 100,  // company↔sector (short — keep them close)
+
+  // Radial hierarchy (d3 forceRadial style)
+  sectorRadialStrength: 0.12,
+  companyRadialStrength: 0.6,  // strong — companies must stick to their sector
+  sectorRadius: 400,           // base sector orbit from center
+  companyBaseRadius: 80,       // minimum company orbit from parent sector
+  companyRadiusPerSibling: 12, // extra radius per sibling (spreads crowded sectors)
+
+  maxTicks: 400,
 };
 
 // ── Velocity storage ──
@@ -49,52 +64,106 @@ export function unpinNode(id) { pinnedNodes.delete(id); }
 export function clearPins() { pinnedNodes.clear(); }
 
 /**
- * Run the force simulation from current node positions.
+ * Pre-compute lookup tables for the simulation:
+ * - parentMap: companyId → parent node (sector it belongs to)
+ * - siblingCount: sectorId → number of child companies
  */
-export function runForceLayout() {
+function buildHierarchy() {
+  const parentMap = new Map();
+  const siblingCount = new Map();
+
+  for (const n of state.nodes) {
+    if (n.type !== 'company') continue;
+    // Find parent via parentId first, then fall back to connections
+    let parent = n.parentId != null ? nodeIndex.get(n.parentId) : null;
+    if (!parent) {
+      for (const c of state.connections) {
+        if (c.from !== n.id && c.to !== n.id) continue;
+        const otherId = c.from === n.id ? c.to : c.from;
+        const other = nodeIndex.get(otherId);
+        if (other && (other.type === 'sector' || other.type === 'center')) {
+          parent = other;
+          break;
+        }
+      }
+    }
+    if (parent) {
+      parentMap.set(n.id, parent);
+      siblingCount.set(parent.id, (siblingCount.get(parent.id) || 0) + 1);
+    }
+  }
+  return { parentMap, siblingCount };
+}
+
+/**
+ * Run the force simulation from current node positions.
+ *
+ * @param {object} [opts]
+ * @param {number} [opts.alpha=1.0] Starting alpha (use ~0.3 for warm restarts after drag)
+ */
+export function runForceLayout(opts = {}) {
   if (!state.physicsLayout) return;
   if (state.nodes.length < 2) return;
 
-  velocities.clear();
-  for (const n of state.nodes) {
-    velocities.set(n.id, { vx: 0, vy: 0 });
+  const startAlpha = opts.alpha ?? CONFIG.alphaStart;
+  if (startAlpha >= CONFIG.alphaStart) {
+    velocities.clear();
+    for (const n of state.nodes) velocities.set(n.id, { vx: 0, vy: 0 });
+  } else {
+    for (const n of state.nodes) {
+      if (!velocities.has(n.id)) velocities.set(n.id, { vx: 0, vy: 0 });
+    }
   }
 
+  const { parentMap, siblingCount } = buildHierarchy();
+  const centerNode = state.nodes.find(n => n.type === 'center');
+
   running = true;
+  let alpha = startAlpha;
   let tick = 0;
 
   function step() {
     tick++;
-    let totalEnergy = 0;
+    alpha += (0 - alpha) * CONFIG.alphaDecay;
 
-    const forces = new Map();
-    for (const n of state.nodes) {
-      forces.set(n.id, { fx: 0, fy: 0 });
-    }
-
-    // 1) Repulsion: all pairs (reduced for text-style company nodes)
+    // ── 1) Repulsion ──
     for (let i = 0; i < state.nodes.length; i++) {
       for (let j = i + 1; j < state.nodes.length; j++) {
         const a = state.nodes[i];
         const b = state.nodes[j];
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
-        // Text-style companies (parentId) repel less — they're small labels
-        const isTextA = a.type === 'company' && a.parentId != null;
-        const isTextB = b.type === 'company' && b.parentId != null;
-        const repMult = (isTextA && isTextB) ? 0.15 : (isTextA || isTextB) ? 0.4 : 1.0;
-        const force = (CONFIG.repulsion * repMult) / (dist * dist);
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
-        forces.get(a.id).fx -= fx;
-        forces.get(a.id).fy -= fy;
-        forces.get(b.id).fx += fx;
-        forces.get(b.id).fy += fy;
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        if (dx === 0 && dy === 0) { dx = (Math.random() - 0.5) * 2; dy = (Math.random() - 0.5) * 2; }
+        const distSq = dx * dx + dy * dy;
+        const dist = Math.sqrt(distSq);
+
+        const isCompA = a.type === 'company';
+        const isCompB = b.type === 'company';
+
+        let strength;
+        if (isCompA && isCompB) {
+          // Same-parent companies need decent repulsion to spread out
+          const sameParent = parentMap.get(a.id) === parentMap.get(b.id);
+          strength = sameParent ? CONFIG.companyRepulsion * 1.5 : CONFIG.companyRepulsion * 0.3;
+        } else if (isCompA || isCompB) {
+          // Company↔sector/center: moderate repulsion
+          strength = CONFIG.repulsion * 0.5;
+        } else {
+          // Sector↔sector or sector↔center: full repulsion
+          strength = CONFIG.repulsion;
+        }
+
+        const w = strength * alpha / distSq;
+        const fx = (dx / dist) * w;
+        const fy = (dy / dist) * w;
+        const va = velocities.get(a.id);
+        const vb = velocities.get(b.id);
+        va.vx -= fx; va.vy -= fy;
+        vb.vx += fx; vb.vy += fy;
       }
     }
 
-    // 2) Spring attraction: connections
+    // ── 2) Link springs ──
     for (const c of state.connections) {
       const a = nodeIndex.get(c.from);
       const b = nodeIndex.get(c.to);
@@ -102,54 +171,50 @@ export function runForceLayout() {
       const dx = b.x - a.x;
       const dy = b.y - a.y;
       const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
-      const displacement = dist - CONFIG.springLength;
-      const force = CONFIG.springStiffness * displacement;
-      const fx = (dx / dist) * force;
-      const fy = (dy / dist) * force;
-      forces.get(a.id).fx += fx;
-      forces.get(a.id).fy += fy;
-      forces.get(b.id).fx -= fx;
-      forces.get(b.id).fy -= fy;
+
+      // Shorter spring for company↔sector links
+      const isCompanyLink = a.type === 'company' || b.type === 'company';
+      const idealLen = isCompanyLink ? CONFIG.companySpringLength : CONFIG.sectorSpringLength;
+
+      const displacement = (dist - idealLen) / dist;
+      const stiffness = isCompanyLink ? CONFIG.companySpringStiffness : CONFIG.springStiffness;
+      const force = stiffness * displacement * alpha;
+      const fx = dx * force;
+      const fy = dy * force;
+      const va = velocities.get(a.id);
+      const vb = velocities.get(b.id);
+      va.vx += fx; va.vy += fy;
+      vb.vx -= fx; vb.vy -= fy;
     }
 
-    // 3) Hierarchy gravity (size-aware)
-    const centerNode = state.nodes.find(n => n.type === 'center');
+    // ── 3) Radial hierarchy ──
     if (centerNode) {
       for (const n of state.nodes) {
         if (n === centerNode) continue;
         let target = null;
-        let idealDist = CONFIG.springLength;
-        let pullStrength = CONFIG.hierarchyPull;
+        let idealDist = 200;
+        let strength = CONFIG.sectorRadialStrength;
 
         if (n.type === 'sector') {
-          // Sectors orbit center — distance scales with sector size
           target = centerNode;
           idealDist = CONFIG.sectorRadius * sizeMultiplier(n);
-          // Check if this sector connects to another sector (not center)
+          // Sub-sector: orbit parent sector instead
           const parentConn = state.connections.find(c =>
             c.to === n.id && nodeIndex.get(c.from)?.type === 'sector'
           );
           if (parentConn) {
-            // Sub-sector: orbit parent sector instead of center
             target = nodeIndex.get(parentConn.from);
-            idealDist = 160 * sizeMultiplier(n);
+            idealDist = 200 * sizeMultiplier(n);
           }
-        } else if (n.type === 'company' && n.parentId != null) {
-          // Text labels stay tight to their parent sector
-          target = nodeIndex.get(n.parentId);
-          idealDist = CONFIG.companyRadius;
-          pullStrength = CONFIG.companyPull; // stronger pull for text labels
         } else if (n.type === 'company') {
-          // Unparented company — find connected sector
-          const conn = state.connections.find(c => c.from === n.id || c.to === n.id);
-          if (conn) {
-            const otherId = conn.from === n.id ? conn.to : conn.from;
-            const other = nodeIndex.get(otherId);
-            if (other && (other.type === 'sector' || other.type === 'center')) {
-              target = other;
-              idealDist = CONFIG.companyRadius;
-              pullStrength = CONFIG.companyPull;
-            }
+          // Company → orbit its parent sector/center
+          const parent = parentMap.get(n.id);
+          if (parent) {
+            target = parent;
+            // Scale orbit radius by sibling count so crowded sectors spread more
+            const siblings = siblingCount.get(parent.id) || 1;
+            idealDist = CONFIG.companyBaseRadius + siblings * CONFIG.companyRadiusPerSibling;
+            strength = CONFIG.companyRadialStrength;
           }
         }
 
@@ -157,33 +222,35 @@ export function runForceLayout() {
           const dx = target.x - n.x;
           const dy = target.y - n.y;
           const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
-          const pull = pullStrength * (dist - idealDist);
-          forces.get(n.id).fx += (dx / dist) * pull;
-          forces.get(n.id).fy += (dy / dist) * pull;
+          // d3 forceRadial: push toward idealDist from target
+          const k = (idealDist - dist) * strength * alpha / dist;
+          const v = velocities.get(n.id);
+          v.vx -= dx * k;
+          v.vy -= dy * k;
         }
       }
     }
 
-    // ── Apply forces ──
+    // ── Apply velocity decay + update positions ──
+    const decay = 1 - CONFIG.velocityDecay;
     for (const n of state.nodes) {
-      if (pinnedNodes.has(n.id)) continue;
-      if (n.type === 'center') continue;
-
-      const f = forces.get(n.id);
+      if (pinnedNodes.has(n.id) || n.type === 'center') continue;
       const v = velocities.get(n.id);
-      v.vx = (v.vx + f.fx) * CONFIG.damping;
-      v.vy = (v.vy + f.fy) * CONFIG.damping;
+      v.vx *= decay;
+      v.vy *= decay;
       n.x += v.vx;
       n.y += v.vy;
-      totalEnergy += v.vx * v.vx + v.vy * v.vy;
     }
 
-    // ── Render ──
-    renderNodes();
+    // ── Render (skip full rebuild if a label is being edited) ──
+    const editing = document.querySelector('[contenteditable="true"]');
+    if (!editing) {
+      renderNodes();
+    }
     renderConnections();
 
     // ── Check convergence ──
-    if (totalEnergy < CONFIG.minEnergy || tick >= CONFIG.maxTicks) {
+    if (alpha < CONFIG.alphaMin || tick >= CONFIG.maxTicks) {
       running = false;
       animFrameId = null;
       updateMinimap();

@@ -44,10 +44,11 @@
   text-align: center;
 }
 
-/* ── Legend (shown for projects with legend data) ── */
+/* ── Legend (auto-generated from sector colors) ── */
 #legend {
   position: fixed;
-  bottom: 16px; left: 16px;
+  bottom: calc(var(--minimap-h) + 32px);
+  right: 16px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);

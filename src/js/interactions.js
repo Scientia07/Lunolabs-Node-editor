@@ -1,17 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        interactions.js
- * @description Mouse interactions — drag, pan, select, connect, resize, endpoint editing
- * @version     2.0
- * @date        2026-03-05
- * @rating      7/10
- * @depends-on  state.js, utils.js, renderer.js, transform.js, minimap.js, persistence.js,
- *              context-menu.js, color-popup.js, gradient-popup.js, constants.js, node-popup.js
- * @used-by     main.js, keyboard.js
- * @strengths   RAF-gated mousemove (60fps cap), clean state machine, endpoint drag with snap
- * @issues      Largest file (540 lines) — consider splitting tool-specific logic;
- *              findNearestAnchor() O(n) per frame during drag; circular dep workaround via setZoomToRef
- * ─────────────────────────────────────────────── */
 // ─── Mouse Interactions ───
 import { state, nodeIndex, genId, saveSnapshot, rebuildIndex, emit } from './state.js';
 import { screenToCanvas, snapToGrid } from './utils.js';
@@ -20,13 +6,11 @@ import { updateTransform } from './transform.js';
 import { updateMinimap } from './minimap.js';
 import { autoSave } from './persistence.js';
 import { closeMenus } from './context-menu.js';
-import { showColorPopup } from './color-popup.js';
-import { showGradientPopup, overrideGradApply } from './gradient-popup.js';
-import { STICKY_COLORS } from './constants.js';
 import { showNodePopup, hideNodePopup, repositionNodePopup } from './node-popup.js';
 import { showQuickAdd } from './quick-add.js';
 import { showConnPopup, hideConnPopup } from './conn-popup.js';
 import { pinNode, isLayoutRunning, runForceLayout } from './force-layout.js';
+import { handleToolCreation } from './node-creation.js';
 
 let isDragging = false, isPanning = false, isSelecting = false, isResizing = false;
 let isDraggingEndpoint = false;
@@ -45,7 +29,8 @@ export function initInteractions() {
   const selRect = document.getElementById('selection-rect');
 
   canvasContainer.addEventListener('mousedown', (e) => onMouseDown(e, canvasContainer, selRect));
-  canvasContainer.addEventListener('mousemove', (e) => {
+  // Bind mousemove/mouseup on document so drags work even when cursor leaves canvas (e.g. over sidebar)
+  document.addEventListener('mousemove', (e) => {
     if (rafPending) return;
     rafPending = true;
     requestAnimationFrame(() => {
@@ -53,7 +38,7 @@ export function initInteractions() {
       onMouseMove(e, canvasContainer, selRect);
     });
   });
-  canvasContainer.addEventListener('mouseup', (e) => onMouseUp(e, canvasContainer, selRect));
+  document.addEventListener('mouseup', (e) => onMouseUp(e, canvasContainer, selRect));
   canvasContainer.addEventListener('dblclick', (e) => {
     const target = e.target.closest('.node');
     if (target) { editNodeLabel(parseInt(target.dataset.id, 10)); e.preventDefault(); }
@@ -74,7 +59,6 @@ export function initInteractions() {
       if (!popupJustOpened) {
         document.getElementById('color-popup')?.classList.remove('open');
         document.getElementById('gradient-popup')?.classList.remove('open');
-        document.getElementById('font-popup')?.classList.remove('open');
       }
     }
     popupJustOpened = false;
@@ -99,6 +83,9 @@ export function setSpaceHeld(v) { spaceHeld = v; }
 
 function onMouseDown(e, canvasContainer, selRect) {
   closeMenus();
+
+  // Don't intercept clicks inside contenteditable labels (sticky note editing)
+  if (e.target.closest('[contenteditable="true"]')) return;
 
   if (e.button === 1 || (e.button === 0 && spaceHeld)) {
     isPanning = true;
@@ -216,64 +203,8 @@ function onMouseDown(e, canvasContainer, selRect) {
   }
 
   if (!target) {
-    if (state.tool === 'sector') {
-      // Use gradient popup for new sector
-      popupJustOpened = true;
-      showGradientPopup(e.clientX, e.clientY, ['__new__']);
-      const cpCopy = { ...cp };
-      overrideGradApply(() => {
-        saveSnapshot();
-        const c1 = document.getElementById('grad-color1').value;
-        const c2 = document.getElementById('grad-color2').value;
-        const angle = parseInt(document.getElementById('grad-angle').value, 10);
-        const node = { id: genId(), type: 'sector', x: snapToGrid(cpCopy.x), y: snapToGrid(cpCopy.y), label: 'Neuer Sektor', color: c1, color2: c2, gradAngle: angle };
-        state.nodes.push(node);
-        rebuildIndex();
-        emit('render');
-        if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
-        setTimeout(() => editNodeLabel(node.id), 100);
-      });
-      return;
-    }
-
-    if (state.tool === 'company') {
-      saveSnapshot();
-      let nearestSector = null, minDist = Infinity;
-      state.nodes.filter(n => n.type === 'sector' || n.type === 'center').forEach(s => {
-        const d = Math.hypot(cp.x - s.x, cp.y - s.y);
-        if (d < minDist) { minDist = d; nearestSector = s; }
-      });
-      const node = { id: genId(), type: 'company', x: snapToGrid(cp.x), y: snapToGrid(cp.y), label: 'Neuer Eintrag', color: nearestSector ? nearestSector.color : '#6c8aff' };
-      state.nodes.push(node);
-      if (nearestSector && minDist < 600) {
-        state.connections.push({ id: genId(), from: nearestSector.id, to: node.id, color: nearestSector.color });
-      }
-      rebuildIndex();
-      emit('render');
-      if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
-      setTimeout(() => editNodeLabel(node.id), 100);
-      return;
-    }
-
-    if (state.tool === 'sticky') {
-      saveSnapshot();
-      const node = { id: genId(), type: 'sticky', x: snapToGrid(cp.x), y: snapToGrid(cp.y), label: '', color: STICKY_COLORS[Math.floor(Math.random() * STICKY_COLORS.length)], width: 160, height: 120 };
-      state.nodes.push(node);
-      rebuildIndex();
-      emit('render');
-      if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
-      setTimeout(() => editNodeLabel(node.id), 100);
-      return;
-    }
-
-    if (state.tool === 'shape') {
-      saveSnapshot();
-      const node = { id: genId(), type: state.shapeType, x: snapToGrid(cp.x), y: snapToGrid(cp.y), label: '', color: null, borderColor: null, width: state.shapeType === 'circle' ? 100 : (state.shapeType === 'textbox' ? null : 140), height: state.shapeType === 'circle' ? 100 : (state.shapeType === 'textbox' ? null : 80) };
-      state.nodes.push(node);
-      rebuildIndex();
-      emit('render');
-      if (state.physicsLayout) setTimeout(() => runForceLayout(), 50);
-      setTimeout(() => editNodeLabel(node.id), 100);
+    if (handleToolCreation(state.tool, cp, e, editNodeLabel)) {
+      if (state.tool === 'sector') popupJustOpened = true;
       return;
     }
 
@@ -363,9 +294,19 @@ function onMouseMove(e, canvasContainer) {
     const node = nodeIndex.get(d.id);
     if (node) {
       node.width = Math.max(80, d.origW + (e.clientX - dragStartX) / state.zoom);
-      node.height = Math.max(60, d.origH + (e.clientY - dragStartY) / state.zoom);
+      if (node.type === 'circle') {
+        // Circle: keep aspect ratio (width = height)
+        node.height = node.width;
+      } else {
+        node.height = Math.max(60, d.origH + (e.clientY - dragStartY) / state.zoom);
+      }
       const el = domCache.get(d.id);
-      if (el) { el.style.width = node.width + 'px'; el.style.minHeight = node.height + 'px'; el.style.height = node.height + 'px'; }
+      if (el) {
+        el.style.width = node.width + 'px';
+        el.style.minHeight = node.height + 'px';
+        el.style.height = node.height + 'px';
+        if (node.type === 'circle') { el.style.minWidth = node.width + 'px'; }
+      }
     }
     return;
   }
@@ -383,7 +324,7 @@ function onMouseUp(e, canvasContainer) {
     isDragging = false;
     autoSave();
     if (state.physicsLayout && !isLayoutRunning()) {
-      runForceLayout();
+      runForceLayout({ alpha: 0.3 });
     }
     return;
   }
@@ -394,16 +335,19 @@ function onMouseUp(e, canvasContainer) {
     if (endpointDrag.tempLine) endpointDrag.tempLine.remove();
     clearAnchorHighlights();
 
-    // Find which node+anchor we landed on
+    // Find which node+anchor we landed on (prevent self-loops)
     const result = findNearestAnchor(e.clientX, e.clientY);
     if (result) {
       const conn = endpointDrag.conn;
-      if (endpointDrag.end === 'from' && result.nodeId !== conn.to) {
-        conn.from = result.nodeId;
-        conn.fromAnchor = result.anchor;
-      } else if (endpointDrag.end === 'to' && result.nodeId !== conn.from) {
-        conn.to = result.nodeId;
-        conn.toAnchor = result.anchor;
+      const otherId = endpointDrag.end === 'from' ? conn.to : conn.from;
+      if (result.nodeId !== otherId) {
+        if (endpointDrag.end === 'from') {
+          conn.from = result.nodeId;
+          conn.fromAnchor = result.anchor;
+        } else {
+          conn.to = result.nodeId;
+          conn.toAnchor = result.anchor;
+        }
       }
     }
     endpointDrag = null;

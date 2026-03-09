@@ -8,7 +8,7 @@ trigger: When adding a new sidebar tab, creating a new sidebar panel, or extendi
 
 ## Architecture
 
-The sidebar sits on the **left side** of the screen (slides in from left edge). It has 5 tabs: Verbindungen, Gruppen, Details, Suche, Einstellungen. Each tab is a `<button>` in a `<div class="sidebar-tabs">` tablist, with a matching `<div class="tab-pane">` content area. The sidebar is **resizable** — drag the right edge to adjust width (200-600px, stored in `--sidebar-w` CSS custom property).
+The sidebar sits on the **left side** of the screen (slides in from left edge). It has 4 tabs: Gruppen, Details, Suche, Einstellungen. Each tab is a `<button>` in a `<div class="sidebar-tabs">` tablist, with a matching `<div class="tab-pane">` content area. The sidebar is **resizable** — drag the right edge to adjust width (200-600px, stored in `--sidebar-w` CSS custom property).
 
 Tab switching is handled by `sidebar.js:initSidebar()` — clicking a tab button sets `activeTab` and toggles `.active` classes on both the button and its pane.
 
@@ -104,11 +104,14 @@ Follow the existing pattern: `var(--bg)` for input backgrounds, `var(--border)` 
 
 | Tab | `data-tab` | Renderer | Module |
 |-----|-----------|----------|--------|
-| Verbindungen | `connections` | `renderConnectionsTab()` | sidebar.js |
 | Gruppen | `groups` | `renderGroupsTab()` | sidebar.js |
 | Details | `details` | `renderDetailsTab()` | sidebar.js |
 | Suche | `search` | `renderSearchTab()` | search.js |
 | Einstellungen | `settings` | `renderSettingsTab()` | settings-panel.js |
+
+### Settings Tab Sections
+
+The Einstellungen tab contains these sections (in order): Projekte, Projekt-Name, Verbindungen (style + default color), Raster (visible, snap, size), Darstellung (theme, auto-layout, **Legende** toggle), Info (counts), Version footer.
 
 ## Important Notes
 

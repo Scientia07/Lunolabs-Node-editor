@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        constants.js
- * @description Shared constants — palette, sticky colors, fonts, defaults
- * @version     2.0
- * @date        2026-03-05
- * @rating      9/10
- * @depends-on  (none)
- * @used-by     state.js, color-popup.js, gradient-popup.js, font-popup.js, node-popup.js, interactions.js
- * @strengths   Single source of truth for all magic values, clean and minimal
- * @issues      None
- * ─────────────────────────────────────────────── */
 // ─── App Info ───
 export const APP_VERSION = '2.1.0';
 // __BUILD_DATE__ is replaced at build time by esbuild; falls back to 'dev' in dev mode
@@ -27,10 +15,6 @@ export const STICKY_COLORS = ['#fef08a', '#fca5a5', '#86efac', '#93c5fd', '#c4b5
 
 export const FONTS = [
   { name: 'DM Sans', family: "'DM Sans', sans-serif" },
-  { name: 'Inter', family: "'Inter', sans-serif" },
-  { name: 'Poppins', family: "'Poppins', sans-serif" },
-  { name: 'Outfit', family: "'Outfit', sans-serif" },
-  { name: 'Nunito', family: "'Nunito', sans-serif" },
   { name: 'Space Mono', family: "'Space Mono', monospace" },
 ];
 

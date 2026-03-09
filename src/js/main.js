@@ -1,17 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        main.js
- * @description App entry point — init sequence, event bus wiring, context menu setup
- * @version     2.0
- * @date        2026-03-05
- * @rating      8/10
- * @depends-on  state.js, grid.js, renderer.js, minimap.js, transform.js, context-menu.js,
- *              color-popup.js, gradient-popup.js, font-popup.js, toolbar.js, interactions.js,
- *              keyboard.js, persistence.js, actions.js, theme.js, project.js, sidebar.js, node-popup.js
- * @used-by     index.html (entry point)
- * @strengths   Clear init sequence, deferred non-critical UI via requestAnimationFrame
- * @issues      Context menu wiring is inline — could be extracted to own module
- * ─────────────────────────────────────────────── */
 // ─── Main Entry Point ───
 import { state, rebuildIndex, on, emit } from './state.js';
 import { initGrid, drawGrid } from './grid.js';
@@ -21,7 +7,6 @@ import { updateTransform, zoomTo, zoomFit } from './transform.js';
 import { initContextMenu, clearContextMenu, addCtxItem, addCtxSep, showContextMenuAt, closeMenus } from './context-menu.js';
 import { initColorPopup, showColorPopup } from './color-popup.js';
 import { initGradientPopup, showGradientPopup } from './gradient-popup.js';
-import { initFontPopup, showFontPopup } from './font-popup.js';
 import { initToolbar, setTool } from './toolbar.js';
 import { initInteractions, setZoomToRef, editNodeLabel } from './interactions.js';
 import { initQuickAdd } from './quick-add.js';
@@ -30,7 +15,7 @@ import { initKeyboard } from './keyboard.js';
 import { autoSave, autoSaveNow, autoLoad } from './persistence.js';
 import { deleteSelected, duplicateSelected } from './actions.js';
 import { applyTheme } from './theme.js';
-import { loadFromURL } from './project.js';
+import { loadFromURL, updateLegend } from './project.js';
 import { nodeIndex, saveSnapshot } from './state.js'; // re-import ok (same module)
 import { initSidebar, refreshSidebar, applyVisibility } from './sidebar.js';
 import { initNodePopup } from './node-popup.js';
@@ -43,9 +28,12 @@ function fullRender() {
   renderConnections();
   applyVisibility();
   updateTransform();
+  // Toggle empty state
+  document.getElementById('empty-state')?.classList.toggle('hidden', state.nodes.length > 0);
   // Non-critical UI updates deferred to next frame
   requestAnimationFrame(() => {
     updateMinimap();
+    updateLegend();
     refreshSidebar();
   });
 }
@@ -72,7 +60,6 @@ function setupContextMenu() {
       clearContextMenu();
       addCtxItem('Bearbeiten', 'Dbl-Click', () => state.selectedIds.forEach(id => editNodeLabel(id)));
       addCtxItem('Farbe / Verlauf', '', () => showGradientPopup(e.clientX, e.clientY, [...state.selectedIds]));
-      addCtxItem('Schriftart', '', () => showFontPopup(e.clientX, e.clientY, [...state.selectedIds]));
       addCtxItem('Duplizieren', 'Ctrl+D', () => duplicateSelected(fullRender));
       addCtxSep();
       addCtxItem('Loeschen', 'Del', () => deleteSelected(fullRender), true);
@@ -113,7 +100,6 @@ async function init() {
   initContextMenu();
   initColorPopup();
   initGradientPopup();
-  initFontPopup();
   initNodePopup();
 
   // Wire zoom reference for interactions (breaks circular dep)

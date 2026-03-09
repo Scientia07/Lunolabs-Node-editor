@@ -68,8 +68,7 @@ initMinimap()       — minimap canvas
 initContextMenu()   — context menu DOM
 initColorPopup()    — simple color picker
 initGradientPopup() — gradient picker
-initFontPopup()     — font picker
-initNodePopup()     — node properties popup
+initNodePopup()     — node properties popup (includes inline font tab)
 initConnPopup()     — connection properties popup
 setZoomToRef(zoomTo) — breaks circular dep
 initToolbar()       — toolbar buttons
@@ -142,7 +141,9 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `main.js` | Entry point, init sequence, context menu wiring, fullRender |
 | `state.js` | Global state, nodeIndex Map, undo/redo snapshots (createSnapshot/applySnapshot) |
 | `renderer.js` | DOM node creation, connection SVG rendering, `domCache` Map for O(1) element lookup |
-| `interactions.js` | All mouse events (drag, pan, select, connect, resize) — RAF-gated mousemove |
+| `interactions.js` | Mouse events (drag, pan, select, connect, resize) — RAF-gated mousemove |
+| `node-creation.js` | Tool-specific node creation (sector, company, sticky, shape) + variant picker |
+| `graph-utils.js` | Pure graph algorithms: buildAdjacencyMap, getNeighbors, buildHierarchyLayers, computeHiddenNodeIds |
 | `keyboard.js` | Keyboard shortcuts |
 | `constants.js` | PALETTE, FONTS, STICKY_COLORS, SUGGESTED_META_FIELDS, defaults |
 | `utils.js` | screenToCanvas, snapToGrid, showToast, esc, safeColor, validateProjectJSON, getNodesBoundingBox, serializeProject, getTier, hexToRgb, confirmIfDirty |
@@ -150,9 +151,11 @@ Modules must NOT import from modules that import from them. Common solutions:
 | `project.js` | Unified `loadProject(project, opts)`, `loadFromURL()`, legend rendering |
 | `project-manager.js` | Project CRUD — save/load/delete/import/download/new (localStorage) |
 | `settings-panel.js` | Settings tab rendering — theme, grid, connection style, project list |
-| `node-popup.js` | Node properties popup — color/gradient, form/type, font editing |
+| `node-popup.js` | Node properties popup — color/gradient, form/type, font editing (inline font tab, DM Sans + Space Mono) |
 | `conn-popup.js` | Connection properties popup — color, style, dash, thickness, outline, hidden |
 | `quick-add.js` | Drag-to-create popup — Sektor/Eintrag from anchor drag to empty canvas |
 | `csv-export.js` | CSV export — buildCSV() + exportCSV(), semicolons + BOM, dynamic meta columns |
 | `csv-import.js` | CSV import — parser, auto-mapping, preview modal, conflict resolution |
 | `search.js` | Search & filter — fuzzyMatch, searchNodes, sidebar tab, navigate-to-node, Ctrl+K |
+| `export-svg.js` | SVG export — standalone vector output, all node types + connections + legend |
+| `export-png.js` | PNG export — 2× resolution canvas rendering |

@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        transform.js
- * @description Pan/zoom transform — updateTransform, zoomTo (pivot-aware), zoomFit (auto-frame)
- * @version     2.0
- * @date        2026-03-05
- * @rating      8.5/10
- * @depends-on  state.js, grid.js, minimap.js, persistence.js, renderer.js, utils.js
- * @used-by     main.js, interactions.js, toolbar.js
- * @strengths   Pivot-point zoom preserves cursor position, zoomFit auto-frames all nodes
- * @issues      None significant
- * ─────────────────────────────────────────────── */
 // ─── Transform (pan/zoom) ───
 import { state } from './state.js';
 import { drawGrid } from './grid.js';
@@ -27,8 +15,10 @@ export function updateTransform() {
 }
 
 export function zoomTo(newZoom, cx, cy) {
-  cx = cx || window.innerWidth / 2;
-  cy = cy || window.innerHeight / 2;
+  const container = document.getElementById('canvas-container');
+  const rect = container.getBoundingClientRect();
+  cx = cx != null ? cx - rect.left : rect.width / 2;
+  cy = cy != null ? cy - rect.top : rect.height / 2;
   const old = state.zoom;
   state.zoom = Math.max(0.1, Math.min(5, newZoom));
   state.panX = cx - (cx - state.panX) * (state.zoom / old);
@@ -44,11 +34,11 @@ export function zoomFit() {
   if (!box) return;
   const w = box.maxX - box.minX;
   const h = box.maxY - box.minY;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  state.zoom = Math.min(vw / w, vh / h, 2);
-  state.panX = (vw - w * state.zoom) / 2 - box.minX * state.zoom;
-  state.panY = (vh - h * state.zoom) / 2 - box.minY * state.zoom;
+  const container = document.getElementById('canvas-container');
+  const rect = container.getBoundingClientRect();
+  state.zoom = Math.min(rect.width / w, rect.height / h, 2);
+  state.panX = (rect.width - w * state.zoom) / 2 - box.minX * state.zoom;
+  state.panY = (rect.height - h * state.zoom) / 2 - box.minY * state.zoom;
   updateTransform();
   autoSave();
 }

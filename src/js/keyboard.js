@@ -1,16 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        keyboard.js
- * @description Keyboard shortcuts — tools, undo/redo, delete, select-all, sidebar toggle
- * @version     2.0
- * @date        2026-03-05
- * @rating      8/10
- * @depends-on  state.js, renderer.js, context-menu.js, actions.js, grid.js, persistence.js,
- *              interactions.js, sidebar.js, node-popup.js
- * @used-by     main.js
- * @strengths   Proper contenteditable/input guard, consistent modifier key handling
- * @issues      No keyboard shortcut help overlay; shortcuts not configurable
- * ─────────────────────────────────────────────── */
 // ─── Keyboard Shortcuts ───
 import { state, undo, redo, emit } from './state.js';
 import { renderSelectionState } from './renderer.js';
@@ -22,6 +9,7 @@ import { setSpaceHeld } from './interactions.js';
 import { toggleSidebar } from './sidebar.js';
 import { hideNodePopup } from './node-popup.js';
 import { focusSearch, clearSearch } from './search.js';
+import { toggleShortcutsHelp } from './toolbar.js';
 
 let setToolFn;
 
@@ -61,6 +49,7 @@ function onKeyDown(e) {
     e.preventDefault();
   }
   if (e.key === 'p' || e.key === 'P') { toggleSidebar(); }
+  if (e.key === '?') { toggleShortcutsHelp(); }
   if (e.key === 'Escape') {
     clearSearch();
     state.selectedIds.clear();
@@ -68,5 +57,7 @@ function onKeyDown(e) {
     closeMenus();
     hideNodePopup();
     setToolFn('select');
+    const scModal = document.getElementById('shortcuts-modal');
+    if (scModal && scModal.style.display !== 'none') scModal.style.display = 'none';
   }
 }

@@ -1,16 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        project.js
- * @description Project loading — single loadProject() source of truth, URL loading, legend rendering
- * @version     2.0
- * @date        2026-03-05
- * @rating      8.5/10
- * @depends-on  state.js, theme.js, utils.js
- * @used-by     main.js, project-manager.js
- * @strengths   Path traversal prevention in loadFromURL(), embedded project support,
- *              safeColor() in legend rendering, clean loadProject API with options
- * @issues      None significant
- * ─────────────────────────────────────────────── */
 // ─── Project Loading ───
 import { state, rebuildIndex } from './state.js';
 import { applyTheme } from './theme.js';
@@ -41,14 +28,12 @@ export function loadProject(project, opts = {}) {
 
   state.projectTitle = project.meta?.title || name;
 
-  clearLegend();
-
   if (project.meta) {
     if (project.meta.theme) applyTheme(project.meta.theme);
     if (project.meta.connectionStyle) state.connectionStyle = project.meta.connectionStyle;
     if (project.meta.gridEnabled !== undefined) state.gridEnabled = project.meta.gridEnabled;
     if (project.meta.physicsLayout !== undefined) state.physicsLayout = project.meta.physicsLayout;
-    if (project.meta.legend) renderLegend(project.meta.legend);
+    if (project.meta.showLegend !== undefined) state.showLegend = project.meta.showLegend;
   }
 
   rebuildIndex();
@@ -83,23 +68,37 @@ export async function loadFromURL() {
   }
 }
 
-export function clearLegend() {
+/** Auto-generate legend from sector node colors */
+export function updateLegend() {
   const el = document.getElementById('legend');
-  if (el) { el.innerHTML = ''; el.classList.remove('visible'); }
-}
+  if (!el) return;
 
-export function renderLegend(legendItems) {
-  const el = document.getElementById('legend');
-  if (!el || !legendItems || !legendItems.length) return;
+  if (!state.showLegend) {
+    el.innerHTML = '';
+    el.classList.remove('visible');
+    return;
+  }
+
+  const sectors = state.nodes
+    .filter(n => n.type === 'sector' || n.type === 'center')
+    .map(n => ({ label: n.label || '', color: n.color || '#6c8aff' }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'de'));
+
+  if (!sectors.length) {
+    el.innerHTML = '';
+    el.classList.remove('visible');
+    return;
+  }
+
   el.innerHTML = '<h4>Legende</h4>';
-  legendItems.forEach(item => {
+  sectors.forEach(item => {
     const row = document.createElement('div');
     row.className = 'legend-item';
     const dot = document.createElement('div');
     dot.className = 'legend-dot';
     dot.style.background = safeColor(item.color);
     row.appendChild(dot);
-    row.appendChild(document.createTextNode(' ' + (item.label || '')));
+    row.appendChild(document.createTextNode(' ' + esc(item.label)));
     el.appendChild(row);
   });
   el.classList.add('visible');

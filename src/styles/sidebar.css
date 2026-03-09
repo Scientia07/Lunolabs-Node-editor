@@ -123,63 +123,6 @@ body.sidebar-open #sidebar-toggle svg { transform: rotate(180deg); }
 .sidebar-content::-webkit-scrollbar-track { background: transparent; }
 .sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ── Connections Tab ── */
-.conn-group-title {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-dim);
-  margin: 12px 0 6px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--border);
-}
-.conn-group-title:first-child { margin-top: 0; }
-
-.conn-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-.conn-item:hover { background: var(--accent-dim); }
-.conn-item.highlighted { background: var(--accent-dim); outline: 1px solid var(--accent-border); }
-
-.conn-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.conn-label {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
-}
-.conn-arrow {
-  color: var(--text-dim);
-  font-size: 10px;
-  flex-shrink: 0;
-}
-.conn-delete {
-  opacity: 0;
-  background: none;
-  border: none;
-  color: var(--danger);
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-size: 14px;
-  line-height: 1;
-  transition: opacity 0.12s;
-}
-.conn-item:hover .conn-delete { opacity: 1; }
-.conn-delete:hover { background: rgba(255,107,107,0.15); }
-
 .conn-empty {
   color: var(--text-dim);
   font-size: 11px;
@@ -207,6 +150,7 @@ body.sidebar-open #sidebar-toggle svg { transform: rotate(180deg); }
   gap: 8px;
   padding: 6px 8px;
   border-radius: 6px;
+  cursor: pointer;
   transition: background 0.12s;
 }
 .group-item:hover { background: var(--accent-dim); }
@@ -229,6 +173,38 @@ body.sidebar-open #sidebar-toggle svg { transform: rotate(180deg); }
   color: var(--text-dim);
   font-family: var(--font-mono);
 }
+/* Scaffold hierarchy layers */
+.scaffold-layer-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  margin-top: 4px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  transition: background 0.12s;
+  user-select: none;
+}
+.scaffold-layer-header:first-child { margin-top: 0; }
+.scaffold-layer-header:hover { background: var(--accent-dim); }
+.scaffold-chevron {
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+  font-size: 13px;
+  transition: transform 0.15s;
+}
+.scaffold-layer-header:not(.collapsed) .scaffold-chevron { transform: rotate(-90deg); }
+.scaffold-layer-label { flex: 1; }
+
+.scaffold-layer-0 .group-name { font-weight: 600; }
+.scaffold-layer-1 .group-name { font-weight: 500; }
+.scaffold-layer-0 .group-color { width: 12px; height: 12px; }
+
 /* Child nodes under sectors */
 .group-child {
   display: flex;

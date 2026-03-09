@@ -224,14 +224,16 @@ function navigateToNode(nodeId) {
   state.selectedIds.clear();
   state.selectedIds.add(nodeId);
 
-  // Pan to center the node on screen
-  const sidebarW = document.body.classList.contains('sidebar-open') ? 280 : 0;
-  const vw = window.innerWidth - sidebarW;
-  const vh = window.innerHeight;
+  // Pan to center the node on screen (account for sidebar width)
+  const sidebarW = document.body.classList.contains('sidebar-open')
+    ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w')) || 280
+    : 0;
+  const cw = window.innerWidth - sidebarW;
+  const ch = window.innerHeight;
   const targetZoom = Math.max(state.zoom, 1);
   state.zoom = targetZoom;
-  state.panX = sidebarW + vw / 2 - (node.x + w / 2) * targetZoom;
-  state.panY = vh / 2 - (node.y + h / 2) * targetZoom;
+  state.panX = sidebarW + cw / 2 - (node.x + w / 2) * targetZoom;
+  state.panY = ch / 2 - (node.y + h / 2) * targetZoom;
   updateTransform();
   emit('render');
 }

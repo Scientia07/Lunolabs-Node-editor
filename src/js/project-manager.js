@@ -1,20 +1,8 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        project-manager.js
- * @description Project CRUD — save/load/delete/import/download/new blank project
- * @version     2.0
- * @date        2026-03-05
- * @rating      8/10
- * @depends-on  state.js, persistence.js, utils.js, project.js
- * @used-by     settings-panel.js
- * @strengths   Clean API, JSON validation on import, URL.revokeObjectURL cleanup,
- *              slug generation for project keys
- * @issues      No confirmation dialog before destructive actions (delete, new blank)
- * ─────────────────────────────────────────────── */
 import { state, rebuildIndex, emit } from './state.js';
 import { autoSave } from './persistence.js';
 import { showToast, validateProjectJSON, serializeProject, confirmIfDirty } from './utils.js';
 import { loadProject as loadProjectData } from './project.js';
+import { zoomFit } from './transform.js';
 
 const SAVED_PROJECTS_KEY = 'network-editor-saved-projects';
 
@@ -68,6 +56,7 @@ function applyProject(project, name) {
   loadProjectData(project, { name, resetState: true });
   emit('render');
   autoSave();
+  if (state.nodes.length) setTimeout(() => zoomFit(), 200);
 }
 
 /** Import a JSON file via the file picker */

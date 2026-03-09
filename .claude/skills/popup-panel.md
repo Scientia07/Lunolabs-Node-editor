@@ -13,7 +13,7 @@ trigger: When creating a new popup, modal, floating panel, picker, or properties
 | Context menu | `#context-menu` | 3000 | Right-click menu |
 | Quick-add | `.quick-add-popup` | 3000 | Drag-to-create (Sektor/Eintrag) |
 | Color picker | `.color-popup` | 2500 | Simple swatch picker |
-| Popup panel | `.popup-panel` | 2500 | Gradient popup, font popup |
+| Popup panel | `.popup-panel` | 2500 | Gradient popup |
 | Node popup | `.node-popup` | 2500 | Tabbed node properties popup |
 | Conn popup | `.node-popup` (`#conn-popup`) | 2500 | Tabbed connection properties popup |
 | Modal overlay | `.modal-overlay` | 5000 | Visibility export confirm, CSV import |
@@ -196,7 +196,7 @@ Reuse existing component classes:
 - `.color-swatches` + `.color-swatch` — swatch grid
 - `.color-row` — inline color picker + label
 - `.gradient-preview` — gradient preview bar
-- `.font-list` + `.font-option` — scrollable font list
+- `.font-list` + `.font-option` — scrollable font list (used in node popup font tab)
 - `.popup-btn` — full-width action button
 - `.cp-toggle-row` — checkbox toggle with label (used in conn popup)
 

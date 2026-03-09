@@ -1,15 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        minimap.js
- * @description Minimap overview — canvas rendering of nodes/connections + viewport indicator
- * @version     2.0
- * @date        2026-03-05
- * @rating      8/10
- * @depends-on  state.js, utils.js
- * @used-by     main.js, transform.js, interactions.js
- * @strengths   Cached dimensions (P5), shape-aware rendering, viewport overlay
- * @issues      Not interactive (no click-to-pan); minimap not clickable for navigation
- * ─────────────────────────────────────────────── */
 // ─── Minimap ───
 import { state, nodeIndex } from './state.js';
 import { getNodesBoundingBox } from './utils.js';
@@ -81,9 +69,10 @@ export function updateMinimap() {
   });
 
   // Viewport indicator
-  const vw = window.innerWidth, vh = window.innerHeight;
+  const container = document.getElementById('canvas-container');
+  const cRect = container.getBoundingClientRect();
   minimapViewport.style.left = Math.max(0, (-state.panX / state.zoom - minX) * scale) + 'px';
   minimapViewport.style.top = Math.max(0, (-state.panY / state.zoom - minY) * scale) + 'px';
-  minimapViewport.style.width = (vw / state.zoom) * scale + 'px';
-  minimapViewport.style.height = (vh / state.zoom) * scale + 'px';
+  minimapViewport.style.width = (cRect.width / state.zoom) * scale + 'px';
+  minimapViewport.style.height = (cRect.height / state.zoom) * scale + 'px';
 }

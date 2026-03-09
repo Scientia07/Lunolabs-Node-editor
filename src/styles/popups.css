@@ -488,3 +488,100 @@
 .modal-btn.primary:hover { opacity: 0.9; }
 .modal-btn.cancel { background: none; border-color: transparent; }
 .modal-btn.cancel:hover { color: var(--text); }
+
+/* ── Shortcuts Help Modal ── */
+.shortcuts-box { max-width: 520px; width: 90vw; }
+.shortcuts-box h3 { margin: 0 0 16px; font-size: 15px; font-weight: 600; color: var(--text); }
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.shortcut-section h4 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+}
+.shortcut-list {
+  margin: 0;
+  padding: 0;
+}
+.shortcut-list div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+.shortcut-list dt {
+  min-width: 56px;
+  padding: 2px 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
+}
+.shortcut-list dd {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Empty State ── */
+.empty-state {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.empty-state.hidden { display: none; }
+.empty-state-content {
+  text-align: center;
+  max-width: 360px;
+  padding: 32px;
+  pointer-events: auto;
+}
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+.empty-state h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.empty-state p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+.empty-state-hint {
+  margin-top: 12px !important;
+  font-size: 12px !important;
+  color: var(--text-dim) !important;
+}
+.empty-state kbd {
+  padding: 1px 5px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}

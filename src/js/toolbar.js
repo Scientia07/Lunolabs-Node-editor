@@ -1,16 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        toolbar.js
- * @description Toolbar button wiring — tools, grid, theme, undo/redo, export, import, zoom
- * @version     2.0
- * @date        2026-03-05
- * @rating      7.5/10
- * @depends-on  state.js, grid.js, transform.js, persistence.js, utils.js, export-json.js,
- *              export-png.js, theme.js, node-popup.js
- * @used-by     main.js
- * @strengths   Safe getElementById wrapper, clean event wiring
- * @issues      resize handler should be debounced
- * ─────────────────────────────────────────────── */
 // ─── Toolbar Wiring ───
 import { state, undo, redo, emit } from './state.js';
 import { drawGrid } from './grid.js';
@@ -19,6 +6,7 @@ import { autoSave } from './persistence.js';
 import { showToast } from './utils.js';
 import { exportJSON, importJSON } from './export-json.js';
 import { exportPNG } from './export-png.js';
+import { exportSVG } from './export-svg.js';
 import { exportCSV } from './csv-export.js';
 import { openCSVImport } from './csv-import.js';
 import { toggleTheme } from './theme.js';
@@ -115,6 +103,10 @@ export function initToolbar() {
     document.getElementById('export-dropdown')?.classList.remove('open');
     confirmVisibilityExport(() => exportPNG(), (hidden) => exportPNG(hidden));
   });
+  bindButton('export-svg-btn', 'click', () => {
+    document.getElementById('export-dropdown')?.classList.remove('open');
+    confirmVisibilityExport(() => exportSVG(), (hidden) => exportSVG(hidden));
+  });
   bindButton('export-csv-btn', 'click', () => {
     document.getElementById('export-dropdown')?.classList.remove('open');
     confirmVisibilityExport(() => exportCSV(), (hidden) => exportCSV(hidden));
@@ -143,6 +135,20 @@ export function initToolbar() {
   bindButton('zoom-out', 'click', () => zoomTo(state.zoom / 1.2));
   bindButton('zoom-fit', 'click', zoomFit);
 
+  // Shortcuts help
+  bindButton('shortcuts-btn', 'click', toggleShortcutsHelp);
+  bindButton('shortcuts-close', 'click', toggleShortcutsHelp);
+  document.getElementById('shortcuts-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'shortcuts-modal') toggleShortcutsHelp();
+  });
+
   // Resize
   window.addEventListener('resize', () => { drawGrid(); });
+}
+
+export function toggleShortcutsHelp() {
+  const modal = document.getElementById('shortcuts-modal');
+  if (!modal) return;
+  const visible = modal.style.display !== 'none';
+  modal.style.display = visible ? 'none' : '';
 }

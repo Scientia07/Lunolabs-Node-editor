@@ -193,14 +193,6 @@
   border-radius: 0 0 3px 0;
 }
 
-.node-sticky .resize-handle {
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 16px; height: 16px;
-  cursor: nwse-resize;
-  z-index: 5;
-}
-
 /* ── Rectangle ── */
 .node-rect {
   min-width: 120px;
@@ -297,7 +289,9 @@
   bottom: 0; right: 0;
   width: 16px; height: 16px;
   cursor: nwse-resize;
-  z-index: 5;
+  z-index: 10;
+  background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.18) 50%);
+  border-radius: 0 0 3px 0;
 }
 
 /* ── Search highlight / dim ── */
