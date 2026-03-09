@@ -1,17 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        node-popup.js
- * @description Node properties popup — color/gradient, shape type, font, opacity, size editing
- * @version     2.0
- * @date        2026-03-05
- * @rating      7.5/10
- * @depends-on  state.js, constants.js, persistence.js
- * @used-by     main.js, interactions.js, keyboard.js
- * @strengths   Live editing with ensureSnapshot() (single undo point per session),
- *              tab system, viewport-clamped positioning, repositionNodePopup during drag
- * @issues      Duplicates gradient/font logic with gradient-popup.js and font-popup.js;
- *              many getElementById calls — could cache references
- * ─────────────────────────────────────────────── */
 // ─── Node Properties Quick-Popup ───
 import { state, nodeIndex, saveSnapshot, rebuildIndex } from './state.js';
 import { PALETTE, FONTS } from './constants.js';
@@ -53,22 +39,22 @@ export function initNodePopup() {
   document.getElementById('np-color1').addEventListener('input', (e) => {
     ensureSnapshot();
     document.getElementById('np-hex1').textContent = e.target.value;
-    applyColor();
+    applyColorDebounced();
   });
   document.getElementById('np-color2').addEventListener('input', (e) => {
     ensureSnapshot();
     document.getElementById('np-hex2').textContent = e.target.value;
-    applyColor();
+    applyColorDebounced();
   });
   document.getElementById('np-angle').addEventListener('input', (e) => {
     ensureSnapshot();
     document.getElementById('np-angle-val').textContent = e.target.value;
-    applyColor();
+    applyColorDebounced();
   });
   document.getElementById('np-opacity').addEventListener('input', (e) => {
     ensureSnapshot();
     document.getElementById('np-opacity-val').textContent = e.target.value;
-    applyOpacity();
+    applyOpacityDebounced();
   });
 
   // ── Form tab ──
@@ -110,7 +96,7 @@ export function initNodePopup() {
   document.getElementById('np-fsize').addEventListener('input', (e) => {
     ensureSnapshot();
     document.getElementById('np-fsize-val').textContent = e.target.value;
-    applyFont();
+    applyFontDebounced();
   });
   document.getElementById('np-fweight').addEventListener('change', () => {
     ensureSnapshot();
@@ -133,6 +119,16 @@ function render() {
   document.dispatchEvent(new CustomEvent('editor:render'));
 }
 
+/** Coalesce rapid input events (sliders, color pickers) to 1 render per frame */
+let _renderRAF = null;
+function debouncedRender() {
+  if (_renderRAF) return;
+  _renderRAF = requestAnimationFrame(() => {
+    _renderRAF = null;
+    render();
+  });
+}
+
 // ── Apply handlers ──
 
 function applyColor() {
@@ -145,11 +141,28 @@ function applyColor() {
   render();
 }
 
+function applyColorDebounced() {
+  const n = getNode();
+  if (!n) return;
+  n.color = document.getElementById('np-color1').value;
+  n.color2 = document.getElementById('np-color2').value;
+  n.gradAngle = parseInt(document.getElementById('np-angle').value, 10);
+  updateGradPreview();
+  debouncedRender();
+}
+
 function applyOpacity() {
   const n = getNode();
   if (!n) return;
   n.opacity = parseInt(document.getElementById('np-opacity').value, 10) / 100;
   render();
+}
+
+function applyOpacityDebounced() {
+  const n = getNode();
+  if (!n) return;
+  n.opacity = parseInt(document.getElementById('np-opacity').value, 10) / 100;
+  debouncedRender();
 }
 
 function applyType() {
@@ -197,6 +210,16 @@ function applyFont() {
   n.fontSize = parseInt(document.getElementById('np-fsize').value, 10);
   n.fontWeight = parseInt(document.getElementById('np-fweight').value, 10);
   render();
+}
+
+function applyFontDebounced() {
+  const n = getNode();
+  if (!n) return;
+  const activeFont = document.querySelector('#np-font-list .font-option.active');
+  if (activeFont) n.font = activeFont.dataset.family;
+  n.fontSize = parseInt(document.getElementById('np-fsize').value, 10);
+  n.fontWeight = parseInt(document.getElementById('np-fweight').value, 10);
+  debouncedRender();
 }
 
 function updateGradPreview() {

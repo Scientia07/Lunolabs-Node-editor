@@ -1,6 +1,6 @@
 # Master PRD: Netzwerk-Editor
 
-**Date**: 2026-03-04 (created) | 2026-03-06 (last updated)
+**Date**: 2026-03-04 (created) | 2026-03-09 (last updated)
 **Status**: Living Document
 **Owner**: Jugendbuero March / LunoLabs
 **Version**: 3.0
@@ -15,10 +15,10 @@ The Jugendbuero March needs an interactive network visualization tool to map ~10
 
 A fully modular vanilla JS editor with:
 - 6 node types (center, sector, company, sticky, rect, circle, textbox)
-- Node properties popup (color/gradient, shape, font, opacity)
+- Node properties popup (color/gradient, shape, font, opacity) — inline font tab (DM Sans, Space Mono)
 - Connection properties popup (color, style, dash, thickness, outline, hidden)
 - Drag-to-create from anchors
-- Left-side sidebar (resizable, 200-600px) with connections, groups, details, search, and settings tabs
+- Left-side sidebar (resizable, 200-600px) with groups, details, search, and settings tabs
 - Dark/light theme, minimap, legend
 - JSON import/export, PNG export
 - Single-file build (`dist/index.html`) works from `file://`
@@ -142,7 +142,7 @@ Company nodes with `meta.tier === "satellit"` receive:
 - Entire import undoable as one action
 
 ### 4.8 Connection Properties Popup (P1) -- DONE
-Per-connection color, style, dash, thickness, outline, hidden.
+Per-connection color, style, dash, thickness, outline, hidden, **label** (text rendered at midpoint with background pill).
 
 ### 4.9 Drag-to-Create from Anchors (P1) -- DONE
 Drag from anchor → popup → Sektor/Eintrag.
@@ -156,8 +156,8 @@ Force-directed layout with sector gravity centers.
 ### 4.12 Touch Support (P2) -- PENDING
 Pointer Events API for unified mouse+touch.
 
-### 4.13 Node Grouping (P2) -- PARTIAL
-Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
+### 4.13 Node Grouping (P2) -- DONE
+Sectors hide/show in groups tab. Custom groups exist. Hierarchical scaffold view with BFS layers from most-connected hub. Collapsible layer headers with chevron toggle. Click any node in the hierarchy to pan+select it on canvas. Former "Verbindungen" tab merged into Groups — connections are managed via canvas context menu.
 
 ---
 
@@ -186,7 +186,9 @@ Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
 - [x] F7: Drag-to-create from anchors
 - [x] F8: Connection properties popup
 - [x] Node properties popup (color/form/font/opacity)
-- [x] Unit tests (vitest: state, utils, actions, persistence)
+- [x] Unit tests (vitest: state, utils, actions, persistence, csv, search, sidebar, bugfix regression)
+- [x] Wave 1: Audit bugfixes (self-loop guard, stale Details ref, sidebar width)
+- [x] Wave 2: Trim — dropped 4 unused Google Fonts, removed standalone font popup, stripped file rating headers
 
 ### Recently Completed
 - [x] Phase 7: Node Metadata System (M1-M6) — `node.meta`, `SUGGESTED_META_FIELDS`, `getTier()`, relevancy→opacity
@@ -199,9 +201,16 @@ Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
 - [x] F4: Export with visibility — modal confirmation for hidden nodes
 - [x] F6: No-data-loss project loading — `isDirty` flag + confirm dialog
 - [x] Sidebar moved to left side, drag-to-resize (200-600px), bounce animation on first load
+- [x] F9/F10: Hierarchy scaffold in Groups tab — BFS layers, collapsible headers
+- [x] Bugfix: Details tab now updates on node selection change (`editor:selection` event)
+- [x] Merged Verbindungen tab into Gruppen — click-to-jump on hierarchy nodes, 4 sidebar tabs instead of 5
 
 ### Pending
-- [ ] F5: Legend integration
+- [x] F5: Legend integration — auto-generated from sector colors, Settings toggle, PNG export support
+- [x] S1: Prototype pollution guard (`safeMetaKey()`) — prevents `__proto__`/`constructor` injection
+- [x] P1: Connection adjacency index — O(1) lookups replacing O(n²) in sidebar/visibility
+- [x] P2: Slider input debounce — `requestAnimationFrame` coalescing, no more 60fps re-renders
+- [x] Connection labels — `conn.label` with SVG text + background pill, PNG export, conn-popup input
 - [ ] SC1-SC4, SC6: Scalability improvements
 - [ ] SVG export, auto-layout, touch support
 
@@ -222,6 +231,12 @@ Sectors hide/show in groups tab. Custom groups exist. Collapse/expand pending.
 | Search as sidebar tab (not Spotlight overlay) | Results stay visible during canvas navigation | 2026-03-06 |
 | Sidebar on left side (not right) | User preference; matches typical IDE layout | 2026-03-06 |
 | Sidebar drag-to-resize via CSS custom property | `--sidebar-w` updates all dependents automatically | 2026-03-06 |
+| BFS layers for hierarchy (not per-node tree) | Graph nodes can have multiple parents; layer-based collapse avoids ambiguity | 2026-03-06 |
+| `editor:selection` event for sidebar sync | Lightweight event avoids full re-render; decouples renderer from sidebar | 2026-03-06 |
+| Merge Verbindungen into Gruppen tab | Groups tab is more useful; click-to-jump covers the main Verbindungen use case; connection deletion stays on canvas | 2026-03-06 |
+| Remove standalone font popup | Node popup has its own inline font tab — standalone was redundant | 2026-03-06 |
+| Keep only DM Sans + Space Mono | 4 unused Google Fonts (Inter, Poppins, Outfit, Nunito) dropped — ~200KB network savings | 2026-03-06 |
+| Strip file rating headers | ~300 lines of comment noise removed from 24 JS files — no runtime value | 2026-03-06 |
 
 ---
 

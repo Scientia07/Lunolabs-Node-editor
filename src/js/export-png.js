@@ -1,17 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        export-png.js
- * @description PNG export — canvas rendering of all node types + connections at 2x resolution
- * @version     2.0
- * @date        2026-03-05
- * @rating      7/10
- * @depends-on  state.js, utils.js, renderer.js
- * @used-by     toolbar.js
- * @strengths   2x resolution for crisp output, handles all 7 node types, gradient support
- * @issues      Hardcoded colors (#1a1a2e, #f0f0f5) ignore theme — always exports "light" style;
- *              bezier curve rendering doesn't match screen exactly (simplified);
- *              large function (220 lines) — could split per node type
- * ─────────────────────────────────────────────── */
 // ─── PNG Export (unified: handles all node types) ───
 import { state, nodeIndex } from './state.js';
 import { getContrastColor, wrapText, roundRect, getNodesBoundingBox, showToast } from './utils.js';
@@ -75,6 +61,32 @@ export function exportPNG(excludeNodeIds) {
     }
     ctx.stroke();
     ctx.globalAlpha = 1;
+
+    // Connection label
+    if (conn.label) {
+      const mx = (fx + tx) / 2;
+      const my = (fy + ty) / 2;
+      ctx.save();
+      ctx.font = '400 11px DM Sans, sans-serif';
+      const tw = ctx.measureText(conn.label).width;
+      const pad = 6;
+      // Background pill
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.9;
+      roundRect(ctx, mx - tw / 2 - pad, my - 10, tw + pad * 2, 20, 10);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#d0d0dd';
+      ctx.lineWidth = 0.5;
+      roundRect(ctx, mx - tw / 2 - pad, my - 10, tw + pad * 2, 20, 10);
+      ctx.stroke();
+      // Text
+      ctx.fillStyle = '#1a1a2e';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(conn.label, mx, my);
+      ctx.restore();
+    }
   });
 
   // Draw nodes
@@ -223,6 +235,56 @@ export function exportPNG(excludeNodeIds) {
 
     ctx.restore();
   });
+
+  // Draw legend if enabled
+  if (state.showLegend) {
+    const sectors = nodes
+      .filter(n => n.type === 'sector' || n.type === 'center')
+      .map(n => ({ label: n.label || '', color: n.color || '#6c8aff' }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'de'));
+
+    if (sectors.length) {
+      const lPad = 14, lGap = 6, dotR = 5, lFontSize = 11, lLineH = 20;
+      const lH = lPad * 2 + 18 + sectors.length * lLineH;
+      ctx.save();
+      // Measure widest label
+      ctx.font = `400 ${lFontSize}px DM Sans, sans-serif`;
+      let maxLabelW = 0;
+      for (const s of sectors) maxLabelW = Math.max(maxLabelW, ctx.measureText(s.label).width);
+      const lW = lPad * 2 + dotR * 2 + lGap + maxLabelW + 8;
+      const lX = canvasW - lW - 16;
+      const lY = canvasH - lH - 16;
+      // Background
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.92;
+      roundRect(ctx, lX, lY, lW, lH, 8);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#d0d0dd';
+      ctx.lineWidth = 1;
+      roundRect(ctx, lX, lY, lW, lH, 8);
+      ctx.stroke();
+      // Title
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = `600 12px DM Sans, sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('Legende', lX + lPad, lY + lPad);
+      // Items
+      ctx.font = `400 ${lFontSize}px DM Sans, sans-serif`;
+      sectors.forEach((s, i) => {
+        const iy = lY + lPad + 18 + i * lLineH;
+        ctx.fillStyle = s.color;
+        ctx.beginPath();
+        ctx.arc(lX + lPad + dotR, iy + dotR, dotR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1a1a2e';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(s.label, lX + lPad + dotR * 2 + lGap, iy + dotR);
+      });
+      ctx.restore();
+    }
+  }
 
   // Download
   c.toBlob(blob => {

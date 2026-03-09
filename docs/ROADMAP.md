@@ -1,6 +1,6 @@
 # Roadmap — Netzwerk-Editor
 
-**Last Updated**: 2026-03-06
+**Last Updated**: 2026-03-09
 **Master PRD**: `docs/prd/2026-03-04-master-prd-netzwerk-editor.md`
 **Research**: `docs/research/INDEX.md`
 
@@ -133,6 +133,35 @@
 
 ---
 
+## Phase 11: Hierarchy Scaffold & Sidebar Bugfix ✅ DONE
+
+> **Completed**: 2026-03-06
+
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| H1 | BFS hierarchy layers in Groups tab | `sidebar.js` | Done — `buildHierarchyLayers()`, most-connected hub at top |
+| H2 | Collapsible layer headers | `sidebar.js`, `sidebar.css` | Done — `collapsedLayers` Set, chevron animation |
+| H3 | Scaffold CSS (layer depth styling) | `sidebar.css` | Done — font-weight, color dot size per depth |
+| H4 | Fix: Details tab not updating on node switch | `renderer.js`, `sidebar.js` | Done — `editor:selection` event |
+
+**Design decision:** BFS layers (not per-node tree) avoids shared-child ambiguity in graph traversal. `collapsedLayers` is UI-only state (not persisted).
+
+---
+
+## Audit Waves ✅ DONE
+
+> **Completed**: 2026-03-06
+> **Plan**: `docs/plans/2026-03-06-audit-fix-plan.md`
+
+| Wave | Items | Status |
+|------|-------|--------|
+| Wave 1 — P0 Bugs | BUG-1 (XSS false positive), BUG-2 (self-loop), BUG-3 (sidebar width), BUG-4 (stale Details ref), BUG-5 (listener accum.) | ✅ Done |
+| Wave 2 — Trim | TRIM-1 (drop 4 fonts), TRIM-2 (remove font popup), TRIM-5 (strip rating headers) | ✅ Done |
+| Wave 2 — Deferred | TRIM-3 (gradient angle), TRIM-4 (conn outline), TRIM-6 (shapes dropdown) | Deferred — low value |
+| Wave 3 — Add What Matters | ADD-1 (auto-fit), ADD-2 (shortcut help), ADD-3 (empty state) | ✅ Done |
+
+---
+
 ## Remaining Earlier Tasks (Lower Priority)
 
 ### Phase 5 — Scalability
@@ -153,8 +182,10 @@
 | F1 | Search & filter | Done (→ Phase 10) |
 | F2 | Group management UX | Done |
 | F4 | Export with visibility | Done |
-| F5 | Legend integration | Pending |
+| F5 | Legend integration | Done — auto-generated from sectors, Settings toggle |
 | F6 | No-data-loss project loading | Done |
+| F9 | Hierarchy scaffold in Groups tab | Done |
+| F10 | Collapsible hierarchy layers | Done |
 
 ### Future
 
@@ -163,7 +194,7 @@
 | SVG export | P2 |
 | Auto-layout (force-directed) | P2 |
 | Touch support (Pointer Events) | P2 |
-| Connection labels | P2 |
+| ~~Connection labels~~ | Done |
 | Multi-user (WebSocket/CRDT) | P3 |
 | Accessibility (ARIA, keyboard nav) | P3 |
 
@@ -184,10 +215,21 @@ Phase 7  (Metadata)     ✅ DONE
 
 Phase 10 (Search)              ✅ DONE
 
+Phase 11 (Hierarchy & Bugfixes)  ✅ DONE
+
 UI: Sidebar left-side + resize + bounce  ✅ DONE
 
-Scalability (SC1-SC4, SC6) ← when needed for 500+ nodes
-Features (F5 legend editor) ← fill in as time allows
+Audit Wave 1 (P0 bugfixes)              ✅ DONE
+Audit Wave 2 (trim the fat)             ✅ DONE
+Audit Wave 3 (add what matters)         ✅ DONE
+
+F5 Legend Integration                   ✅ DONE
+
+Security fix (safeMetaKey)                     ✅ DONE
+Performance (adjacency index, slider debounce) ✅ DONE
+Connection labels                              ✅ DONE
+
+Next: Architecture cleanup (A2, A3), scalability (SC1-SC4, SC6), testing gaps
 ```
 
 ---
@@ -202,5 +244,5 @@ Features (F5 legend editor) ← fill in as time allows
 | CSV Import/Export | `docs/research/02-csv-import-export/` | Format design, Excel compatibility |
 | Visual Tier System | `docs/research/03-visual-tier-system/` | Gradient wash design |
 | Integration Roadmap | `docs/research/04-integration-roadmap/` | Original phased plan (superseded by this file) |
-| Latest Handoff | `docs/handoffs/HANDOFF-20260306-CW10d.md` | Session context |
+| Latest Handoff | `docs/handoffs/HANDOFF-20260309-CW11.md` | Session context |
 | Lessons Learned | `docs/lessons-learned/LESSONS-LOG.md` | Architecture & process insights |

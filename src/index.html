@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Netzwerk-Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/base.css">
 <link rel="stylesheet" href="styles/toolbar.css">
@@ -122,6 +122,10 @@
       </button>
     </div>
   </div>
+  <div class="sep" role="separator"></div>
+  <button class="tb-btn icon-only" id="shortcuts-btn" title="Tastenkürzel (?)" aria-label="Tastenkürzel anzeigen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  </button>
 </div>
 
 <!-- CANVAS -->
@@ -198,23 +202,6 @@
   <button class="popup-btn" id="grad-apply">Anwenden</button>
 </div>
 
-<!-- FONT POPUP -->
-<div class="popup-panel" id="font-popup" role="dialog" aria-label="Schriftart">
-  <strong class="popup-heading">Schriftart</strong>
-  <div class="font-list" id="font-list"></div>
-  <label for="font-size">Grösse: <span id="font-size-val">13</span>px</label>
-  <input type="range" id="font-size" min="9" max="24" value="13">
-  <label for="font-weight">Stärke</label>
-  <select id="font-weight" class="popup-select">
-    <option value="300">Light</option>
-    <option value="400" selected>Regular</option>
-    <option value="500">Medium</option>
-    <option value="600">Semibold</option>
-    <option value="700">Bold</option>
-  </select>
-  <button class="popup-btn" id="font-apply">Anwenden</button>
-</div>
-
 <!-- SIDEBAR TOGGLE -->
 <button id="sidebar-toggle" title="Seitenleiste" aria-label="Seitenleiste ein-/ausblenden">
   <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
@@ -224,15 +211,13 @@
 <aside id="sidebar" aria-label="Seitenleiste">
   <div id="sidebar-resize" aria-hidden="true"></div>
   <div class="sidebar-tabs" role="tablist">
-    <button class="sidebar-tab active" data-tab="connections" role="tab" aria-selected="true" aria-controls="tab-connections">Verbindungen</button>
-    <button class="sidebar-tab" data-tab="groups" role="tab" aria-selected="false" aria-controls="tab-groups">Gruppen</button>
+    <button class="sidebar-tab active" data-tab="groups" role="tab" aria-selected="true" aria-controls="tab-groups">Gruppen</button>
     <button class="sidebar-tab" data-tab="details" role="tab" aria-selected="false" aria-controls="tab-details">Details</button>
     <button class="sidebar-tab" data-tab="search" role="tab" aria-selected="false" aria-controls="tab-search">Suche</button>
     <button class="sidebar-tab" data-tab="settings" role="tab" aria-selected="false" aria-controls="tab-settings">Einstellungen</button>
   </div>
   <div class="sidebar-content">
-    <div class="tab-pane active" data-tab="connections" id="tab-connections" role="tabpanel"></div>
-    <div class="tab-pane" data-tab="groups" id="tab-groups" role="tabpanel"></div>
+    <div class="tab-pane active" data-tab="groups" id="tab-groups" role="tabpanel"></div>
     <div class="tab-pane" data-tab="details" id="tab-details" role="tabpanel"></div>
     <div class="tab-pane" data-tab="search" id="tab-search" role="tabpanel"></div>
     <div class="tab-pane" data-tab="settings" id="tab-settings" role="tabpanel"></div>
@@ -279,6 +264,8 @@
     </div>
     <label for="cp-outline-w">Randdicke: <span id="cp-outline-w-val">0</span>px</label>
     <input type="range" id="cp-outline-w" min="0" max="6" value="0">
+    <label for="cp-label">Beschriftung</label>
+    <input type="text" id="cp-label" class="np-select" placeholder="z.B. Kooperation, Finanzierung...">
     <label class="cp-toggle-row">
       <input type="checkbox" id="cp-hidden">
       <span>Unsichtbar</span>
@@ -349,6 +336,63 @@
       <option value="600">Semibold</option>
       <option value="700">Bold</option>
     </select>
+  </div>
+</div>
+
+<!-- SHORTCUTS HELP MODAL -->
+<div id="shortcuts-modal" class="modal-overlay" style="display:none" role="dialog" aria-label="Tastenkürzel" aria-modal="true">
+  <div class="modal-box shortcuts-box">
+    <h3>Tastenkürzel</h3>
+    <div class="shortcuts-grid">
+      <div class="shortcut-section">
+        <h4>Werkzeuge</h4>
+        <dl class="shortcut-list">
+          <div><dt>V</dt><dd>Auswahl</dd></div>
+          <div><dt>C</dt><dd>Verbinden</dd></div>
+          <div><dt>G</dt><dd>Raster ein/aus</dd></div>
+          <div><dt>P</dt><dd>Seitenleiste</dd></div>
+        </dl>
+      </div>
+      <div class="shortcut-section">
+        <h4>Bearbeiten</h4>
+        <dl class="shortcut-list">
+          <div><dt>Ctrl+Z</dt><dd>Rückgängig</dd></div>
+          <div><dt>Ctrl+Y</dt><dd>Wiederherstellen</dd></div>
+          <div><dt>Ctrl+D</dt><dd>Duplizieren</dd></div>
+          <div><dt>Ctrl+A</dt><dd>Alles auswählen</dd></div>
+          <div><dt>Del</dt><dd>Löschen</dd></div>
+        </dl>
+      </div>
+      <div class="shortcut-section">
+        <h4>Navigation</h4>
+        <dl class="shortcut-list">
+          <div><dt>Leertaste</dt><dd>Verschieben</dd></div>
+          <div><dt>Scroll</dt><dd>Zoom</dd></div>
+          <div><dt>Ctrl+K</dt><dd>Suche</dd></div>
+          <div><dt>Esc</dt><dd>Abbrechen</dd></div>
+          <div><dt>?</dt><dd>Diese Hilfe</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button id="shortcuts-close" class="modal-btn primary">Schliessen</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY STATE -->
+<div id="empty-state" class="empty-state" aria-label="Willkommen">
+  <div class="empty-state-content">
+    <svg viewBox="0 0 64 64" class="empty-state-icon" aria-hidden="true">
+      <circle cx="20" cy="28" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+      <circle cx="44" cy="20" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+      <circle cx="40" cy="44" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+      <line x1="27" y1="24" x2="38" y2="21" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <line x1="25" y1="34" x2="35" y2="39" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3,2"/>
+    </svg>
+    <h2>Willkommen im Netzwerk-Editor</h2>
+    <p>Klicke auf <strong>Sektor</strong> oder <strong>Eintrag</strong> in der Toolbar und dann auf die Leinwand, um deinen ersten Knoten zu erstellen.</p>
+    <p class="empty-state-hint">Drücke <kbd>?</kbd> für alle Tastenkürzel</p>
   </div>
 </div>
 

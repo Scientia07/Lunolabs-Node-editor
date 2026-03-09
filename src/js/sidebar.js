@@ -1,26 +1,14 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        sidebar.js
- * @description Sidebar panel — tabs, connections list, groups management, visibility toggling
- * @version     2.0
- * @date        2026-03-05
- * @rating      7/10
- * @depends-on  state.js, persistence.js, utils.js, renderer.js, settings-panel.js
- * @used-by     main.js, keyboard.js
- * @strengths   Clean tab system, sector auto-groups, O(1) visibility via domCache + connIndex
- * @issues      innerHTML-heavy rendering (re-renders full tab on every change);
- *              event listeners re-created on each render (no delegation)
- * ─────────────────────────────────────────────── */
 import { state, nodeIndex, saveSnapshot, genId, emit } from './state.js';
 import { autoSave } from './persistence.js';
-import { esc, safeColor, getTier } from './utils.js';
+import { esc, safeColor, getTier, safeMetaKey } from './utils.js';
 import { SUGGESTED_META_FIELDS } from './constants.js';
 import { domCache } from './renderer.js';
 import { renderSettingsTab } from './settings-panel.js';
 import { renderSearchTab } from './search.js';
 
 let sidebarEl, contentEl;
-let activeTab = 'connections';
+let activeTab = 'groups';
+const collapsedLayers = new Set(); // UI-only state for collapsed hierarchy layers
 
 // ─── Groups state (persisted via autoSave) ───
 // state.groups = [{ id, name, nodeIds: [], hidden: false }]
@@ -59,6 +47,7 @@ export function initSidebar() {
 
   // Listen for state changes
   document.addEventListener('editor:render', () => refreshSidebar());
+  document.addEventListener('editor:selection', () => refreshSidebar());
 }
 
 export function toggleSidebar() {
@@ -107,8 +96,8 @@ function initSidebarResize(toggleBtn) {
 
 export function refreshSidebar() {
   if (!document.body.classList.contains('sidebar-open')) return;
-  if (activeTab === 'connections') renderConnectionsTab();
-  else if (activeTab === 'groups') renderGroupsTab();
+  rebuildAdjMap();
+  if (activeTab === 'groups') renderGroupsTab();
   else if (activeTab === 'details') renderDetailsTab();
   else if (activeTab === 'search') renderSearchTab(contentEl);
   else if (activeTab === 'settings') renderSettingsTab(contentEl, refreshSidebar);
@@ -120,106 +109,17 @@ const iconEyeOff = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0
 const iconPlus = `<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 const iconTrash = `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`;
 
-// ─── Connections Tab ───
-function renderConnectionsTab() {
-  const pane = contentEl.querySelector('[data-tab="connections"]');
-  if (!state.connections.length) {
-    pane.innerHTML = '<div class="conn-empty">Keine Verbindungen vorhanden</div>';
-    return;
-  }
-
-  // Group connections by source node
-  const groups = new Map();
-  for (const c of state.connections) {
-    const fromNode = nodeIndex.get(c.from);
-    if (!fromNode) continue;
-    if (!groups.has(c.from)) groups.set(c.from, []);
-    groups.get(c.from).push(c);
-  }
-
-  let html = '';
-  for (const [fromId, conns] of groups) {
-    const fromNode = nodeIndex.get(fromId);
-    const fromLabel = fromNode?.label || `Node ${fromId}`;
-    html += `<div class="conn-group-title">${esc(fromLabel)}</div>`;
-    for (const c of conns) {
-      const toNode = nodeIndex.get(c.to);
-      const toLabel = toNode?.label || `Node ${c.to}`;
-      html += `<div class="conn-item" data-conn-id="${c.id}" data-from="${c.from}" data-to="${c.to}">
-        <span class="conn-dot" style="background:${safeColor(c.color)}"></span>
-        <span class="conn-label">${esc(toLabel)}</span>
-        <button class="conn-delete" data-conn-id="${c.id}" title="Loeschen">&times;</button>
-      </div>`;
-    }
-  }
-  pane.innerHTML = html;
-
-  // Wire events
-  pane.querySelectorAll('.conn-item').forEach(el => {
-    el.addEventListener('click', (e) => {
-      if (e.target.closest('.conn-delete')) return;
-      highlightConnection(parseInt(el.dataset.connId, 10));
-    });
-    el.addEventListener('mouseenter', () => {
-      hoverConnection(parseInt(el.dataset.connId, 10), true);
-    });
-    el.addEventListener('mouseleave', () => {
-      hoverConnection(parseInt(el.dataset.connId, 10), false);
-    });
-  });
-  pane.querySelectorAll('.conn-delete').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const cid = parseInt(btn.dataset.connId, 10);
-      saveSnapshot();
-      state.connections = state.connections.filter(c => c.id !== cid);
-      emit('render');
-      autoSave();
-      refreshSidebar();
-    });
-  });
-}
-
-function highlightConnection(connId) {
-  const conn = state.connections.find(c => c.id === connId);
-  if (!conn) return;
-  // Select both connected nodes
+/** Pan canvas to center on a node and select it */
+function jumpToNode(nodeId) {
+  const node = nodeIndex.get(nodeId);
+  if (!node) return;
   state.selectedIds.clear();
-  state.selectedIds.add(conn.from);
-  state.selectedIds.add(conn.to);
-  emit('render');
-
-  // Scroll canvas to show the connection midpoint
-  const fromNode = nodeIndex.get(conn.from);
-  const toNode = nodeIndex.get(conn.to);
-  if (fromNode && toNode) {
-    const midX = (fromNode.x + toNode.x) / 2;
-    const midY = (fromNode.y + toNode.y) / 2;
-    const sidebarW = document.body.classList.contains('sidebar-open') ? 280 : 0;
-    const cw = window.innerWidth - sidebarW;
-    const ch = window.innerHeight;
-    state.panX = sidebarW + cw / 2 - midX * state.zoom;
-    state.panY = ch / 2 - midY * state.zoom;
-    document.dispatchEvent(new CustomEvent('editor:render'));
-  }
-
-  // Highlight in sidebar
-  contentEl.querySelectorAll('.conn-item').forEach(el => {
-    el.classList.toggle('highlighted', parseInt(el.dataset.connId, 10) === connId);
-  });
-}
-
-function hoverConnection(connId, on) {
-  const svgLayer = document.getElementById('connections-layer');
-  const el = svgLayer.querySelector(`[data-id="${connId}"]`);
-  if (!el) return;
-  if (on) {
-    el.setAttribute('stroke-width', el.tagName === 'path' ? '4' : '3.5');
-    el.style.filter = 'drop-shadow(0 0 8px currentColor)';
-  } else {
-    el.setAttribute('stroke-width', el.tagName === 'path' ? '2' : '1.5');
-    el.style.filter = '';
-  }
+  state.selectedIds.add(nodeId);
+  const container = document.getElementById('canvas-container');
+  const rect = container.getBoundingClientRect();
+  state.panX = rect.width / 2 - node.x * state.zoom;
+  state.panY = rect.height / 2 - node.y * state.zoom;
+  document.dispatchEvent(new CustomEvent('editor:render'));
 }
 
 // ─── Groups Tab ───
@@ -227,37 +127,42 @@ function renderGroupsTab() {
   const pane = contentEl.querySelector('[data-tab="groups"]');
   let html = '';
 
-  // ── Auto groups (sectors) ──
-  const sectors = state.nodes.filter(n => n.type === 'sector' || n.type === 'center');
-  if (sectors.length) {
+  // ── Hierarchical scaffold (layers by connection distance) ──
+  const layers = buildHierarchyLayers();
+  if (layers.length) {
     html += `<div class="group-section">
-      <div class="group-section-title">Sektoren</div>`;
-    for (const s of sectors) {
-      const connected = getNodesConnectedTo(s.id);
-      const isHidden = state.hiddenSectors.has(s.id);
-      html += `<div class="group-item ${isHidden ? 'hidden-group' : ''}" data-sector-id="${s.id}">
-        <span class="group-color" style="background:${safeColor(s.color)}"></span>
-        <span class="group-name">${esc(s.label || 'Sektor ' + s.id)}</span>
-        <span class="group-count">${connected.length}</span>
-        <button class="group-eye" data-sector-id="${s.id}" title="${isHidden ? 'Einblenden' : 'Ausblenden'}">
-          ${isHidden ? iconEyeOff : iconEye}
-        </button>
+      <div class="group-section-title">Netzwerk-Hierarchie</div>`;
+    for (let depth = 0; depth < layers.length; depth++) {
+      const layerNodes = layers[depth];
+      const isCollapsed = collapsedLayers.has(depth);
+      const layerLabel = depth === 0 ? 'Hub' : `Ebene ${depth}`;
+
+      html += `<div class="scaffold-layer-header ${isCollapsed ? 'collapsed' : ''}" data-layer="${depth}">
+        <span class="scaffold-chevron">${isCollapsed ? '›' : '‹'}</span>
+        <span class="scaffold-layer-label">${layerLabel}</span>
+        <span class="group-count">${layerNodes.length}</span>
       </div>`;
 
-      // Child nodes under this sector
-      const children = getNodesConnectedTo(s.id)
-        .map(id => nodeIndex.get(id))
-        .filter(n => n && n.type !== 'sector' && n.type !== 'center')
-        .sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+      if (!isCollapsed) {
+        for (const n of layerNodes) {
+          const connCount = getNodesConnectedTo(n.id).length;
+          const isSector = n.type === 'sector' || n.type === 'center';
+          const isHiddenSector = isSector && state.hiddenSectors.has(n.id);
+          const isHiddenNode = !isSector && state.hiddenNodes.has(n.id);
+          const isHidden = isHiddenSector || isHiddenNode;
 
-      for (const child of children) {
-        const nodeHidden = state.hiddenNodes.has(child.id);
-        html += `<div class="group-child ${nodeHidden ? 'hidden-group' : ''}" data-node-id="${child.id}">
-          <span class="group-child-name">${esc(child.label || 'Node ' + child.id)}</span>
-          <button class="group-eye group-child-eye" data-hide-node="${child.id}" title="${nodeHidden ? 'Einblenden' : 'Ausblenden'}">
-            ${nodeHidden ? iconEyeOff : iconEye}
-          </button>
-        </div>`;
+          html += `<div class="group-item scaffold-layer-${Math.min(depth, 4)} ${isHidden ? 'hidden-group' : ''}"
+            ${isSector ? `data-sector-id="${n.id}"` : `data-node-id="${n.id}"`}
+            style="padding-left:${8 + depth * 16}px">
+            <span class="group-color" style="background:${safeColor(n.color || 'var(--accent)')}"></span>
+            <span class="group-name">${esc(n.label || 'Node ' + n.id)}</span>
+            <span class="group-count">${connCount}</span>
+            <button class="group-eye" ${isSector ? `data-sector-id="${n.id}"` : `data-hide-node="${n.id}"`}
+              title="${isHidden ? 'Einblenden' : 'Ausblenden'}">
+              ${isHidden ? iconEyeOff : iconEye}
+            </button>
+          </div>`;
+        }
       }
     }
     html += '</div>';
@@ -298,6 +203,25 @@ function renderGroupsTab() {
   }
 
   pane.innerHTML = html;
+
+  // Wire layer collapse/expand
+  pane.querySelectorAll('.scaffold-layer-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const depth = parseInt(header.dataset.layer, 10);
+      if (collapsedLayers.has(depth)) collapsedLayers.delete(depth);
+      else collapsedLayers.add(depth);
+      renderGroupsTab();
+    });
+  });
+
+  // Wire click-to-jump on hierarchy items
+  pane.querySelectorAll('.group-item[data-sector-id], .group-item[data-node-id]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.group-eye')) return;
+      const nid = parseInt(el.dataset.sectorId || el.dataset.nodeId, 10);
+      jumpToNode(nid);
+    });
+  });
 
   // Wire sector toggle
   pane.querySelectorAll('.group-eye[data-sector-id]').forEach(btn => {
@@ -387,13 +311,75 @@ function showGroupEditRow() {
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') create(); if (e.key === 'Escape') area.innerHTML = ''; });
 }
 
-function getNodesConnectedTo(nodeId) {
-  const ids = new Set();
+// ─── Connection adjacency index (P1 perf fix: O(1) lookups instead of O(n)) ───
+let _adjMap = null;
+
+/** Rebuild adjacency map from current connections. Call at entry points. */
+function rebuildAdjMap() {
+  _adjMap = new Map();
   for (const c of state.connections) {
-    if (c.from === nodeId) ids.add(c.to);
-    if (c.to === nodeId) ids.add(c.from);
+    if (!_adjMap.has(c.from)) _adjMap.set(c.from, new Set());
+    if (!_adjMap.has(c.to)) _adjMap.set(c.to, new Set());
+    _adjMap.get(c.from).add(c.to);
+    _adjMap.get(c.to).add(c.from);
   }
-  return [...ids].filter(id => nodeIndex.has(id));
+}
+
+function getNodesConnectedTo(nodeId) {
+  if (!_adjMap) rebuildAdjMap();
+  const neighbors = _adjMap.get(nodeId);
+  if (!neighbors) return [];
+  return [...neighbors].filter(id => nodeIndex.has(id));
+}
+
+/** BFS from the most-connected node to build layers by graph distance */
+function buildHierarchyLayers() {
+  if (!state.nodes.length) return [];
+
+  // Count connections per node
+  const connCounts = new Map();
+  for (const n of state.nodes) connCounts.set(n.id, 0);
+  for (const c of state.connections) {
+    if (connCounts.has(c.from)) connCounts.set(c.from, connCounts.get(c.from) + 1);
+    if (connCounts.has(c.to)) connCounts.set(c.to, connCounts.get(c.to) + 1);
+  }
+
+  // Start BFS from the node with the most connections
+  const sorted = [...connCounts.entries()].sort((a, b) => b[1] - a[1]);
+  if (!sorted.length) return [];
+
+  const visited = new Set();
+  const layers = [];
+  const queue = [sorted[0][0]]; // start with highest-connected node
+  visited.add(sorted[0][0]);
+
+  while (queue.length) {
+    const layerNodes = queue.map(id => nodeIndex.get(id)).filter(Boolean);
+    // Sort within layer: most connections first
+    layerNodes.sort((a, b) => (connCounts.get(b.id) || 0) - (connCounts.get(a.id) || 0));
+    layers.push(layerNodes);
+
+    const nextQueue = [];
+    for (const id of queue) {
+      for (const neighborId of getNodesConnectedTo(id)) {
+        if (!visited.has(neighborId)) {
+          visited.add(neighborId);
+          nextQueue.push(neighborId);
+        }
+      }
+    }
+    queue.length = 0;
+    queue.push(...nextQueue);
+  }
+
+  // Add disconnected nodes as a final layer
+  const disconnected = state.nodes.filter(n => !visited.has(n.id));
+  if (disconnected.length) {
+    disconnected.sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+    layers.push(disconnected);
+  }
+
+  return layers;
 }
 
 function toggleSectorVisibility(sectorId) {
@@ -518,17 +504,29 @@ function renderBatchDetails(pane, nodes) {
 }
 
 function wireDetailsEvents(pane, node) {
+  // Capture ID so we always fetch fresh from nodeIndex (prevents stale references)
+  const nodeId = node.id;
+  const getNode = () => nodeIndex.get(nodeId);
+
   const slider = pane.querySelector('#details-relevancy');
   const valSpan = pane.querySelector('#details-relevancy-val');
   if (slider) {
     slider.addEventListener('input', () => {
+      const n = getNode(); if (!n) return;
       valSpan.textContent = slider.value;
-      node.meta.relevancy = parseInt(slider.value, 10);
-      emit('render');
+      n.meta.relevancy = parseInt(slider.value, 10);
+      // Tier badge update (local DOM only — no full re-render)
+      const badge = pane.querySelector('.details-tier-badge');
+      if (badge) {
+        const tier = parseInt(slider.value, 10) > 5 ? 'nah' : 'satellit';
+        badge.textContent = tier === 'nah' ? 'Nah' : 'Satellit';
+        badge.className = `details-tier-badge details-tier-badge--${tier}`;
+      }
     });
     slider.addEventListener('change', () => {
+      const n = getNode(); if (!n) return;
       saveSnapshot();
-      node.meta.relevancy = parseInt(slider.value, 10);
+      n.meta.relevancy = parseInt(slider.value, 10);
       emit('render');
       autoSave();
     });
@@ -537,12 +535,13 @@ function wireDetailsEvents(pane, node) {
   pane.querySelectorAll('[data-meta-key]').forEach(input => {
     const key = input.dataset.metaKey;
     input.addEventListener('change', () => {
+      const n = getNode(); if (!n) return;
       saveSnapshot();
       const val = input.value.trim();
       if (val) {
-        node.meta[key] = val;
+        n.meta[key] = val;
       } else {
-        delete node.meta[key];
+        delete n.meta[key];
       }
       autoSave();
       refreshSidebar();
@@ -551,16 +550,22 @@ function wireDetailsEvents(pane, node) {
 
   pane.querySelectorAll('[data-custom-key]').forEach(input => {
     input.addEventListener('change', () => {
+      const n = getNode(); if (!n) return;
+      const key = safeMetaKey(input.dataset.customKey);
+      if (!key) return;
       saveSnapshot();
-      node.meta[input.dataset.customKey] = input.value;
+      n.meta[key] = input.value;
       autoSave();
     });
   });
 
   pane.querySelectorAll('[data-delete-key]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const n = getNode(); if (!n) return;
+      const key = safeMetaKey(btn.dataset.deleteKey);
+      if (!key) return;
       saveSnapshot();
-      delete node.meta[btn.dataset.deleteKey];
+      delete n.meta[key];
       autoSave();
       renderDetailsTab();
     });
@@ -569,13 +574,14 @@ function wireDetailsEvents(pane, node) {
   const addBtn = pane.querySelector('#details-add-field');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
+      const n = getNode(); if (!n) return;
       const keyInput = pane.querySelector('#details-new-key');
       const valInput = pane.querySelector('#details-new-val');
-      const key = keyInput.value.trim();
+      const key = safeMetaKey(keyInput.value);
       const val = valInput.value.trim();
       if (!key) return;
       saveSnapshot();
-      node.meta[key] = val;
+      n.meta[key] = val;
       autoSave();
       renderDetailsTab();
     });
@@ -584,6 +590,7 @@ function wireDetailsEvents(pane, node) {
 
 /** Compute set of all node IDs that should be hidden */
 export function getHiddenNodeIds() {
+  rebuildAdjMap();
   const hiddenNodeIds = new Set();
 
   for (const sid of state.hiddenSectors) {

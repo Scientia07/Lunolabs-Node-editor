@@ -128,3 +128,39 @@ At the current scale (131 nodes), running `searchNodes()` on every keystroke wit
 
 ### [PROCESS] Subagent-per-task keeps implementation focused
 Dispatching 5 fresh subagents (one per task) prevented context pollution. Each agent read only the files it needed and made targeted changes. The controller provided full task specs inline — no plan-file reading overhead. Total wall time was ~5 minutes for the full feature.
+
+---
+
+## Session: Phase 11 Hierarchy Scaffold & Sidebar Bugfix — 2026-03-06
+
+### [ARCHITECTURE] BFS layers solve hierarchy display for graphs with shared children
+In a network graph, a node in layer 2 can be connected to multiple nodes in layer 1. Per-node tree collapse would need to decide which parent "owns" the collapse — ambiguous and complex. Layer-based collapse (all nodes at depth N) sidesteps this entirely. The `buildHierarchyLayers()` BFS starts from the most-connected node and groups by graph distance.
+
+### [CODE-PATTERN] Lightweight custom events decouple render paths without full re-render
+The codebase had two render paths: `emit('render')` (heavy, full DOM rebuild) and `renderSelectionState()` (lightweight, CSS class toggle). The sidebar was only subscribed to the heavy path, so selection changes never updated the Details tab. Adding `editor:selection` as a lightweight DOM event from `renderSelectionState()` — fired only when selection actually changes (`toAdd.size || toRemove.size`) — lets the sidebar react without triggering expensive canvas re-renders.
+
+### [ARCHITECTURE] UI-only state belongs in module scope, not in the persisted state object
+`collapsedLayers` (which hierarchy layers are expanded/collapsed) is transient view preference — it resets on reload and doesn't affect data. Storing it as a module-level `Set` in sidebar.js (not in `state.js`) prevents it from triggering save/undo cycles and keeps the serialized state clean.
+
+---
+
+## Session: F5 Legend Integration — 2026-03-09
+
+### [ARCHITECTURE] Derive UI from existing data instead of maintaining parallel state
+The legend was originally stored as `meta.legend` in project JSON — a manually curated array of `{color, label}` pairs. Switching to auto-derivation from sector nodes eliminated an entire CRUD surface (add/edit/delete legend items), prevented stale data (legend out of sync with sectors), and reduced the feature from "legend editor" to "legend toggle". When data already exists in another form, derive from it rather than maintaining a copy.
+
+### [CODE-PATTERN] `!== false` for backward-compatible boolean defaults
+Using `state.showLegend !== false` (instead of `|| true`) means existing projects/saves without the field default to `true`, while still respecting an explicit `false`. This one-liner pattern handles schema evolution for booleans that default to truthy — no migration needed.
+
+---
+
+## Session: Security + Performance Fixes + Connection Labels — 2026-03-09
+
+### [SECURITY] Guard all bracket-notation property writes with a whitelist function
+Any `obj[userInput] = value` is a prototype pollution vector. The fix is trivial — a 5-line `safeMetaKey()` that rejects `__proto__`, `constructor`, `prototype` — but the bug is invisible until exploited. Apply the guard at every point where user-supplied strings become object keys, not just the most obvious one.
+
+### [PERFORMANCE] Adjacency maps turn O(n²) graph traversal into O(n+c)
+When `getNodesConnectedTo(id)` scans all connections for every node in a loop (BFS, hierarchy rendering, visibility computation), the cost is O(nodes × connections). Building a `Map<nodeId, Set<nodeId>>` once per render cycle costs O(connections) and makes each lookup O(1). The key insight: rebuild at entry points (`refreshSidebar`, `getHiddenNodeIds`), not inside the lookup function.
+
+### [PERFORMANCE] requestAnimationFrame is the right debounce for render-triggering inputs
+`setTimeout` adds arbitrary latency and can still fire multiple times per frame. `requestAnimationFrame` guarantees exactly 1 render per browser paint cycle — zero wasted work, zero perceptible lag. For slider/color picker `input` events that trigger full re-renders, this is the optimal coalescing strategy.

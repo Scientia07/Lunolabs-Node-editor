@@ -6,7 +6,7 @@
 // ─── CSV Import ───
 import { state, genId, rebuildIndex, saveSnapshot, emit } from './state.js';
 import { SUGGESTED_META_FIELDS } from './constants.js';
-import { showToast, esc } from './utils.js';
+import { showToast, esc, safeMetaKey } from './utils.js';
 import { autoSave } from './persistence.js';
 
 // ─── Header Aliases (fuzzy matching) ───
@@ -92,8 +92,9 @@ export function parseCSV(text) {
     if (HEADER_MAP[normalized]) {
       mappings[i] = HEADER_MAP[normalized];
     } else {
-      // Unknown column → custom meta field
-      mappings[i] = `meta.${headers[i].trim()}`;
+      // Unknown column → custom meta field (guarded against prototype pollution)
+      const safeKey = safeMetaKey(headers[i]);
+      if (safeKey) mappings[i] = `meta.${safeKey}`;
     }
   }
 
@@ -192,7 +193,8 @@ export function applyImport(rows, mappings) {
         const num = parseFloat(value);
         if (!isNaN(num)) node.y = num;
       } else if (field.startsWith('meta.')) {
-        const key = field.slice(5);
+        const key = safeMetaKey(field.slice(5));
+        if (!key) continue;
         // Parse numeric for relevancy
         if (key === 'relevancy') {
           const num = parseInt(value, 10);

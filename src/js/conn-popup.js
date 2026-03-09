@@ -78,6 +78,11 @@ export function initConnPopup() {
     applyOutline();
   });
 
+  document.getElementById('cp-label').addEventListener('change', () => {
+    ensureSnapshot();
+    applyLabel();
+  });
+
   document.getElementById('cp-hidden').addEventListener('change', () => {
     ensureSnapshot();
     applyHidden();
@@ -132,6 +137,15 @@ function applyOutline() {
   autoSave();
 }
 
+function applyLabel() {
+  const conn = getConn();
+  if (!conn) return;
+  const val = document.getElementById('cp-label').value.trim();
+  conn.label = val || null;
+  renderConnections();
+  autoSave();
+}
+
 function applyHidden() {
   const conn = getConn();
   if (!conn) return;
@@ -167,6 +181,7 @@ export function showConnPopup(connId) {
   document.getElementById('cp-outline-w-val').textContent = outlineW;
   document.getElementById('cp-outline-hex').textContent = outlineW > 0
     ? (conn.outlineColor || '#000000') : 'keiner';
+  document.getElementById('cp-label').value = conn.label || '';
   document.getElementById('cp-hidden').checked = !!conn.hidden;
 
   // Position near the connection midpoint

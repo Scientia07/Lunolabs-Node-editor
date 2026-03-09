@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { esc, safeColor, validateProjectJSON, getContrastColor, getGradientCSS, serializeProject, getTier, hexToRgb, confirmIfDirty } from '../utils.js';
+import { esc, safeColor, safeMetaKey, validateProjectJSON, getContrastColor, getGradientCSS, serializeProject, getTier, hexToRgb, confirmIfDirty } from '../utils.js';
 import { state } from '../state.js';
 
 describe('utils.js', () => {
@@ -224,6 +224,41 @@ describe('utils.js', () => {
       expect(hexToRgb('red')).toBeNull();
       expect(hexToRgb('')).toBeNull();
       expect(hexToRgb(null)).toBeNull();
+    });
+  });
+
+  describe('safeMetaKey', () => {
+    it('returns trimmed key for valid strings', () => {
+      expect(safeMetaKey('email')).toBe('email');
+      expect(safeMetaKey('  phone  ')).toBe('phone');
+    });
+
+    it('rejects __proto__', () => {
+      expect(safeMetaKey('__proto__')).toBeNull();
+    });
+
+    it('rejects constructor', () => {
+      expect(safeMetaKey('constructor')).toBeNull();
+    });
+
+    it('rejects prototype', () => {
+      expect(safeMetaKey('prototype')).toBeNull();
+    });
+
+    it('rejects empty strings', () => {
+      expect(safeMetaKey('')).toBeNull();
+      expect(safeMetaKey('   ')).toBeNull();
+    });
+
+    it('rejects non-strings', () => {
+      expect(safeMetaKey(null)).toBeNull();
+      expect(safeMetaKey(42)).toBeNull();
+      expect(safeMetaKey(undefined)).toBeNull();
+    });
+
+    it('rejects keys longer than 200 chars', () => {
+      expect(safeMetaKey('a'.repeat(201))).toBeNull();
+      expect(safeMetaKey('a'.repeat(200))).toBe('a'.repeat(200));
     });
   });
 });

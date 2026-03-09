@@ -1,22 +1,9 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        utils.js
- * @description Shared utilities — coordinate math, XSS escaping, color helpers, validation, serialization
- * @version     2.0
- * @date        2026-03-05
- * @rating      8.5/10
- * @depends-on  state.js
- * @used-by     renderer.js, interactions.js, persistence.js, sidebar.js, export-png.js,
- *              export-json.js, project.js, project-manager.js, settings-panel.js, transform.js
- * @strengths   esc() for XSS, safeColor() for CSS injection, validateProjectJSON() thorough,
- *              serializeProject() single source of truth for export format
- * @issues      wrapText() and roundRect() only used by export-png — could be co-located
- * ─────────────────────────────────────────────── */
 // ─── Utility Functions ───
 import { state } from './state.js';
 
 export function screenToCanvas(sx, sy) {
-  return { x: (sx - state.panX) / state.zoom, y: (sy - state.panY) / state.zoom };
+  const rect = document.getElementById('canvas-container').getBoundingClientRect();
+  return { x: (sx - rect.left - state.panX) / state.zoom, y: (sy - rect.top - state.panY) / state.zoom };
 }
 
 export function snapToGrid(v) {
@@ -164,6 +151,15 @@ export function hexToRgb(hex) {
   return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
 }
 
+/** Guard against prototype pollution — rejects dangerous property names */
+export function safeMetaKey(key) {
+  if (typeof key !== 'string') return null;
+  const k = key.trim();
+  if (!k || k.length > 200) return null;
+  if (k === '__proto__' || k === 'constructor' || k === 'prototype') return null;
+  return k;
+}
+
 export function confirmIfDirty(callback) {
   if (state.isDirty) {
     if (!confirm('Ungespeicherte Aenderungen gehen verloren. Fortfahren?')) return;
@@ -180,6 +176,7 @@ export function serializeProject(state, title) {
       theme: state.theme,
       connectionStyle: state.connectionStyle,
       gridEnabled: state.gridEnabled,
+      showLegend: state.showLegend !== false,
     },
     nodes: state.nodes,
     connections: state.connections,

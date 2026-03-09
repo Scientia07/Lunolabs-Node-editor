@@ -1,16 +1,3 @@
-/**
- * ─── File Rating ──────────────────────────────
- * @file        renderer.js
- * @description Node & connection DOM rendering, domCache, anchor geometry, selection state
- * @version     2.0
- * @date        2026-03-05
- * @rating      7.5/10
- * @depends-on  state.js, utils.js
- * @used-by     main.js, interactions.js, export-png.js, sidebar.js, node-popup.js
- * @strengths   O(1) domCache Map, diff-based renderSelectionState(), anchor auto-detection
- * @issues      renderNodes() full innerHTML rebuild on every call — bottleneck at 200+ nodes;
- *              SVG connection rendering also full rebuild per call
- * ─────────────────────────────────────────────── */
 // ─── Node & Connection Rendering ───
 import { state, nodeIndex } from './state.js';
 import { getContrastColor, getGradientCSS, esc, getTier, hexToRgb } from './utils.js';
@@ -103,6 +90,7 @@ export function createNodeElement(n) {
     el.style.borderColor = n.borderColor || 'var(--border)';
     if (n.width) el.style.width = n.width + 'px';
     if (n.height) el.style.height = n.height + 'px';
+    el.appendChild(Object.assign(document.createElement('div'), { className: 'resize-handle' }));
 
   } else if (n.type === 'circle') {
     el.className = 'node node-circle';
@@ -114,9 +102,13 @@ export function createNodeElement(n) {
       el.style.minWidth = n.width + 'px';
       el.style.minHeight = n.width + 'px';
     }
+    el.appendChild(Object.assign(document.createElement('div'), { className: 'resize-handle' }));
 
   } else if (n.type === 'textbox') {
     el.className = 'node node-textbox';
+    if (n.width) el.style.width = n.width + 'px';
+    if (n.height) { el.style.minHeight = n.height + 'px'; el.style.height = n.height + 'px'; }
+    el.appendChild(Object.assign(document.createElement('div'), { className: 'resize-handle' }));
   }
 
   // Metadata-driven visuals for company nodes
@@ -316,6 +308,36 @@ export function renderConnections() {
       svgLayer.appendChild(path);
     }
 
+    // Connection label at midpoint
+    if (c.label) {
+      const mx = (fc.x + tc.x) / 2;
+      const my = (fc.y + tc.y) / 2;
+      // Background pill for readability
+      const textLen = c.label.length * 6.5 + 12;
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bg.setAttribute('x', mx - textLen / 2);
+      bg.setAttribute('y', my - 10);
+      bg.setAttribute('width', textLen);
+      bg.setAttribute('height', 20);
+      bg.setAttribute('rx', 10);
+      bg.setAttribute('fill', 'var(--bg, #1a1a2e)');
+      bg.setAttribute('fill-opacity', '0.85');
+      bg.dataset.id = c.id;
+      svgLayer.appendChild(bg);
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', mx);
+      text.setAttribute('y', my);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.setAttribute('fill', 'var(--text, #e0e0e0)');
+      text.setAttribute('font-size', '11');
+      text.setAttribute('font-family', 'DM Sans, sans-serif');
+      text.setAttribute('pointer-events', 'none');
+      text.textContent = c.label;
+      svgLayer.appendChild(text);
+    }
+
     // Draw endpoint handles when connection is selected
     if (isSelected) {
       renderEndpointHandle(fc, c.id, 'from');
@@ -420,4 +442,9 @@ export function renderSelectionState() {
   }
 
   prevSelectedIds = new Set(state.selectedIds);
+
+  // Notify sidebar (details tab) that selection changed
+  if (toAdd.size || toRemove.size) {
+    document.dispatchEvent(new CustomEvent('editor:selection'));
+  }
 }
